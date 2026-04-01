@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>预订延长</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #722ed1; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9f9f9; padding: 20px; }
+        .extension-info { background: white; padding: 15px; margin: 10px 0; border-left: 4px solid #722ed1; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        .highlight { color: #722ed1; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>预订延长确认</h1>
+            <p>您的预订已成功延长</p>
+        </div>
+        
+        <div class="content">
+            <p>尊敬的 <span th:text="${user.username}" class="highlight"></span>，</p>
+            <p>您的电动滑板车预订已成功延长！以下是延长详情：</p>
+            
+            <div class="extension-info">
+                <h3>延长信息</h3>
+                <p><strong>订单编号：</strong><span th:text="${booking.id}" class="highlight"></span></p>
+                <p><strong>滑板车型号：</strong><span th:text="${scooter.model}"></span></p>
+                <p><strong>延长后的租赁时长：</strong><span th:text="${booking.durationType}"></span></p>
+                <p><strong>新的结束时间：</strong><span th:text="${#dates.format(booking.endTime, 'yyyy-MM-dd HH:mm')}" class="highlight"></span></p>
+                <p><strong>延长费用：</strong>¥<span th:text="${#numbers.formatDecimal(booking.totalPrice * booking.discountApplied, 1, 2)}"></span></p>
+                <p><strong>延长时间：</strong><span th:text="${#dates.format(booking.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+            </div>
+            
+            <p><strong>延长后的预订详情：</strong></p>
+            <ul>
+                <li>开始时间：<span th:text="${#dates.format(booking.startTime, 'yyyy-MM-dd HH:mm')}"></span></li>
+                <li>新的结束时间：<span th:text="${#dates.format(booking.endTime, 'yyyy-MM-dd HH:mm')}" class="highlight"></span></li>
+                <li>总租赁时长：根据延长后的设置</li>
+            </ul>
+            
+            <p><strong>重要提醒：</strong></p>
+            <ul>
+                <li>请确保在延长后的结束时间前归还滑板车</li>
+                <li>如需再次延长，请提前操作</li>
+                <li>超时归还将产生额外费用</li>
+            </ul>
+            
+            <p>祝您使用愉快！</p>
+        </div>
+        
+        <div class="footer">
+            <p>电动滑板车租赁系统</p>
+            <p>此邮件为系统自动发送，请勿回复</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const routes = [
+  {
+    path: '/',
+    redirect: '/scooters'
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/Login.vue'),
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/Register.vue'),
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/scooters',
+    name: 'Scooters',
+    component: () => import('@/views/Scooters.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/bookings',
+    name: 'Bookings',
+    component: () => import('@/views/Bookings.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/feedback',
+    name: 'Feedback',
+    component: () => import('@/views/Feedback.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/dashboard',
+    name: 'AdminDashboard',
+    component: () => import('@/views/admin/Dashboard.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/scooters',
+    name: 'AdminScooters',
+    component: () => import('@/views/admin/Scooters.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/feedback',
+    name: 'AdminFeedback',
+    component: () => import('@/views/admin/Feedback.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next('/login')
+  } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    next('/')
+  } else if (to.meta.requiresAdmin && authStore.userInfo?.role !== 'ADMIN') {
+    next('/')
+  } else {
+    next()
+  }
+})
+
+export default router

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>预订取消</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #fa541c; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9f9f9; padding: 20px; }
+        .cancellation-info { background: white; padding: 15px; margin: 10px 0; border-left: 4px solid #fa541c; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        .highlight { color: #fa541c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>预订取消确认</h1>
+            <p>您的预订已成功取消</p>
+        </div>
+        
+        <div class="content">
+            <p>尊敬的 <span th:text="${user.username}" class="highlight"></span>，</p>
+            <p>您的电动滑板车预订已成功取消。以下是取消详情：</p>
+            
+            <div class="cancellation-info">
+                <h3>取消信息</h3>
+                <p><strong>原订单编号：</strong><span th:text="${booking.id}" class="highlight"></span></p>
+                <p><strong>滑板车型号：</strong><span th:text="${scooter.model}"></span></p>
+                <p><strong>原租赁时长：</strong><span th:text="${booking.durationType}"></span></p>
+                <p><strong>原开始时间：</strong><span th:text="${#dates.format(booking.startTime, 'yyyy-MM-dd HH:mm')}"></span></p>
+                <p><strong>取消时间：</strong><span th:text="${#dates.format(booking.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+                <p><strong>取消状态：</strong><span style="color: #fa541c;">已取消</span></p>
+            </div>
+            
+            <p><strong>退款信息：</strong></p>
+            <ul>
+                <li>退款金额：¥<span th:text="${#numbers.formatDecimal(booking.totalPrice * booking.discountApplied, 1, 2)}" class="highlight"></span></li>
+                <li>退款方式：原支付方式退回</li>
+                <li>退款到账时间：3-7个工作日</li>
+            </ul>
+            
+            <p><strong>重要提醒：</strong></p>
+            <ul>
+                <li>退款将退回到您原支付账户</li>
+                <li>如对退款有疑问，请及时联系客服</li>
+                <li>欢迎您再次使用我们的服务</li>
+            </ul>
+            
+            <p>感谢您对我们的支持！</p>
+        </div>
+        
+        <div class="footer">
+            <p>电动滑板车租赁系统</p>
+            <p>此邮件为系统自动发送，请勿回复</p>
+        </div>
+    </div>
+</body>
+</html>

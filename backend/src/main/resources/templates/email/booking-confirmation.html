@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>预订确认</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #1890ff; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9f9f9; padding: 20px; }
+        .booking-info { background: white; padding: 15px; margin: 10px 0; border-left: 4px solid #1890ff; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        .highlight { color: #1890ff; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>电动滑板车预订确认</h1>
+            <p>感谢您选择我们的服务</p>
+        </div>
+        
+        <div class="content">
+            <p>尊敬的 <span th:text="${user.username}" class="highlight"></span>，</p>
+            <p>您的电动滑板车预订已成功创建！以下是您的预订详情：</p>
+            
+            <div class="booking-info">
+                <h3>预订信息</h3>
+                <p><strong>订单编号：</strong><span th:text="${booking.id}" class="highlight"></span></p>
+                <p><strong>滑板车型号：</strong><span th:text="${scooter.model}"></span></p>
+                <p><strong>租赁时长：</strong><span th:text="${booking.durationType}"></span></p>
+                <p><strong>开始时间：</strong><span th:text="${#dates.format(booking.startTime, 'yyyy-MM-dd HH:mm')}"></span></p>
+                <p><strong>结束时间：</strong><span th:text="${#dates.format(booking.endTime, 'yyyy-MM-dd HH:mm')}"></span></p>
+                <p><strong>总价格：</strong>¥<span th:text="${#numbers.formatDecimal(booking.totalPrice, 1, 2)}"></span></p>
+                <p><strong>折扣：</strong><span th:text="${#numbers.formatDecimal(booking.discountApplied * 10, 1, 1)}"></span>折</p>
+                <p><strong>最终价格：</strong>¥<span th:text="${#numbers.formatDecimal(booking.totalPrice * booking.discountApplied, 1, 2)}" class="highlight"></span></p>
+            </div>
+            
+            <p><strong>重要提醒：</strong></p>
+            <ul>
+                <li>请在预订开始时间前到达指定地点取车</li>
+                <li>请携带有效身份证件进行身份验证</li>
+                <li>如需要取消预订，请在开始时间前操作</li>
+                <li>如有任何问题，请及时联系客服</li>
+            </ul>
+            
+            <p>祝您使用愉快！</p>
+        </div>
+        
+        <div class="footer">
+            <p>电动滑板车租赁系统</p>
+            <p>此邮件为系统自动发送，请勿回复</p>
+        </div>
+    </div>
+</body>
+</html>

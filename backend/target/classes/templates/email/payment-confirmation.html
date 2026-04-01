@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>支付确认</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #52c41a; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9f9f9; padding: 20px; }
+        .payment-info { background: white; padding: 15px; margin: 10px 0; border-left: 4px solid #52c41a; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        .highlight { color: #52c41a; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>支付成功确认</h1>
+            <p>您的支付已成功处理</p>
+        </div>
+        
+        <div class="content">
+            <p>尊敬的 <span th:text="${user.username}" class="highlight"></span>，</p>
+            <p>我们已成功处理您的支付请求！以下是支付详情：</p>
+            
+            <div class="payment-info">
+                <h3>支付信息</h3>
+                <p><strong>订单编号：</strong><span th:text="${booking.id}" class="highlight"></span></p>
+                <p><strong>滑板车型号：</strong><span th:text="${scooter.model}"></span></p>
+                <p><strong>租赁时长：</strong><span th:text="${booking.durationType}"></span></p>
+                <p><strong>支付金额：</strong>¥<span th:text="${#numbers.formatDecimal(booking.totalPrice * booking.discountApplied, 1, 2)}" class="highlight"></span></p>
+                <p><strong>支付方式：</strong>信用卡（尾号 ****）</p>
+                <p><strong>支付时间：</strong><span th:text="${#dates.format(booking.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+                <p><strong>支付状态：</strong><span style="color: #52c41a;">支付成功</span></p>
+            </div>
+            
+            <p><strong>预订详情：</strong></p>
+            <ul>
+                <li>开始时间：<span th:text="${#dates.format(booking.startTime, 'yyyy-MM-dd HH:mm')}"></span></li>
+                <li>结束时间：<span th:text="${#dates.format(booking.endTime, 'yyyy-MM-dd HH:mm')}"></span></li>
+                <li>取车地点：系统指定租赁点</li>
+            </ul>
+            
+            <p><strong>重要提醒：</strong></p>
+            <ul>
+                <li>请妥善保管此支付确认邮件</li>
+                <li>如需发票，请联系客服</li>
+                <li>预订取消政策请参考用户协议</li>
+            </ul>
+            
+            <p>感谢您的信任与支持！</p>
+        </div>
+        
+        <div class="footer">
+            <p>电动滑板车租赁系统</p>
+            <p>此邮件为系统自动发送，请勿回复</p>
+        </div>
+    </div>
+</body>
+</html>
