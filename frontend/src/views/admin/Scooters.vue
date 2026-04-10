@@ -56,6 +56,14 @@
             {{ formatDate(row.createdAt) }}
           </template>
         </el-table-column>
+        <el-table-column prop="locationName" label="点位" width="120">
+          <template #default="{ row }">
+            <el-tag v-if="row.locationName" type="info" size="small">
+              {{ row.locationName }}
+            </el-tag>
+            <span v-else style="color: #999;">未设置</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="200">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="openEditDialog(row)">
@@ -108,6 +116,16 @@
             controls-position="right"
           />
         </el-form-item>
+        <el-form-item label="点位" prop="locationId">
+          <el-select v-model="createForm.locationId" placeholder="选择点位" clearable style="width: 100%">
+            <el-option label="不设置点位" :value="null" />
+            <el-option label="市中心广场" :value="1" />
+            <el-option label="大学城校区" :value="2" />
+            <el-option label="商业步行街" :value="3" />
+            <el-option label="地铁站出口" :value="4" />
+            <el-option label="公园入口" :value="5" />
+          </el-select>
+        </el-form-item>
       </el-form>
       
       <template #footer>
@@ -157,6 +175,16 @@
             controls-position="right"
           />
         </el-form-item>
+        <el-form-item label="点位" prop="locationId">
+          <el-select v-model="editForm.locationId" placeholder="选择点位" clearable style="width: 100%">
+            <el-option label="不设置点位" :value="null" />
+            <el-option label="市中心广场" :value="1" />
+            <el-option label="大学城校区" :value="2" />
+            <el-option label="商业步行街" :value="3" />
+            <el-option label="地铁站出口" :value="4" />
+            <el-option label="公园入口" :value="5" />
+          </el-select>
+        </el-form-item>
       </el-form>
       
       <template #footer>
@@ -189,7 +217,8 @@ const createForm = ref({
   imageUrl: '',
   totalQuantity: 1,
   hourlyRate: 5,
-  dailyRate: 25
+  dailyRate: 25,
+  locationId: null
 })
 
 const editForm = ref({
@@ -197,7 +226,8 @@ const editForm = ref({
   imageUrl: '',
   totalQuantity: 1,
   hourlyRate: 5,
-  dailyRate: 25
+  dailyRate: 25,
+  locationId: null
 })
 
 const rules = {
@@ -232,9 +262,16 @@ const handleCreate = async () => {
   creating.value = true
   
   try {
-    await api.post('/scooters', null, {
-      params: createForm.value
-    })
+      await api.post('/scooters', null, {
+        params: {
+          model: createForm.value.model,
+          imageUrl: createForm.value.imageUrl || '',
+          totalQuantity: createForm.value.totalQuantity,
+          hourlyRate: createForm.value.hourlyRate,
+          dailyRate: createForm.value.dailyRate,
+          locationId: createForm.value.locationId
+        }
+      })
     ElMessage.success('新增成功')
     showCreateDialog.value = false
     createForm.value = { model: '', hourlyRate: 5, dailyRate: 25 }
@@ -253,7 +290,8 @@ const openEditDialog = (scooter) => {
     imageUrl: scooter.imageUrl || '',
     totalQuantity: scooter.totalQuantity || 1,
     hourlyRate: parseFloat(scooter.hourlyRate),
-    dailyRate: parseFloat(scooter.dailyRate)
+    dailyRate: parseFloat(scooter.dailyRate),
+    locationId: scooter.locationId || null
   }
   showEditDialog.value = true
 }
@@ -267,9 +305,16 @@ const handleEdit = async () => {
   editing.value = true
   
   try {
-    await api.put(`/scooters/${currentScooter.value.id}`, null, {
-      params: editForm.value
-    })
+      await api.put(`/scooters/${currentScooter.value.id}`, null, {
+        params: {
+          model: editForm.value.model,
+          imageUrl: editForm.value.imageUrl || '',
+          totalQuantity: editForm.value.totalQuantity,
+          hourlyRate: editForm.value.hourlyRate,
+          dailyRate: editForm.value.dailyRate,
+          locationId: editForm.value.locationId
+        }
+      })
     ElMessage.success('修改成功')
     showEditDialog.value = false
     loadScooters()

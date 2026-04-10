@@ -22,7 +22,7 @@ public class ScooterService {
         return scooterRepository.findAvailableScooters();
     }
     
-    public Scooter createScooter(String model, String imageUrl, Integer totalQuantity, Double hourlyRate, Double dailyRate) {
+    public Scooter createScooter(String model, String imageUrl, Integer totalQuantity, Double hourlyRate, Double dailyRate, Integer locationId) {
         Scooter scooter = new Scooter();
         scooter.setModel(model);
         scooter.setImageUrl(imageUrl);
@@ -32,10 +32,25 @@ public class ScooterService {
         scooter.setDailyRate(new BigDecimal(dailyRate.toString()));
         scooter.setStatus(totalQuantity > 0 ? "AVAILABLE" : "UNAVAILABLE");
         
+        // 设置点位信息
+        // 处理点位信息：如果locationId为null，则清除点位信息；如果locationId有值，则设置点位信息
+        if (locationId != null) {
+            scooter.setLocationId(locationId);
+            scooter.setLocationName(getLocationName(locationId));
+            scooter.setLatitude(getLocationLatitude(locationId));
+            scooter.setLongitude(getLocationLongitude(locationId));
+        } else {
+            // 清除点位信息
+            scooter.setLocationId(null);
+            scooter.setLocationName(null);
+            scooter.setLatitude(null);
+            scooter.setLongitude(null);
+        }
+        
         return scooterRepository.save(scooter);
     }
     
-    public Scooter updateScooter(Long id, String model, String imageUrl, Integer totalQuantity, Double hourlyRate, Double dailyRate) {
+    public Scooter updateScooter(Long id, String model, String imageUrl, Integer totalQuantity, Double hourlyRate, Double dailyRate, Integer locationId) {
         Scooter scooter = scooterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("滑板车不存在"));
         
@@ -60,6 +75,12 @@ public class ScooterService {
         }
         if (dailyRate != null) {
             scooter.setDailyRate(new BigDecimal(dailyRate.toString()));
+        }
+        if (locationId != null) {
+            scooter.setLocationId(locationId);
+            scooter.setLocationName(getLocationName(locationId));
+            scooter.setLatitude(getLocationLatitude(locationId));
+            scooter.setLongitude(getLocationLongitude(locationId));
         }
         
         return scooterRepository.save(scooter);
@@ -106,5 +127,41 @@ public class ScooterService {
     public Scooter getScooterById(Long id) {
         return scooterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("滑板车不存在"));
+    }
+    
+    // 获取点位名称
+    private String getLocationName(Integer locationId) {
+        switch (locationId) {
+            case 1: return "市中心广场";
+            case 2: return "大学城校区";
+            case 3: return "商业步行街";
+            case 4: return "地铁站出口";
+            case 5: return "公园入口";
+            default: return "点位" + locationId;
+        }
+    }
+    
+    // 获取点位纬度
+    private Double getLocationLatitude(Integer locationId) {
+        switch (locationId) {
+            case 1: return 39.9042;
+            case 2: return 39.9896;
+            case 3: return 39.9138;
+            case 4: return 39.9022;
+            case 5: return 39.9163;
+            default: return 39.9042;
+        }
+    }
+    
+    // 获取点位经度
+    private Double getLocationLongitude(Integer locationId) {
+        switch (locationId) {
+            case 1: return 116.4074;
+            case 2: return 116.3509;
+            case 3: return 116.3631;
+            case 4: return 116.3912;
+            case 5: return 116.3972;
+            default: return 116.4074;
+        }
     }
 }

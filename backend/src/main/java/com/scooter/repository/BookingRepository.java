@@ -12,8 +12,11 @@ import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findByUserId(Long userId);
-    List<Booking> findByUserIdAndStatusIn(Long userId, List<String> statuses);
+    @Query("SELECT b FROM Booking b JOIN FETCH b.scooter WHERE b.user.id = :userId ORDER BY b.startTime DESC")
+    List<Booking> findByUserId(@Param("userId") Long userId);
+    
+    @Query("SELECT b FROM Booking b JOIN FETCH b.scooter WHERE b.user.id = :userId AND b.status IN :statuses ORDER BY b.startTime DESC")
+    List<Booking> findByUserIdAndStatusIn(@Param("userId") Long userId, @Param("statuses") List<String> statuses);
     
     @Query("SELECT b FROM Booking b WHERE b.user = :user AND b.startTime >= :startDate AND b.startTime <= :endDate AND b.status = 'COMPLETED'")
     List<Booking> findCompletedBookingsByUserAndDateRange(@Param("user") User user, 

@@ -1,0 +1,285 @@
+/* 全局响应式样式 */
+
+/* 基础响应式设置 */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+  line-height: 1.5;
+  color: #303133;
+  background-color: #f5f7fa;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  
+  /* 调整Element Plus组件在移动端的显示 */
+  .el-dialog {
+    width: 90% !important;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .el-card {
+    margin-bottom: 12px;
+  }
+  
+  .el-button {
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+  
+  .el-input__inner {
+    font-size: 14px;
+  }
+  
+  .el-form-item__label {
+    font-size: 13px;
+  }
+  
+  .el-menu-item {
+    font-size: 13px;
+    padding: 0 12px;
+  }
+  
+  .el-tag {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+  
+  .el-dialog {
+    width: 95% !important;
+    max-width: 350px;
+  }
+  
+  .el-button {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  
+  .el-input__inner {
+    font-size: 13px;
+  }
+}
+
+/* 通用容器响应式 */
+.responsive-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+@media (max-width: 768px) {
+  .responsive-container {
+    padding: 0 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-container {
+    padding: 0 8px;
+  }
+}
+
+/* 通用卡片响应式 */
+.responsive-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .responsive-card {
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* 通用网格布局响应式 */
+.responsive-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.responsive-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.responsive-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.responsive-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1024px) {
+  .responsive-grid-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .responsive-grid-2,
+  .responsive-grid-3,
+  .responsive-grid-4 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* 通用标题响应式 */
+.responsive-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.responsive-subtitle {
+  font-size: 16px;
+  color: #909399;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .responsive-title {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+  
+  .responsive-subtitle {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-title {
+    font-size: 18px;
+  }
+  
+  .responsive-subtitle {
+    font-size: 13px;
+  }
+}
+
+/* 通用按钮组响应式 */
+.button-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .button-group {
+    gap: 8px;
+  }
+  
+  .button-group .el-button {
+    flex: 1;
+    min-width: auto;
+  }
+}
+
+/* 通用表单响应式 */
+.responsive-form {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .responsive-form {
+    max-width: 100%;
+  }
+}
+
+/* 通用表格响应式 */
+.responsive-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .responsive-table {
+    font-size: 13px;
+  }
+  
+  .responsive-table .el-table__cell {
+    padding: 8px 4px;
+  }
+}
+
+/* 通用图片响应式 */
+.responsive-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* 通用间距响应式 */
+.mobile-spacing {
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .mobile-spacing {
+    margin-bottom: 12px;
+  }
+}
+
+/* 隐藏/显示元素响应式 */
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+  
+  .mobile-only {
+    display: block;
+  }
+}
+
+/* 通用滚动条优化 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

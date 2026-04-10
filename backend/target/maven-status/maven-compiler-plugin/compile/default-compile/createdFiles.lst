@@ -11,6 +11,7 @@ com\scooter\ScooterRentalApplication.class
 com\scooter\dto\RegisterRequest.class
 com\scooter\repository\ScooterRepository.class
 com\scooter\dto\FeedbackRequest.class
+com\scooter\util\SecurityUtils.class
 com\scooter\controller\BookingController.class
 com\scooter\controller\AuthController.class
 com\scooter\config\JwtAuthTokenFilter.class

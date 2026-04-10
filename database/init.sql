@@ -24,6 +24,7 @@ CREATE TABLE scooters (
     hourly_rate DECIMAL(10,2) NOT NULL,
     daily_rate DECIMAL(10,2) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'AVAILABLE' CHECK (status IN ('AVAILABLE', 'UNAVAILABLE')),
+    location_id INTEGER NOT NULL REFERENCES locations(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -38,6 +39,21 @@ CREATE TABLE bookings (
     total_price DECIMAL(10,2) NOT NULL,
     discount_applied DECIMAL(3,2) DEFAULT 1.0,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'ACTIVE', 'COMPLETED', 'CANCELLED')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 点位管理表
+CREATE TABLE locations (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    address VARCHAR(255),
+    latitude DECIMAL(10,6) NOT NULL,
+    longitude DECIMAL(10,6) NOT NULL,
+    capacity INTEGER NOT NULL DEFAULT 10,
+    available_count INTEGER NOT NULL DEFAULT 0,
+    booked_count INTEGER NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -66,16 +82,24 @@ CREATE TABLE feedback (
 INSERT INTO users (username, email, password_hash, role) VALUES 
 ('admin', 'admin@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVwHvO', 'ADMIN');
 
--- 插入示例滑板车数据
-INSERT INTO scooters (model, hourly_rate, daily_rate, status) VALUES 
-('Xiaomi Mi Electric Scooter 3', 5.00, 25.00, 'AVAILABLE'),
-('Segway Ninebot MAX G30', 6.00, 30.00, 'AVAILABLE'),
-('Hiboy S2 Pro', 4.50, 22.00, 'AVAILABLE'),
-('Gotrax GXL V2', 4.00, 20.00, 'AVAILABLE'),
-('Razor E300', 3.50, 18.00, 'AVAILABLE'),
-('Swagtron Swagger 5', 5.50, 28.00, 'AVAILABLE'),
-('Glion Dolly', 6.50, 32.00, 'AVAILABLE'),
-('Unagi Model One', 7.00, 35.00, 'AVAILABLE');
+-- 插入示例点位数据
+INSERT INTO locations (name, address, latitude, longitude, capacity, available_count, booked_count) VALUES 
+('市中心广场', '北京市东城区王府井大街', 39.9042, 116.4074, 20, 15, 5),
+('大学城校区', '北京市海淀区中关村大街', 39.9896, 116.3509, 15, 12, 3),
+('商业步行街', '北京市西城区西单北大街', 39.9138, 116.3631, 10, 8, 2),
+('地铁站出口', '北京市朝阳区国贸地铁站', 39.9022, 116.3912, 12, 10, 2),
+('公园入口', '北京市海淀区颐和园东门', 39.9163, 116.3972, 8, 6, 2);
+
+-- 插入示例滑板车数据（关联到点位）
+INSERT INTO scooters (model, hourly_rate, daily_rate, status, location_id) VALUES 
+('Xiaomi Mi Electric Scooter 3', 5.00, 25.00, 'AVAILABLE', 1),
+('Segway Ninebot MAX G30', 6.00, 30.00, 'AVAILABLE', 1),
+('Hiboy S2 Pro', 4.50, 22.00, 'AVAILABLE', 2),
+('Gotrax GXL V2', 4.00, 20.00, 'AVAILABLE', 2),
+('Razor E300', 3.50, 18.00, 'AVAILABLE', 3),
+('Swagtron Swagger 5', 5.50, 28.00, 'AVAILABLE', 3),
+('Glion Dolly', 6.50, 32.00, 'AVAILABLE', 4),
+('Unagi Model One', 7.00, 35.00, 'AVAILABLE', 5);
 
 -- 创建索引以提高查询性能
 CREATE INDEX idx_users_email ON users(email);

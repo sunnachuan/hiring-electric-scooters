@@ -24,9 +24,10 @@ public class BookingService {
     private final ScooterRepository scooterRepository;
     private final PaymentRepository paymentRepository;
     private final EmailService emailService;
+    private final ScooterService scooterService;
     
     @Transactional
-    public Booking createBooking(User user, Scooter scooter, String durationType, String cardNumber) {
+    public Booking createBooking(User user, Scooter scooter, Integer hours, String cardNumber) {
         // 检查滑板车是否可用
         if (!"AVAILABLE".equals(scooter.getStatus())) {
             throw new RuntimeException("滑板车不可用");
@@ -34,7 +35,7 @@ public class BookingService {
         
         // 计算开始和结束时间
         LocalDateTime startTime = LocalDateTime.now();
-        LocalDateTime endTime = calculateEndTime(startTime, durationType);
+        LocalDateTime endTime = startTime.plusHours(hours);
         
         // 检查时间冲突
         List<Booking> overlappingBookings = bookingRepository.findOverlappingBookings(
@@ -44,7 +45,7 @@ public class BookingService {
         }
         
         // 计算价格和折扣
-        BigDecimal basePrice = calculateBasePrice(scooter, durationType);
+        BigDecimal basePrice = calculateTieredPrice(scooter.getHourlyRate(), hours);
         BigDecimal discount = calculateDiscount(user);
         BigDecimal totalPrice = basePrice.multiply(discount);
         
@@ -54,58 +55,56 @@ public class BookingService {
         booking.setScooter(scooter);
         booking.setStartTime(startTime);
         booking.setEndTime(endTime);
-        booking.setDurationType(durationType);
+        booking.setDurationType(hours + "h");
         booking.setTotalPrice(totalPrice);
         booking.setDiscountApplied(discount);
         booking.setStatus("PENDING");
         
-        // 处理支付
-        processPayment(booking, cardNumber);
+        // 先保存预订以获取ID
+        Booking savedBooking = bookingRepository.save(booking);
+        
+        // 处理支付（使用已保存的预订）
+        processPayment(savedBooking, cardNumber);
         
         // 更新滑板车可用数量
         scooterService.decrementAvailableQuantity(scooter.getId());
         
-        Booking savedBooking = bookingRepository.save(booking);
-        
-        // 发送预订确认邮件
+        // 发送预订确认邮件（可选，失败不影响主要流程）
         try {
             emailService.sendBookingConfirmation(savedBooking, user);
             emailService.sendPaymentConfirmation(savedBooking, user);
         } catch (Exception e) {
             // 邮件发送失败不应影响主要业务流程
-            System.err.println("邮件发送失败: " + e.getMessage());
+            System.err.println("邮件发送失败（不影响预订）: " + e.getMessage());
         }
         
         return savedBooking;
     }
     
-    private LocalDateTime calculateEndTime(LocalDateTime startTime, String durationType) {
-        switch (durationType) {
-            case "1h":
-                return startTime.plusHours(1);
-            case "4h":
-                return startTime.plusHours(4);
-            case "1d":
-                return startTime.plusDays(1);
-            case "1w":
-                return startTime.plusWeeks(1);
-            default:
-                throw new RuntimeException("无效的租赁时长");
-        }
-    }
+
     
-    private BigDecimal calculateBasePrice(Scooter scooter, String durationType) {
-        switch (durationType) {
-            case "1h":
-                return scooter.getHourlyRate();
-            case "4h":
-                return scooter.getHourlyRate().multiply(BigDecimal.valueOf(4));
-            case "1d":
-                return scooter.getDailyRate();
-            case "1w":
-                return scooter.getDailyRate().multiply(BigDecimal.valueOf(7));
-            default:
-                throw new RuntimeException("无效的租赁时长");
+    private BigDecimal calculateTieredPrice(BigDecimal hourlyRate, Integer hours) {
+        BigDecimal basePrice = hourlyRate; // 基准单价P
+        
+        // 分层定价逻辑
+        if (hours <= 3) {
+            // 1-3小时：100% 原价
+            return basePrice.multiply(BigDecimal.valueOf(hours));
+        } else if (hours <= 8) {
+            // 4-8小时：85% 折扣
+            return basePrice.multiply(BigDecimal.valueOf(hours)).multiply(BigDecimal.valueOf(0.85));
+        } else if (hours <= 24) {
+            // 9-24小时：60% 折扣，但最高收12小时费用
+            int effectiveHours = Math.min(hours, 12);
+            return basePrice.multiply(BigDecimal.valueOf(effectiveHours)).multiply(BigDecimal.valueOf(0.6));
+        } else if (hours <= 72) {
+            // 1-3天：50% 折扣，每天按12小时计费
+            int days = (int) Math.ceil(hours / 24.0);
+            return basePrice.multiply(BigDecimal.valueOf(12 * days)).multiply(BigDecimal.valueOf(0.5));
+        } else {
+            // 3天以上：30% 折扣，每天按12小时计费
+            int days = (int) Math.ceil(hours / 24.0);
+            return basePrice.multiply(BigDecimal.valueOf(12 * days)).multiply(BigDecimal.valueOf(0.3));
         }
     }
     
@@ -194,8 +193,44 @@ public class BookingService {
         return cancelledBooking;
     }
     
+    /**
+     * 提前还车
+     */
     @Transactional
-    public Booking extendBooking(Long bookingId, String durationType, User user) {
+    public Booking returnScooterEarly(Long bookingId, User user) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("预订不存在"));
+        
+        if (!booking.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("无权操作此预订");
+        }
+        
+        if (!"ACTIVE".equals(booking.getStatus())) {
+            throw new RuntimeException("只能归还进行中的预订");
+        }
+        
+        // 更新预订状态为已完成
+        booking.setStatus("COMPLETED");
+        booking.setEndTime(LocalDateTime.now());
+        
+        // 恢复滑板车可用数量
+        scooterService.incrementAvailableQuantity(booking.getScooter().getId());
+        
+        Booking returnedBooking = bookingRepository.save(booking);
+        
+        // 发送还车确认邮件
+        try {
+            emailService.sendReturnConfirmation(returnedBooking, user);
+        } catch (Exception e) {
+            // 邮件发送失败不应影响主要业务流程
+            System.err.println("还车确认邮件发送失败: " + e.getMessage());
+        }
+        
+        return returnedBooking;
+    }
+    
+    @Transactional
+    public Booking extendBooking(Long bookingId, Integer hours, User user) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("预订不存在"));
         
@@ -208,11 +243,11 @@ public class BookingService {
         }
         
         // 计算延长价格
-        BigDecimal extensionPrice = calculateBasePrice(booking.getScooter(), durationType)
+        BigDecimal extensionPrice = calculateTieredPrice(booking.getScooter().getHourlyRate(), hours)
                 .multiply(booking.getDiscountApplied());
         
         // 更新结束时间和总价
-        LocalDateTime newEndTime = calculateEndTime(booking.getEndTime(), durationType);
+        LocalDateTime newEndTime = booking.getEndTime().plusHours(hours);
         booking.setEndTime(newEndTime);
         booking.setTotalPrice(booking.getTotalPrice().add(extensionPrice));
         

@@ -25,6 +25,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('@/views/Profile.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/bookings',
     name: 'Bookings',
     component: () => import('@/views/Bookings.vue'),
@@ -37,9 +43,21 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/map',
+    name: 'Map',
+    component: () => import('@/views/Map.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/admin/dashboard',
     name: 'AdminDashboard',
     component: () => import('@/views/admin/Dashboard.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/locations',
+    name: 'LocationManagement',
+    component: () => import('@/views/admin/LocationManagement.vue'),
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {

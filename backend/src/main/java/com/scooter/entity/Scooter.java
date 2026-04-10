@@ -38,6 +38,18 @@ public class Scooter {
     @Column(nullable = false, length = 20)
     private String status;
     
+    @Column(name = "location_id")
+    private Integer locationId;
+    
+    @Column(name = "location_name", length = 100)
+    private String locationName;
+    
+    @Column(name = "latitude", precision = 10, scale = 6)
+    private Double latitude;
+    
+    @Column(name = "longitude", precision = 10, scale = 6)
+    private Double longitude;
+    
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     

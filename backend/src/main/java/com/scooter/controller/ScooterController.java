@@ -32,8 +32,9 @@ public class ScooterController {
                                                 @RequestParam(required = false) String imageUrl,
                                                 @RequestParam Integer totalQuantity,
                                                 @RequestParam Double hourlyRate,
-                                                @RequestParam Double dailyRate) {
-        return ResponseEntity.ok(scooterService.createScooter(model, imageUrl, totalQuantity, hourlyRate, dailyRate));
+                                                @RequestParam Double dailyRate,
+                                                @RequestParam(required = false) Integer locationId) {
+        return ResponseEntity.ok(scooterService.createScooter(model, imageUrl, totalQuantity, hourlyRate, dailyRate, locationId));
     }
     
     @PutMapping("/{id}")
@@ -43,7 +44,8 @@ public class ScooterController {
                                                 @RequestParam(required = false) String imageUrl,
                                                 @RequestParam(required = false) Integer totalQuantity,
                                                 @RequestParam(required = false) Double hourlyRate,
-                                                @RequestParam(required = false) Double dailyRate) {
-        return ResponseEntity.ok(scooterService.updateScooter(id, model, imageUrl, totalQuantity, hourlyRate, dailyRate));
+                                                @RequestParam(required = false) Double dailyRate,
+                                                @RequestParam(required = false) Integer locationId) {
+        return ResponseEntity.ok(scooterService.updateScooter(id, model, imageUrl, totalQuantity, hourlyRate, dailyRate, locationId));
     }
 }

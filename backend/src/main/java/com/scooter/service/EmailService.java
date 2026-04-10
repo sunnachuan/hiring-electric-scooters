@@ -104,6 +104,26 @@ public class EmailService {
     }
     
     /**
+     * 发送还车确认邮件
+     */
+    public void sendReturnConfirmation(Booking booking, User user) {
+        try {
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("user", user);
+            variables.put("booking", booking);
+            variables.put("scooter", booking.getScooter());
+            
+            String subject = "还车成功确认 - 订单 #" + booking.getId();
+            String content = buildEmailContent("return-confirmation", variables);
+            
+            sendEmail(user.getEmail(), subject, content);
+            log.info("还车确认邮件已发送至: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("发送还车确认邮件失败: {}", e.getMessage());
+        }
+    }
+    
+    /**
      * 构建邮件内容
      */
     private String buildEmailContent(String templateName, Map<String, Object> variables) {

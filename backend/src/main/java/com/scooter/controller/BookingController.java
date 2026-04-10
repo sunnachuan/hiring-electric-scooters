@@ -7,6 +7,7 @@ import com.scooter.entity.User;
 import com.scooter.service.BookingService;
 import com.scooter.service.ScooterService;
 import com.scooter.service.UserService;
+import com.scooter.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,46 +24,57 @@ public class BookingController {
     private final BookingService bookingService;
     private final ScooterService scooterService;
     private final UserService userService;
+    private final SecurityUtils securityUtils;
     
     @PostMapping
     public ResponseEntity<Booking> createBooking(@Valid @RequestBody BookingRequest bookingRequest,
                                                 HttpServletRequest request) {
-        // 简化版本：直接使用第一个用户（开发测试用）
-        User user = userService.findAll().stream().findFirst()
-                .orElseThrow(() -> new RuntimeException("没有用户存在"));
+        // 使用当前登录用户
+        User user = securityUtils.getCurrentUser(request);
         
         Scooter scooter = scooterService.getScooterById(bookingRequest.getScooterId());
         
         Booking booking = bookingService.createBooking(user, scooter, 
-                bookingRequest.getDurationType(), bookingRequest.getCardNumber());
+                bookingRequest.getHours(), bookingRequest.getCardNumber());
         
         return ResponseEntity.ok(booking);
     }
     
     @GetMapping("/user")
     public ResponseEntity<List<Booking>> getUserBookings(HttpServletRequest request) {
-        // 简化版本：返回所有预订（开发测试用）
-        List<Booking> bookings = bookingService.getAllBookings();
+        // 返回当前用户的预订
+        User user = securityUtils.getCurrentUser(request);
+        List<Booking> bookings = bookingService.getUserBookings(user.getId());
         return ResponseEntity.ok(bookings);
     }
     
     @PutMapping("/{id}/cancel")
     public ResponseEntity<Booking> cancelBooking(@PathVariable Long id, HttpServletRequest request) {
-        // 简化版本：直接取消预订
-        User user = userService.findAll().stream().findFirst()
-                .orElseThrow(() -> new RuntimeException("没有用户存在"));
+        // 使用当前登录用户取消预订
+        User user = securityUtils.getCurrentUser(request);
         
         return ResponseEntity.ok(bookingService.cancelBooking(id, user));
     }
     
+    /**
+     * 提前还车
+     */
+    @PutMapping("/{id}/return")
+    public ResponseEntity<Booking> returnScooterEarly(@PathVariable Long id, HttpServletRequest request) {
+        // 使用当前登录用户还车
+        User user = securityUtils.getCurrentUser(request);
+        
+        return ResponseEntity.ok(bookingService.returnScooterEarly(id, user));
+    }
+    
     @PutMapping("/{id}/extend")
     public ResponseEntity<Booking> extendBooking(@PathVariable Long id,
-                                                @RequestParam String durationType,
+                                                @RequestParam Integer hours,
                                                 HttpServletRequest request) {
         // 简化版本：直接延长预订
         User user = userService.findAll().stream().findFirst()
                 .orElseThrow(() -> new RuntimeException("没有用户存在"));
         
-        return ResponseEntity.ok(bookingService.extendBooking(id, durationType, user));
+        return ResponseEntity.ok(bookingService.extendBooking(id, hours, user));
     }
 }
