@@ -154,6 +154,9 @@
           <router-view />
         </el-main>
       </el-container>
+      
+      <!-- Footer组件 -->
+      <Footer />
     </el-container>
     
     <router-view v-else />
@@ -173,9 +176,10 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import Footer from '@/components/Footer.vue'
 import { 
   MapLocation, Location, User, ChatDotRound,
   DataAnalysis, Setting, ChatLineRound 
@@ -357,6 +361,14 @@ onUnmounted(() => {
   font-size: 24px;
   font-weight: 600;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  font-size: 28px;
+  color: white;
 }
 
 .user-info {

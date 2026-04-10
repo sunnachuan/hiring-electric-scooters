@@ -58,24 +58,32 @@ public class DataInitializer implements CommandLineRunner {
     if (scooterRepository.count() == 0) {
         log.info("创建测试滑板车数据...");
         
-        // 点位1: 市中心广场 - 3辆滑板车
-        createScooter("城市通勤款", "https://example.com/scooter1.jpg", 3, 5.0, 25.0, 1);
+        // 城市通勤款 - 分散到3个位置
+        createScooter("城市通勤款", "https://example.com/scooter1.jpg", 5, 5.0, 25.0, 1);  // 市中心广场
+        createScooter("城市通勤款", "https://example.com/scooter1.jpg", 4, 5.0, 25.0, 3);  // 商业步行街
+        createScooter("城市通勤款", "https://example.com/scooter1.jpg", 3, 5.0, 25.0, 5);  // 公园入口
         
-        // 点位2: 大学城校区 - 4辆滑板车
-        createScooter("校园轻便款", "https://example.com/scooter2.jpg", 2, 4.5, 20.0, 2);
-        createScooter("学生特惠款", "https://example.com/scooter3.jpg", 2, 3.5, 15.0, 2);
+        // 校园轻便款 - 分散到3个位置
+        createScooter("校园轻便款", "https://example.com/scooter2.jpg", 6, 4.5, 20.0, 2);  // 大学城校区
+        createScooter("校园轻便款", "https://example.com/scooter2.jpg", 2, 4.5, 20.0, 1);  // 市中心广场
+        createScooter("校园轻便款", "https://example.com/scooter2.jpg", 2, 4.5, 20.0, 4);  // 地铁站出口
         
-        // 点位3: 商业步行街 - 3辆滑板车
-        createScooter("商务精英款", "https://example.com/scooter4.jpg", 1, 6.0, 30.0, 3);
-        createScooter("时尚潮流款", "https://example.com/scooter5.jpg", 2, 5.5, 28.0, 3);
+        // 商务精英款 - 分散到3个位置
+        createScooter("商务精英款", "https://example.com/scooter4.jpg", 3, 6.0, 30.0, 3);  // 商业步行街
+        createScooter("商务精英款", "https://example.com/scooter4.jpg", 2, 6.0, 30.0, 1);  // 市中心广场
+        createScooter("商务精英款", "https://example.com/scooter4.jpg", 1, 6.0, 30.0, 2);  // 大学城校区
         
-        // 点位4: 地铁站出口 - 2辆滑板车
-        createScooter("地铁接驳款", "https://example.com/scooter6.jpg", 2, 4.0, 18.0, 4);
+        // 时尚潮流款 - 分散到3个位置
+        createScooter("时尚潮流款", "https://example.com/scooter5.jpg", 4, 5.5, 28.0, 3);  // 商业步行街
+        createScooter("时尚潮流款", "https://example.com/scooter5.jpg", 2, 5.5, 28.0, 5);  // 公园入口
+        createScooter("时尚潮流款", "https://example.com/scooter5.jpg", 2, 5.5, 28.0, 4);  // 地铁站出口
         
-        // 点位5: 公园入口 - 3辆滑板车
-        createScooter("休闲娱乐款", "https://example.com/scooter7.jpg", 3, 4.0, 20.0, 5);
+        // 休闲娱乐款 - 分散到3个位置
+        createScooter("休闲娱乐款", "https://example.com/scooter7.jpg", 6, 4.0, 20.0, 5);  // 公园入口
+        createScooter("休闲娱乐款", "https://example.com/scooter7.jpg", 4, 4.0, 20.0, 2);  // 大学城校区
+        createScooter("休闲娱乐款", "https://example.com/scooter7.jpg", 4, 4.0, 20.0, 3);  // 商业步行街
         
-        log.info("测试滑板车数据创建完成，共创建15辆滑板车");
+        log.info("测试滑板车数据创建完成，共创建50辆滑板车");
     }
     
     log.info("数据初始化完成");

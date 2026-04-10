@@ -38,7 +38,12 @@
       <el-divider />
       
       <h3>我的反馈记录</h3>
-      <el-table :data="myFeedback" v-loading="loading">
+      <el-table 
+        :data="myFeedback" 
+        v-loading="loading"
+        empty-text="暂无反馈记录"
+        :height="300"
+      >
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="title" label="标题" />
         <el-table-column prop="description" label="描述" show-overflow-tooltip />

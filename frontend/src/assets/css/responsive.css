@@ -26,9 +26,20 @@ body {
   
   /* 调整Element Plus组件在移动端的显示 */
   .el-dialog {
-    width: 90% !important;
-    max-width: 400px;
-    margin: 0 auto;
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 0 auto !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    position: fixed !important;
+  }
+  
+  .el-dialog__wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(0, 0, 0, 0.5) !important;
   }
   
   .el-card {

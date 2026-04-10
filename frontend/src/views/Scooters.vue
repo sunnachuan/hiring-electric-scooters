@@ -3,27 +3,38 @@
     <div class="page-header">
       <h1 class="page-title">滑板车租赁</h1>
       <p class="page-subtitle">选择您喜欢的滑板车开始租赁之旅</p>
-      <el-button 
-        type="primary" 
-        size="large" 
-        @click="showBookingDialog = true" 
-        v-if="!isAdmin"
-        class="booking-btn"
-      >
-        <el-icon><Plus /></el-icon>
-        快速预订
-      </el-button>
+      <div class="header-actions">
+        <el-button 
+          type="primary" 
+          size="large" 
+          @click="showBookingDialog = true" 
+          v-if="!isAdmin"
+          class="booking-btn"
+        >
+          <el-icon><Plus /></el-icon>
+          快速预订
+        </el-button>
+        <el-button 
+          type="info" 
+          size="small" 
+          circle
+          @click="showPricingScheme = true" 
+          v-if="!isAdmin"
+          class="pricing-btn"
+          title="阶梯定价方案"
+        >
+          <el-icon><PriceTag /></el-icon>
+        </el-button>
+      </div>
     </div>
     
-    <div class="scooters-grid">
-  <el-card 
-    v-for="(scooter, index) in scooters" 
-    :key="scooter.id" 
-    class="scooter-card card-hover fade-in"
-    :class="{ 'unavailable': scooter.status !== 'AVAILABLE' }"
-    shadow="hover"
-    :style="{ animationDelay: `${index * 0.1}s` }"
-  >
+    <div class="scooters-grid" v-if="!loading">
+      <el-card 
+        v-for="scooter in groupedScooters" 
+        :key="scooter.model" 
+        class="scooter-card card-hover fade-in"
+        shadow="hover"
+      >
         <!-- 滑板车图片 -->
         <div class="scooter-image" v-if="scooter.imageUrl">
           <el-image 
@@ -55,10 +66,10 @@
         </div>
         
         <!-- 点位信息 -->
-        <div class="location-info" v-if="scooter.locationName">
+        <div class="location-info" v-if="scooter.locations && scooter.locations.length > 0">
           <el-tag size="small" type="info">
             <el-icon><Location /></el-icon>
-            {{ scooter.locationName }}
+            {{ scooter.locations.join('、') }}
           </el-tag>
         </div>
         
@@ -66,7 +77,7 @@
         <div class="quantity-info" v-if="scooter.status === 'AVAILABLE'">
           <el-tag type="info" size="small">
             <el-icon><Collection /></el-icon>
-            可用: {{ scooter.availableQuantity }}/{{ scooter.totalQuantity }}
+            可用: {{ scooter.totalAvailableQuantity }}/{{ scooter.totalQuantity }}
           </el-tag>
         </div>
         
@@ -83,9 +94,9 @@
           </div>
           
           <div class="scooter-features">
-            <el-tag size="small" type="info">电动</el-tag>
-            <el-tag size="small" type="info">便携</el-tag>
-            <el-tag size="small" type="info">环保</el-tag>
+            <el-tag size="small" type="info" v-for="feature in getScooterFeatures(scooter.model)" :key="feature">
+              {{ feature }}
+            </el-tag>
           </div>
         </div>
         
@@ -93,7 +104,7 @@
           <el-button 
             :type="getBookingButtonType(scooter)"
             class="book-btn"
-            :disabled="scooter.status !== 'AVAILABLE' || scooter.availableQuantity <= 0"
+            :disabled="scooter.status !== 'AVAILABLE' || scooter.totalAvailableQuantity <= 0"
             @click="openBookingDialog(scooter)"
           >
             <el-icon><ShoppingCart /></el-icon>
@@ -112,15 +123,29 @@
       v-model="showBookingDialog" 
       title="预订滑板车" 
       width="500px"
+      center
       :before-close="handleBookingClose"
     >
       <el-form :model="bookingForm" :rules="bookingRules" ref="bookingFormRef">
-        <el-form-item label="滑板车" prop="scooterId">
-          <el-select v-model="bookingForm.scooterId" placeholder="选择滑板车" style="width: 100%">
+        <!-- 第一步：选择滑板车型号 -->
+        <el-form-item label="滑板车型号" prop="scooterModel">
+          <el-select v-model="bookingForm.scooterModel" placeholder="请先选择滑板车型号" style="width: 100%" @change="handleModelChange">
             <el-option
-              v-for="scooter in availableScooters"
+              v-for="model in availableModels"
+              :key="model"
+              :label="model"
+              :value="model"
+            />
+          </el-select>
+        </el-form-item>
+        
+        <!-- 第二步：选择具体位置 -->
+        <el-form-item label="取车位置" prop="scooterId" v-if="bookingForm.scooterModel">
+          <el-select v-model="bookingForm.scooterId" placeholder="请选择取车位置" style="width: 100%">
+            <el-option
+              v-for="scooter in filteredScooters"
               :key="scooter.id"
-              :label="`${scooter.model} - ¥${scooter.hourlyRate}/小时`"
+              :label="`${scooter.locationName} - 剩余${scooter.availableQuantity}辆`"
               :value="scooter.id"
             />
           </el-select>
@@ -219,19 +244,67 @@
           <p class="total-price">¥{{ getPriceDetails().totalPrice.toFixed(2) }}</p>
         </div>
         
-        <div class="detail-section">
-          <h4>阶梯定价方案</h4>
-          <el-table :data="getPricingTable()" size="small" stripe>
-            <el-table-column prop="duration" label="租赁时长" width="120" />
-            <el-table-column prop="discount" label="折扣" width="80" />
-            <el-table-column prop="effectiveHours" label="计费时长" width="100" />
-            <el-table-column prop="price" label="价格" align="right" />
-          </el-table>
-        </div>
+
       </div>
       
       <template #footer>
         <el-button @click="showPriceDetails = false">关闭</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 阶梯定价方案弹窗 -->
+    <el-dialog 
+      v-model="showPricingScheme" 
+      title="阶梯定价方案" 
+      width="700px"
+      center
+    >
+      <div class="pricing-scheme">
+        <el-alert 
+          title="定价说明" 
+          type="info" 
+          description="所有滑板车均采用统一的阶梯定价方案，租赁时间越长，折扣越大" 
+          show-icon 
+          :closable="false"
+          style="margin-bottom: 20px;"
+        />
+        
+        <el-table :data="getPricingTable()" size="small" stripe border>
+          <el-table-column prop="duration" label="租赁时长" align="center" />
+          <el-table-column prop="discount" label="折扣" align="center" />
+          <el-table-column label="计费时长" align="center">
+            <template #default="{ row }">
+              <div>
+                {{ row.durationLabel === '使用时长' ? '使用时长' : row.effectiveHours }}
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="说明" align="center">
+            <template #default="{ row }">
+              <el-tag 
+                size="small" 
+                :class="getPricingTagClass(row.duration)"
+              >
+                {{ getPricingDescription(row.duration) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+        </el-table>
+        
+        <div class="pricing-tips" style="margin-top: 20px;">
+          <h4>定价规则说明：</h4>
+          <ul>
+            <li><strong>1-3小时</strong>：按原价计费，无折扣</li>
+            <li><strong>4-8小时</strong>：享受85折优惠</li>
+            <li><strong>9-24小时</strong>：享受6折优惠，最高按12小时计费</li>
+            <li><strong>2-3天</strong>：享受5折优惠，按天计费（每天按12小时计算）</li>
+            <li><strong>3天以上</strong>：享受3折优惠，按天计费（每天按12小时计算）</li>
+          </ul>
+        </div>
+      </div>
+      
+      <template #footer>
+        <el-button @click="showPricingScheme = false">关闭</el-button>
       </template>
     </el-dialog>
   </div>
@@ -239,7 +312,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Plus, Bicycle, ShoppingCart, Location, InfoFilled } from '@element-plus/icons-vue'
+import { Plus, Bicycle, ShoppingCart, Location, InfoFilled, PriceTag } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/api'
 import { ElMessage } from 'element-plus'
@@ -251,17 +324,20 @@ const scooters = ref([])
 const loading = ref(false)
 const showBookingDialog = ref(false)
 const showPriceDetails = ref(false)
+const showPricingScheme = ref(false)
 const bookingLoading = ref(false)
 const bookingFormRef = ref()
 
 const bookingForm = ref({
+  scooterModel: null,
   scooterId: null,
   hours: 1,
   cardNumber: '123456789012' // 默认信用卡号
 })
 
 const bookingRules = {
-  scooterId: [{ required: true, message: '请选择滑板车', trigger: 'change' }],
+  scooterModel: [{ required: true, message: '请选择滑板车型号', trigger: 'change' }],
+  scooterId: [{ required: true, message: '请选择取车位置', trigger: 'change' }],
   hours: [
     { required: true, message: '请输入租赁时长', trigger: 'blur' },
     { type: 'number', min: 1, max: 168, message: '时长必须在1-168小时之间', trigger: 'blur' }
@@ -271,6 +347,53 @@ const bookingRules = {
 const availableScooters = computed(() => 
   scooters.value.filter(s => s.status === 'AVAILABLE')
 )
+
+// 获取所有可用的滑板车型号（去重）
+const availableModels = computed(() => {
+  const models = availableScooters.value.map(s => s.model)
+  return [...new Set(models)]
+})
+
+// 根据选择的型号筛选滑板车
+const filteredScooters = computed(() => {
+  if (!bookingForm.value.scooterModel) {
+    return []
+  }
+  return availableScooters.value.filter(s => s.model === bookingForm.value.scooterModel)
+})
+
+// 聚合同款滑板车数据
+const groupedScooters = computed(() => {
+  const grouped = {}
+  
+  availableScooters.value.forEach(scooter => {
+    if (!grouped[scooter.model]) {
+      grouped[scooter.model] = {
+        model: scooter.model,
+        imageUrl: getScooterImage(scooter.model),
+        hourlyRate: scooter.hourlyRate,
+        dailyRate: scooter.dailyRate,
+        status: scooter.status,
+        totalQuantity: 0,
+        totalAvailableQuantity: 0,
+        locations: [],
+        scooters: [] // 保存原始滑板车数据用于预订
+      }
+    }
+    
+    const group = grouped[scooter.model]
+    group.totalQuantity += scooter.totalQuantity
+    group.totalAvailableQuantity += scooter.availableQuantity
+    
+    if (scooter.locationName && !group.locations.includes(scooter.locationName)) {
+      group.locations.push(scooter.locationName)
+    }
+    
+    group.scooters.push(scooter)
+  })
+  
+  return Object.values(grouped)
+})
 
 const selectedScooter = computed(() => 
   scooters.value.find(s => s.id === bookingForm.value.scooterId)
@@ -305,15 +428,42 @@ const getScooterStatusText = (scooter) => {
 // 获取预订按钮类型
 const getBookingButtonType = (scooter) => {
   if (scooter.status === 'UNAVAILABLE') return 'info'
-  if (scooter.availableQuantity <= 0) return 'warning'
+  if (scooter.totalAvailableQuantity <= 0) return 'warning'
   return 'primary'
 }
 
 // 获取预订按钮文本
 const getBookingButtonText = (scooter) => {
   if (scooter.status === 'UNAVAILABLE') return '不可预订'
-  if (scooter.availableQuantity <= 0) return '已租完'
+  if (scooter.totalAvailableQuantity <= 0) return '已租完'
   return '立即预订'
+}
+
+// 滑板车图片映射
+const scooterImages = {
+  '城市通勤款': '/src/assets/images/b1.png',
+  '校园轻便款': '/src/assets/images/b2.png',
+  '商务精英款': '/src/assets/images/b3.png',
+  '时尚潮流款': '/src/assets/images/b4.png',
+  '休闲娱乐款': '/src/assets/images/b5.png'
+}
+
+// 获取滑板车图片
+const getScooterImage = (model) => {
+  return scooterImages[model] || ''
+}
+
+// 获取滑板车特色标签
+const getScooterFeatures = (model) => {
+  const featuresMap = {
+    '城市通勤款': ['通勤', '续航', '轻便'],
+    '校园轻便款': ['学生', '轻便', '经济'],
+    '商务精英款': ['商务', '高端', '舒适'],
+    '时尚潮流款': ['时尚', '潮流', '个性'],
+    '休闲娱乐款': ['休闲', '娱乐', '舒适']
+  }
+  
+  return featuresMap[model] || ['便携', '环保']
 }
 
 // 新的分层定价计算逻辑
@@ -395,80 +545,116 @@ const updatePricePreview = () => {
 
 // 生成阶梯定价方案表格
 const getPricingTable = () => {
-  if (!selectedScooter.value) return []
-  
-  const basePrice = selectedScooter.value.hourlyRate
+  // 使用示例价格10元/小时来显示定价方案
+  const basePrice = 10
   const durations = [
-    { hours: 1, label: '1小时' },
-    { hours: 3, label: '3小时' },
-    { hours: 4, label: '4小时' },
-    { hours: 8, label: '8小时' },
-    { hours: 9, label: '9小时' },
-    { hours: 12, label: '12小时' },
-    { hours: 24, label: '1天' },
-    { hours: 48, label: '2天' },
-    { hours: 72, label: '3天' },
-    { hours: 96, label: '4天' },
-    { hours: 120, label: '5天' },
-    { hours: 144, label: '6天' },
-    { hours: 168, label: '1周' }
-  ]
+      { hours: [1, 3], label: '1-3小时' },
+      { hours: [4, 8], label: '4-8小时' },
+      { hours: [9, 12], label: '9-12小时' },
+      { hours: [24], label: '1天' },
+      { hours: [48], label: '2天' },
+      { hours: [72], label: '3天' },
+      { hours: [96], label: '4天' },
+      { hours: [120], label: '5天' },
+      { hours: [144], label: '6天' },
+      { hours: [168], label: '7天' }
+    ]
   
   return durations.map(duration => {
-    const hours = duration.hours
-    let discountRate = 1
-    let effectiveHours = hours
-    let pricingTier = ''
-    
-    if (hours <= 3) {
-      discountRate = 1
-      effectiveHours = hours
-      pricingTier = '原价'
-    } else if (hours <= 8) {
-      discountRate = 0.85
-      effectiveHours = hours
-      pricingTier = '85折'
-    } else if (hours <= 24) {
-      discountRate = 0.6
-      effectiveHours = Math.min(hours, 12)
-      pricingTier = '6折'
-    } else if (hours <= 72) {
-      discountRate = 0.5
-      const days = Math.ceil(hours / 24)
-      effectiveHours = 12 * days
-      pricingTier = '5折'
-    } else {
-      discountRate = 0.3
-      const days = Math.ceil(hours / 24)
-      effectiveHours = 12 * days
-      pricingTier = '3折'
-    }
-    
-    const price = basePrice * effectiveHours * discountRate
-    
-    return {
-      duration: duration.label,
-      discount: `${(discountRate * 100).toFixed(0)}%`,
-      effectiveHours: `${effectiveHours}小时`,
-      price: `¥${price.toFixed(2)}`
-    }
-  })
+      const hours = Array.isArray(duration.hours) ? duration.hours[0] : duration.hours
+      let discountRate = 1
+      let effectiveHours = hours
+      let pricingTier = ''
+      
+      if (hours <= 3) {
+        discountRate = 1
+        effectiveHours = hours
+        pricingTier = '原价'
+      } else if (hours <= 8) {
+        discountRate = 0.85
+        effectiveHours = hours
+        pricingTier = '85折'
+      } else if (hours <= 24) {
+        discountRate = 0.6
+        effectiveHours = Math.min(hours, 12)
+        pricingTier = '6折'
+      } else if (hours <= 72) {
+        discountRate = 0.5
+        const days = Math.ceil(hours / 24)
+        effectiveHours = 12 * days
+        pricingTier = '5折'
+      } else {
+        discountRate = 0.3
+        const days = Math.ceil(hours / 24)
+        effectiveHours = 12 * days
+        pricingTier = '3折'
+      }
+      
+      // 前三行显示"使用时长"，后面行显示小时数
+      const durationLabel = hours <= 24 ? '使用时长' : '计费时长'
+      
+      return {
+        duration: duration.label,
+        discount: `${(discountRate * 100).toFixed(0)}%`,
+        effectiveHours: `${effectiveHours}小时`,
+        durationLabel: durationLabel
+      }
+    })
 }
 
-const openBookingDialog = (scooter) => {
+// 获取定价标签类名
+const getPricingTagClass = (duration) => {
+  if (duration === '1-3小时') {
+    return 'pricing-tag-gray' // 原价计费 - 浅灰色
+  } else if (duration === '4-8小时') {
+    return 'pricing-tag-yellow' // 85折 - 浅黄色
+  } else if (duration === '9-12小时' || duration === '1天') {
+    return 'pricing-tag-green' // 6折 - 浅绿色
+  } else if (duration === '2天' || duration === '3天') {
+    return 'pricing-tag-blue' // 5折 - 浅蓝色
+  } else {
+    return 'pricing-tag-purple' // 3折 - 浅紫色
+  }
+}
+
+// 获取定价说明
+const getPricingDescription = (duration) => {
+  if (duration === '1-3小时') {
+    return '原价计费'
+  } else if (duration === '4-8小时') {
+    return '85折优惠'
+  } else if (duration === '9-12小时' || duration === '1天') {
+    return '6折优惠'
+  } else if (duration === '2天' || duration === '3天') {
+    return '5折优惠'
+  } else {
+    return '3折优惠'
+  }
+}
+
+const handleModelChange = () => {
+  // 当型号改变时，重置位置选择
+  bookingForm.value.scooterId = null
+}
+
+const openBookingDialog = (groupedScooter) => {
   // 检查滑板车是否可用
-  if (scooter.status === 'UNAVAILABLE' || scooter.availableQuantity <= 0) {
+  if (groupedScooter.status === 'UNAVAILABLE' || groupedScooter.totalAvailableQuantity <= 0) {
     ElMessage.warning('该滑板车暂不可租用')
     return
   }
   
-  bookingForm.value.scooterId = scooter.id
+  // 设置默认选择的型号
+  bookingForm.value.scooterModel = groupedScooter.model
+  // 不设置默认位置，让用户选择
+  bookingForm.value.scooterId = null
   showBookingDialog.value = true
 }
 
 const handleBookingClose = () => {
   showBookingDialog.value = false
   bookingForm.value = {
+    scooterModel: null,
     scooterId: null,
     hours: 1,
     cardNumber: '123456789012' // 重置时保留默认信用卡号
@@ -537,10 +723,104 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 弹窗样式优化 */
+.el-dialog {
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden;
+}
+
+.el-dialog__header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  padding: 16px 20px !important;
+  margin: 0 !important;
+}
+
+.el-dialog__title {
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 18px !important;
+}
+
+.el-dialog__body {
+  padding: 24px 20px !important;
+}
+
+.el-dialog__footer {
+  padding: 16px 20px !important;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 弹窗在手机版的居中样式 */
+@media (max-width: 768px) {
+  .el-dialog {
+    margin: 0 auto !important;
+    max-width: 95vw !important;
+    width: 95vw !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    position: fixed !important;
+  }
+  
+  .el-dialog__wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  .el-dialog__header {
+    padding: 12px 16px !important;
+  }
+  
+  .el-dialog__body {
+    padding: 20px 16px !important;
+    max-height: 70vh !important;
+    overflow-y: auto !important;
+  }
+  
+  .el-dialog__footer {
+     padding: 12px 16px !important;
+   }
+   
+   /* 弹窗内表单布局优化 */
+   .el-form-item {
+     margin-bottom: 16px !important;
+   }
+   
+   .el-form-item__label {
+     font-size: 14px !important;
+     margin-bottom: 6px !important;
+   }
+   
+   .el-input, .el-select, .el-input-number {
+     width: 100% !important;
+   }
+   
+   .duration-input-group {
+     display: flex !important;
+     flex-direction: column !important;
+     gap: 8px !important;
+   }
+   
+   .duration-input-group .el-input-number,
+   .duration-input-group .el-select {
+     width: 100% !important;
+     margin-right: 0 !important;
+   }
+   
+   .duration-tips small {
+     font-size: 12px !important;
+     color: #666 !important;
+   }
+ }
+
 .scooters-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 20px;
 }
 
 .page-header {
@@ -903,5 +1183,160 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.booking-btn {
+  transition: all 0.3s ease;
+}
+
+.booking-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+
+.pricing-btn {
+  transition: all 0.3s ease;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+}
+
+.pricing-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.3);
+}
+
+.pricing-scheme {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.pricing-tips ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.pricing-tips li {
+  margin: 5px 0;
+  color: #666;
+  line-height: 1.6;
+}
+
+.pricing-tips strong {
+  color: #333;
+}
+
+/* 定价标签浅色系样式 */
+.pricing-tag-gray {
+  background-color: #f8f9fa !important;
+  border-color: #e9ecef !important;
+  color: #6c757d !important;
+}
+
+.pricing-tag-yellow {
+  background-color: #fff9c4 !important;
+  border-color: #fff59d !important;
+  color: #8d6e00 !important;
+}
+
+.pricing-tag-green {
+  background-color: #c8e6c9 !important;
+  border-color: #a5d6a7 !important;
+  color: #2e7d32 !important;
+}
+
+.pricing-tag-blue {
+  background-color: #bbdefb !important;
+  border-color: #90caf9 !important;
+  color: #1565c0 !important;
+}
+
+.pricing-tag-purple {
+  background-color: #e1bee7 !important;
+  border-color: #ce93d8 !important;
+  color: #6a1b9a !important;
+}
+
+/* 更亮的info标签样式 */
+.scooter-card .el-tag--info {
+  background-color: #e3f2fd !important;
+  border-color: #bbdefb !important;
+  color: #1976d2 !important;
+}
+
+.scooter-card .el-tag--info:hover {
+  background-color: #bbdefb !important;
+  border-color: #90caf9 !important;
+}
+
+/* 标题图标样式 */
+.title-icon {
+  font-size: 36px;
+  color: #667eea;
+  margin-right: 12px;
+  vertical-align: middle;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Footer样式 */
+.page-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  margin-top: 60px;
+  padding: 40px 0 20px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-around;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-section {
+  flex: 1;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.footer-section h4 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.footer-section p {
+  color: #666;
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.footer-bottom p {
+  color: #999;
+  font-size: 14px;
+  margin: 0;
 }
 </style>

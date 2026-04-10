@@ -157,6 +157,21 @@
             <el-form-item label="手机号">
               <el-input v-model="userForm.phone" placeholder="请输入手机号" />
             </el-form-item>
+            
+            <!-- 认证按钮区域 -->
+            <el-form-item label="身份认证">
+              <div class="certification-buttons">
+                <el-button type="primary" class="certification-btn" @click="handleStudentCertification">
+                  <el-icon><User /></el-icon>
+                  学生认证
+                </el-button>
+                <el-button type="success" class="certification-btn" @click="handleSeniorCertification">
+                  <el-icon><UserFilled /></el-icon>
+                  长者认证
+                </el-button>
+              </div>
+            </el-form-item>
+            
             <el-form-item>
               <el-button type="primary" @click="updateProfile">保存修改</el-button>
               <el-button>取消</el-button>
@@ -214,7 +229,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/api'
 import { 
   Star, Document, Setting, SwitchButton, ArrowRight, Plus, 
-  Location, Clock, Coin, Lock, Switch
+  Location, Clock, Coin, Lock, Switch, User, UserFilled
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -311,6 +326,16 @@ const formatDate = (dateString) => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+// 学生认证
+const handleStudentCertification = () => {
+  ElMessage.info('学生认证功能开发中，敬请期待！')
+}
+
+// 长者认证
+const handleSeniorCertification = () => {
+  ElMessage.info('长者认证功能开发中，敬请期待！')
 }
 
 // 退出登录
@@ -663,6 +688,30 @@ onMounted(() => {
 /* 设置表单 */
 .settings-form {
   max-width: 500px;
+}
+
+/* 认证按钮样式 */
+.certification-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.certification-btn {
+  flex: 1;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.certification-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* 响应式设计 */
