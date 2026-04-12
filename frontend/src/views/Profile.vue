@@ -128,6 +128,15 @@
                       <el-button 
                         type="primary" 
                         size="small" 
+                        @click="extendBookingTime(booking.id)"
+                        :loading="extendingBookingId === booking.id"
+                      >
+                        <el-icon><Clock /></el-icon>
+                        延长用车
+                      </el-button>
+                      <el-button 
+                        type="primary" 
+                        size="small" 
                         @click="returnScooterEarly(booking.id)"
                         :loading="returningBookingId === booking.id"
                       >
@@ -252,6 +261,7 @@ const bookingStats = ref({
 const bookings = ref([])
 const loading = ref(false)
 const returningBookingId = ref(null)
+const extendingBookingId = ref(null)
 
 // 用户表单
 const userForm = ref({
@@ -392,6 +402,56 @@ const resetPasswordForm = () => {
   }
 }
 
+// 延长用车时间
+const extendBookingTime = async (bookingId) => {
+  try {
+    extendingBookingId.value = bookingId
+    
+    // 询问用户要延长多少小时
+    const { value: hours } = await ElMessageBox.prompt(
+      '请输入要延长的小时数（最少1小时）:',
+      '延长用车时间',
+      {
+        confirmButtonText: '确认延长',
+        cancelButtonText: '取消',
+        inputPattern: /^[1-9][0-9]*$/,
+        inputErrorMessage: '请输入有效的正整数（最少1小时）'
+      }
+    )
+    
+    const extendHours = parseInt(hours)
+    
+    if (extendHours < 1) {
+      ElMessage.error('延长时间不能少于1小时')
+      return
+    }
+    
+    // 调用延长用车API
+    await api.put(`/bookings/${bookingId}/extend?hours=${extendHours}`)
+    
+    ElMessage.success(`延长用车时间成功！已延长 ${extendHours} 小时`)
+    
+    // 重新加载预订数据
+    await loadBookings()
+    
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') {
+      // 用户取消操作
+      return
+    }
+    
+    console.error('延长用车失败:', error)
+    if (error.response) {
+      const errorMessage = error.response.data?.message || error.response.data?.error || '延长用车失败'
+      ElMessage.error(`延长用车失败: ${errorMessage}`)
+    } else {
+      ElMessage.error('延长用车失败，请重试')
+    }
+  } finally {
+    extendingBookingId.value = null
+  }
+}
+
 // 提前还车
 const returnScooterEarly = async (bookingId) => {
   try {
@@ -431,6 +491,13 @@ const returnScooterEarly = async (bookingId) => {
 
 // 加载预订数据
 const loadBookings = async () => {
+  // 检查用户是否已登录
+  if (!authStore.isAuthenticated) {
+    bookings.value = []
+    bookingStats.value = { total: 0, active: 0, completed: 0 }
+    return
+  }
+  
   loading.value = true
   try {
     const response = await api.get('/bookings/user')
@@ -449,8 +516,13 @@ const loadBookings = async () => {
     bookingStats.value.active = bookings.value.filter(b => b.status === 'ACTIVE' || b.status === 'PENDING').length
     bookingStats.value.completed = bookings.value.filter(b => b.status === 'COMPLETED').length
   } catch (error) {
-    console.error('加载预订数据失败:', error)
-    ElMessage.error('加载预订数据失败')
+    // 如果是401未授权错误，说明用户已退出登录，不显示错误信息
+    if (error.response?.status !== 401) {
+      console.error('加载预订数据失败:', error)
+      ElMessage.error('加载预订数据失败')
+    }
+    bookings.value = []
+    bookingStats.value = { total: 0, active: 0, completed: 0 }
   } finally {
     loading.value = false
   }

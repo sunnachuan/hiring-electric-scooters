@@ -184,6 +184,49 @@
           </div>
         </el-form-item>
         
+        <!-- 支付方式选择 -->
+        <el-form-item label="支付方式" prop="paymentMethod">
+          <el-radio-group v-model="bookingForm.paymentMethod" @change="handlePaymentMethodChange">
+            <el-radio label="saved">使用存储的银行卡</el-radio>
+            <el-radio label="new">输入新银行卡</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        
+        <!-- 存储的银行卡选择 -->
+        <el-form-item v-if="bookingForm.paymentMethod === 'saved'" label="选择银行卡">
+          <el-select v-model="bookingForm.bankCardId" placeholder="请选择银行卡" style="width: 100%">
+            <el-option
+              v-for="card in bankCards"
+              :key="card.id"
+              :label="`${card.cardHolderName} - ****${card.cardNumber.slice(-4)}`"
+              :value="card.id"
+            />
+          </el-select>
+          <div style="margin-top: 10px;">
+            <el-button type="text" size="small" @click="showBankCardDialog = true">
+              <el-icon><Plus /></el-icon>
+              管理银行卡
+            </el-button>
+          </div>
+        </el-form-item>
+        
+        <!-- 新银行卡输入 -->
+        <div v-if="bookingForm.paymentMethod === 'new'">
+          <el-form-item label="银行卡号" prop="cardNumber">
+            <el-input v-model="bookingForm.cardNumber" placeholder="请输入银行卡号" />
+          </el-form-item>
+          
+          <el-form-item label="持卡人姓名" prop="cardHolderName">
+            <el-input v-model="bookingForm.cardHolderName" placeholder="请输入持卡人姓名" />
+          </el-form-item>
+          
+          <!-- 移除有效期和CVV输入框 -->
+          
+          <el-form-item>
+            <el-checkbox v-model="bookingForm.saveCard">保存此银行卡以便下次使用</el-checkbox>
+          </el-form-item>
+        </div>
+        
         <!-- 支付信息提示 -->
         <el-form-item>
           <el-alert 
@@ -307,6 +350,105 @@
         <el-button @click="showPricingScheme = false">关闭</el-button>
       </template>
     </el-dialog>
+
+    <!-- 银行卡管理弹窗 -->
+    <el-dialog 
+      v-model="showBankCardDialog" 
+      title="银行卡管理" 
+      width="700px"
+      center
+    >
+      <div class="bank-card-management">
+        <!-- 添加新银行卡 -->
+        <el-card class="add-card-form" shadow="never">
+          <template #header>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>添加新银行卡</span>
+              <el-button type="text" @click="resetBankCardForm">重置</el-button>
+            </div>
+          </template>
+          
+          <el-form :model="bankCardForm" :rules="bankCardRules" ref="bankCardFormRef">
+            <el-form-item label="银行卡号" prop="cardNumber">
+              <el-input v-model="bankCardForm.cardNumber" placeholder="请输入银行卡号" />
+            </el-form-item>
+            
+            <el-form-item label="持卡人姓名" prop="cardHolderName">
+              <el-input v-model="bankCardForm.cardHolderName" placeholder="请输入持卡人姓名" />
+            </el-form-item>
+            
+            <!-- 移除有效期和CVV输入框 -->
+            
+            <el-form-item>
+              <el-checkbox v-model="bankCardForm.isDefault">设为默认支付方式</el-checkbox>
+            </el-form-item>
+            
+            <el-form-item>
+              <el-button type="primary" @click="addBankCard" :loading="bankCardLoading">
+                添加银行卡
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-card>
+        
+        <!-- 银行卡列表 -->
+        <el-card class="card-list" shadow="never" style="margin-top: 20px;">
+          <template #header>
+            <span>我的银行卡</span>
+          </template>
+          
+          <div v-if="bankCards.length === 0" class="empty-state">
+            <el-empty description="暂无银行卡" />
+          </div>
+          
+          <div v-else class="card-list-content">
+            <div 
+              v-for="card in bankCards" 
+              :key="card.id" 
+              class="card-item"
+              :class="{ 'default-card': card.isDefault }"
+            >
+              <div class="card-info">
+                <div class="card-number">
+                  <el-icon><CreditCard /></el-icon>
+                  **** **** **** {{ card.cardNumber.slice(-4) }}
+                  <el-tag v-if="card.isDefault" size="small" type="success" style="margin-left: 10px;">
+                    默认
+                  </el-tag>
+                </div>
+                <div class="card-details">
+                  <span class="card-holder">{{ card.cardHolderName }}</span>
+                  <span class="card-expiry">{{ card.expiryMonth }}/{{ card.expiryYear }}</span>
+                </div>
+              </div>
+              
+              <div class="card-actions">
+                <el-button 
+                  v-if="!card.isDefault" 
+                  type="text" 
+                  size="small" 
+                  @click="setDefaultCard(card.id)"
+                >
+                  设为默认
+                </el-button>
+                <el-button 
+                  type="text" 
+                  size="small" 
+                  @click="deleteBankCard(card.id)"
+                  style="color: #f56c6c;"
+                >
+                  删除
+                </el-button>
+              </div>
+            </div>
+          </div>
+        </el-card>
+      </div>
+      
+      <template #footer>
+        <el-button @click="showBankCardDialog = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -323,16 +465,36 @@ const isAdmin = computed(() => authStore.userInfo?.role === 'ADMIN')
 const scooters = ref([])
 const loading = ref(false)
 const showBookingDialog = ref(false)
-const showPriceDetails = ref(false)
 const showPricingScheme = ref(false)
+const showPriceDetails = ref(false)
+const showBankCardDialog = ref(false)
 const bookingLoading = ref(false)
+const bankCardLoading = ref(false)
 const bookingFormRef = ref()
+const bankCardFormRef = ref()
+const bankCards = ref([])
 
 const bookingForm = ref({
-  scooterModel: null,
+  scooterModel: '',
   scooterId: null,
   hours: 1,
-  cardNumber: '123456789012' // 默认信用卡号
+  paymentMethod: 'saved', // 'saved' 或 'new'
+  bankCardId: null,
+  cardNumber: '',
+  cardHolderName: '',
+  expiryMonth: '',
+  expiryYear: '',
+  cvv: '',
+  saveCard: false
+})
+
+const bankCardForm = ref({
+  cardNumber: '',
+  cardHolderName: '',
+  expiryMonth: '',
+  expiryYear: '',
+  cvv: '',
+  isDefault: false
 })
 
 const bookingRules = {
@@ -341,6 +503,18 @@ const bookingRules = {
   hours: [
     { required: true, message: '请输入租赁时长', trigger: 'blur' },
     { type: 'number', min: 1, max: 168, message: '时长必须在1-168小时之间', trigger: 'blur' }
+  ],
+  paymentMethod: [{ required: true, message: '请选择支付方式', trigger: 'change' }]
+}
+
+const bankCardRules = {
+  cardNumber: [
+    { required: true, message: '请输入银行卡号', trigger: 'blur' },
+    { pattern: /^[0-9\s-]{12,19}$/, message: '银行卡号格式不正确', trigger: 'blur' }
+  ],
+  cardHolderName: [
+    { required: true, message: '请输入持卡人姓名', trigger: 'blur' },
+    { min: 2, max: 50, message: '姓名长度应在2-50个字符之间', trigger: 'blur' }
   ]
 }
 
@@ -661,13 +835,110 @@ const handleBookingClose = () => {
   }
 }
 
+
+
+// 银行卡管理相关方法
+const handlePaymentMethodChange = (method) => {
+  if (method === 'saved') {
+    loadBankCards()
+  }
+}
+
+const loadBankCards = async () => {
+  try {
+    const response = await api.get('/bank-cards')
+    bankCards.value = response.data
+    
+    // 如果有默认卡，自动选择
+    const defaultCard = bankCards.value.find(card => card.isDefault)
+    if (defaultCard) {
+      bookingForm.value.bankCardId = defaultCard.id
+    }
+  } catch (error) {
+    console.error('加载银行卡失败:', error)
+  }
+}
+
+const addBankCard = async () => {
+  if (!bankCardFormRef.value) return
+  
+  try {
+    await bankCardFormRef.value.validate()
+  } catch (error) {
+    return
+  }
+  
+  bankCardLoading.value = true
+  
+  try {
+    const bankCardData = {
+      cardNumber: bankCardForm.value.cardNumber,
+      cardHolderName: bankCardForm.value.cardHolderName
+    }
+    const response = await api.post('/bank-cards', bankCardData)
+    ElMessage.success('银行卡添加成功')
+    
+    // 重新加载银行卡列表
+    await loadBankCards()
+    
+    // 重置表单
+    resetBankCardForm()
+  } catch (error) {
+    console.error('添加银行卡失败:', error)
+    ElMessage.error('添加银行卡失败，请重试')
+  } finally {
+    bankCardLoading.value = false
+  }
+}
+
+const setDefaultCard = async (cardId) => {
+  try {
+    await api.put(`/bank-cards/${cardId}/default`)
+    ElMessage.success('默认银行卡设置成功')
+    await loadBankCards()
+  } catch (error) {
+    console.error('设置默认卡失败:', error)
+    ElMessage.error('设置默认卡失败，请重试')
+  }
+}
+
+const deleteBankCard = async (cardId) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这张银行卡吗？', '确认删除', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    
+    await api.delete(`/bank-cards/${cardId}`)
+    ElMessage.success('银行卡删除成功')
+    await loadBankCards()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除银行卡失败:', error)
+      ElMessage.error('删除银行卡失败，请重试')
+    }
+  }
+}
+
+const resetBankCardForm = () => {
+  bankCardForm.value = {
+    cardNumber: '',
+    cardHolderName: '',
+    expiryMonth: '',
+    expiryYear: '',
+    cvv: '',
+    isDefault: false
+  }
+}
+
+// 修改预订处理逻辑
 const handleBooking = async () => {
   if (!bookingFormRef.value) return
   
   try {
     await bookingFormRef.value.validate()
   } catch (error) {
-    // 表单验证失败，直接返回
     return
   }
   
@@ -682,15 +953,32 @@ const handleBooking = async () => {
     ElMessage.success('支付成功！')
     await new Promise(resolve => setTimeout(resolve, 500))
     
-    // 提交预订
-    console.log('发送预订请求:', bookingForm.value)
-    console.log('请求完整URL:', api.defaults.baseURL + '/bookings')
-    
-    // 构建后端期望的请求格式
+    // 构建预订数据
     const bookingData = {
       scooterId: bookingForm.value.scooterId,
-      hours: bookingForm.value.hours,
-      cardNumber: bookingForm.value.cardNumber
+      hours: bookingForm.value.hours
+    }
+    
+    // 根据支付方式添加支付信息
+    if (bookingForm.value.paymentMethod === 'saved') {
+      bookingData.bankCardId = bookingForm.value.bankCardId
+    } else {
+      bookingData.cardNumber = bookingForm.value.cardNumber
+      
+      // 如果需要保存银行卡
+      if (bookingForm.value.saveCard) {
+        try {
+          const bankCardData = {
+            cardNumber: bookingForm.value.cardNumber,
+            cardHolderName: bookingForm.value.cardHolderName
+          }
+          await api.post('/bank-cards', bankCardData)
+          ElMessage.success('银行卡已保存')
+        } catch (error) {
+          console.error('保存银行卡失败:', error)
+          // 银行卡保存失败不影响预订
+        }
+      }
     }
     
     const response = await api.post('/bookings', bookingData)
@@ -794,6 +1082,105 @@ onMounted(() => {
      font-size: 14px !important;
      margin-bottom: 6px !important;
    }
+
+/* 银行卡管理样式 */
+.bank-card-management {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.add-card-form {
+  margin-bottom: 20px;
+}
+
+.card-list-content {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.card-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.card-item:hover {
+  border-color: #409eff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
+}
+
+.card-item.default-card {
+  border-color: #67c23a;
+  background-color: rgba(103, 194, 58, 0.05);
+}
+
+.card-info {
+  flex: 1;
+}
+
+.card-number {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.card-number .el-icon {
+  margin-right: 8px;
+  color: #409eff;
+}
+
+.card-details {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: #666;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 0;
+}
+
+/* 支付方式选择样式 */
+.el-radio-group {
+  width: 100%;
+}
+
+.el-radio {
+  margin-right: 0;
+  width: 50%;
+  text-align: center;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .card-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .card-actions {
+    margin-top: 12px;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .el-radio {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
    
    .el-input, .el-select, .el-input-number {
      width: 100% !important;

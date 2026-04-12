@@ -15,6 +15,9 @@ public class BookingRequest {
     @Max(value = 168, message = "租赁时长不能超过168小时（7天）")
     private Integer hours;
     
-    @NotNull(message = "信用卡号不能为空")
+    // 新增：使用存储的银行卡ID（可选）
+    private Long bankCardId;
+    
+    // 新增：直接输入卡号（可选，与bankCardId二选一）
     private String cardNumber;
 }

@@ -1,9 +1,11 @@
 package com.scooter.service;
 
+import com.scooter.entity.BankCard;
 import com.scooter.entity.Booking;
 import com.scooter.entity.Payment;
 import com.scooter.entity.Scooter;
 import com.scooter.entity.User;
+import com.scooter.repository.BankCardRepository;
 import com.scooter.repository.BookingRepository;
 import com.scooter.repository.PaymentRepository;
 import com.scooter.repository.ScooterRepository;
@@ -23,11 +25,13 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final ScooterRepository scooterRepository;
     private final PaymentRepository paymentRepository;
+    private final BankCardRepository bankCardRepository;
+    private final BankCardService bankCardService;
     private final EmailService emailService;
     private final ScooterService scooterService;
     
     @Transactional
-    public Booking createBooking(User user, Scooter scooter, Integer hours, String cardNumber) {
+    public Booking createBooking(User user, Scooter scooter, Integer hours, String cardNumber, Long bankCardId) {
         // 检查滑板车是否可用
         if (!"AVAILABLE".equals(scooter.getStatus())) {
             throw new RuntimeException("滑板车不可用");
@@ -64,7 +68,7 @@ public class BookingService {
         Booking savedBooking = bookingRepository.save(booking);
         
         // 处理支付（使用已保存的预订）
-        processPayment(savedBooking, cardNumber);
+        processPayment(savedBooking, cardNumber, bankCardId);
         
         // 更新滑板车可用数量
         scooterService.decrementAvailableQuantity(scooter.getId());
@@ -135,16 +139,47 @@ public class BookingService {
         return discount;
     }
     
-    private void processPayment(Booking booking, String cardNumber) {
-        // 模拟支付验证
-        if (cardNumber == null || cardNumber.length() < 12) {
-            throw new RuntimeException("支付失败：无效的信用卡号");
+    private void processPayment(Booking booking, String cardNumber, Long bankCardId) {
+        // 简化支付验证 - 模拟支付，只需基本验证
+        String finalCardNumber = null;
+        
+        if (bankCardId != null) {
+            // 使用存储的银行卡
+            BankCard bankCard = bankCardRepository.findById(bankCardId)
+                    .orElseThrow(() -> new RuntimeException("银行卡不存在"));
+            
+            if (!bankCard.getUser().getId().equals(booking.getUser().getId())) {
+                throw new RuntimeException("无权使用此银行卡");
+            }
+            
+            finalCardNumber = bankCard.getCardNumber();
+            
+            // 更新银行卡的最后使用时间
+            bankCardService.updateLastUsedTime(bankCardId);
+        } else if (cardNumber != null && !cardNumber.trim().isEmpty()) {
+            // 使用直接输入的卡号
+            finalCardNumber = cardNumber;
+        } else {
+            // 如果没有提供支付信息，使用模拟卡号
+            finalCardNumber = "123456789012";
         }
         
+        // 简化验证：只需基本非空检查
+        if (finalCardNumber == null || finalCardNumber.trim().isEmpty()) {
+            throw new RuntimeException("支付失败：无效的支付信息");
+        }
+        
+        // 模拟支付成功
         Payment payment = new Payment();
         payment.setBooking(booking);
         payment.setAmount(booking.getTotalPrice());
-        payment.setCardLastFour(cardNumber.substring(cardNumber.length() - 4));
+        
+        // 安全处理卡号显示
+        if (finalCardNumber.length() >= 4) {
+            payment.setCardLastFour(finalCardNumber.substring(finalCardNumber.length() - 4));
+        } else {
+            payment.setCardLastFour("1234");
+        }
         
         paymentRepository.save(payment);
         booking.setStatus("ACTIVE");
@@ -242,9 +277,13 @@ public class BookingService {
             throw new RuntimeException("只能延长进行中的预订");
         }
         
-        // 计算延长价格
-        BigDecimal extensionPrice = calculateTieredPrice(booking.getScooter().getHourlyRate(), hours)
-                .multiply(booking.getDiscountApplied());
+        // 确保最少延长1小时
+        if (hours < 1) {
+            throw new RuntimeException("延长时间不能少于1小时");
+        }
+        
+        // 计算延长价格（直接使用分层定价，不应用额外折扣）
+        BigDecimal extensionPrice = calculateTieredPrice(booking.getScooter().getHourlyRate(), hours);
         
         // 更新结束时间和总价
         LocalDateTime newEndTime = booking.getEndTime().plusHours(hours);

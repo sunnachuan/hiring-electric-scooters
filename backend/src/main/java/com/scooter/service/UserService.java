@@ -61,4 +61,8 @@ public class UserService implements UserDetailsService {
     public java.util.List<User> findAll() {
         return userRepository.findAll();
     }
+    
+    public User updateUser(User user) {
+        return userRepository.save(user);
+    }
 }

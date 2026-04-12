@@ -5,6 +5,7 @@ import com.scooter.entity.Feedback;
 import com.scooter.entity.User;
 import com.scooter.service.FeedbackService;
 import com.scooter.service.UserService;
+import com.scooter.config.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +21,20 @@ public class FeedbackController {
     
     private final FeedbackService feedbackService;
     private final UserService userService;
+    private final JwtUtils jwtUtils;
     
     @PostMapping
     public ResponseEntity<Feedback> createFeedback(@Valid @RequestBody FeedbackRequest feedbackRequest,
                                                   HttpServletRequest request) {
-        // 简化版本：直接使用第一个用户（开发测试用）
-        User user = userService.findAll().stream().findFirst()
-                .orElseThrow(() -> new RuntimeException("没有用户存在"));
+        // 从JWT令牌中获取当前用户
+        String token = extractTokenFromRequest(request);
+        if (token == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        String username = jwtUtils.extractUsername(token);
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
         
         Feedback feedback = feedbackService.createFeedback(user, 
                 feedbackRequest.getTitle(), feedbackRequest.getDescription());
@@ -36,8 +44,27 @@ public class FeedbackController {
     
     @GetMapping("/user")
     public ResponseEntity<List<Feedback>> getUserFeedback(HttpServletRequest request) {
-        // 简化版本：返回所有反馈（开发测试用）
-        List<Feedback> feedbacks = feedbackService.getAllFeedback();
+        // 从JWT令牌中获取当前用户
+        String token = extractTokenFromRequest(request);
+        if (token == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        String username = jwtUtils.extractUsername(token);
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+        
+        // 返回当前用户的反馈（包括管理员自己的反馈）
+        List<Feedback> feedbacks = feedbackService.getUserFeedback(user.getId());
+        
         return ResponseEntity.ok(feedbacks);
+    }
+    
+    private String extractTokenFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 }

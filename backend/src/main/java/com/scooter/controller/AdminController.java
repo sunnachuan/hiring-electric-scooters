@@ -40,7 +40,7 @@ public class AdminController {
         
         // 使用模拟信用卡号进行支付
         Booking booking = bookingService.createBooking(user, scooter, 
-                request.getHours(), "123456789012");
+                request.getHours(), "123456789012", null);
         
         return ResponseEntity.ok(booking);
     }

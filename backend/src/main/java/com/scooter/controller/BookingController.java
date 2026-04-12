@@ -35,7 +35,7 @@ public class BookingController {
         Scooter scooter = scooterService.getScooterById(bookingRequest.getScooterId());
         
         Booking booking = bookingService.createBooking(user, scooter, 
-                bookingRequest.getHours(), bookingRequest.getCardNumber());
+                bookingRequest.getHours(), bookingRequest.getCardNumber(), bookingRequest.getBankCardId());
         
         return ResponseEntity.ok(booking);
     }
@@ -71,9 +71,8 @@ public class BookingController {
     public ResponseEntity<Booking> extendBooking(@PathVariable Long id,
                                                 @RequestParam Integer hours,
                                                 HttpServletRequest request) {
-        // 简化版本：直接延长预订
-        User user = userService.findAll().stream().findFirst()
-                .orElseThrow(() -> new RuntimeException("没有用户存在"));
+        // 使用当前登录用户
+        User user = securityUtils.getCurrentUser(request);
         
         return ResponseEntity.ok(bookingService.extendBooking(id, hours, user));
     }

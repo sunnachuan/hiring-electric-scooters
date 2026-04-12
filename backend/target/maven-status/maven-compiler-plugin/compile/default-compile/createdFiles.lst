@@ -1,3 +1,4 @@
+com\scooter\controller\BankCardController.class
 com\scooter\service\FeedbackService.class
 com\scooter\config\DataInitializer.class
 com\scooter\dto\AuthRequest.class
@@ -5,8 +6,10 @@ com\scooter\entity\Payment.class
 com\scooter\service\UserService.class
 com\scooter\controller\FeedbackController.class
 com\scooter\service\EmailService.class
+com\scooter\service\BankCardService.class
 com\scooter\config\JwtUtils.class
 com\scooter\service\ScooterService.class
+com\scooter\entity\BankCard.class
 com\scooter\ScooterRentalApplication.class
 com\scooter\dto\RegisterRequest.class
 com\scooter\repository\ScooterRepository.class
@@ -23,10 +26,12 @@ com\scooter\dto\BookingRequest.class
 com\scooter\dto\AdminBookingRequest.class
 com\scooter\service\BookingService.class
 com\scooter\controller\ScooterController.class
+com\scooter\dto\BankCardRequest.class
 com\scooter\config\SecurityConfig.class
 com\scooter\entity\Booking.class
 com\scooter\entity\Feedback.class
 com\scooter\repository\PaymentRepository.class
 com\scooter\repository\BookingRepository.class
+com\scooter\repository\BankCardRepository.class
 com\scooter\controller\AdminController.class
 com\scooter\entity\Scooter.class
