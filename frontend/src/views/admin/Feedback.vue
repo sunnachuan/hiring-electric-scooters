@@ -43,7 +43,7 @@
             {{ formatDate(row.createdAt) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column label="操作" width="300">
           <template #default="{ row }">
             <el-button 
               type="primary" 
@@ -51,6 +51,22 @@
               @click="togglePriority(row)"
             >
               {{ row.priority === 'HIGH' ? '设为低优先级' : '设为高优先级' }}
+            </el-button>
+            <el-button 
+              v-if="row.status === 'OPEN'"
+              type="success" 
+              size="small" 
+              @click="markAsResolved(row)"
+            >
+              标记为已处理
+            </el-button>
+            <el-button 
+              v-else
+              type="warning" 
+              size="small" 
+              @click="reopenFeedback(row)"
+            >
+              重新打开
             </el-button>
           </template>
         </el-table-column>
@@ -103,10 +119,30 @@ const togglePriority = async (feedbackItem) => {
   try {
     const newPriority = feedbackItem.priority === 'HIGH' ? 'LOW' : 'HIGH'
     await api.put(`/admin/feedback/${feedbackItem.id}/priority?priority=${newPriority}`)
+    feedbackItem.priority = newPriority
     ElMessage.success('优先级更新成功')
-    loadFeedback()
   } catch (error) {
-    ElMessage.error('更新失败')
+    ElMessage.error('更新优先级失败')
+  }
+}
+
+const markAsResolved = async (feedbackItem) => {
+  try {
+    await api.put(`/admin/feedback/${feedbackItem.id}/status?status=RESOLVED`)
+    feedbackItem.status = 'RESOLVED'
+    ElMessage.success('反馈已标记为已处理')
+  } catch (error) {
+    ElMessage.error('标记为已处理失败')
+  }
+}
+
+const reopenFeedback = async (feedbackItem) => {
+  try {
+    await api.put(`/admin/feedback/${feedbackItem.id}/status?status=OPEN`)
+    feedbackItem.status = 'OPEN'
+    ElMessage.success('反馈已重新打开')
+  } catch (error) {
+    ElMessage.error('重新打开反馈失败')
   }
 }
 

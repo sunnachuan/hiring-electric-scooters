@@ -41,6 +41,14 @@ public class FeedbackService {
         return feedbackRepository.save(feedback);
     }
     
+    public Feedback updateStatus(Long feedbackId, String status) {
+        Feedback feedback = feedbackRepository.findById(feedbackId)
+                .orElseThrow(() -> new RuntimeException("反馈不存在"));
+        
+        feedback.setStatus(status);
+        return feedbackRepository.save(feedback);
+    }
+    
     public List<Feedback> getFeedbackByPriority(String priority) {
         return feedbackRepository.findByPriorityOrderByCreatedAtDesc(priority);
     }

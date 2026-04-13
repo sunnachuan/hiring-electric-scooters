@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -301,5 +303,64 @@ public class BookingService {
         }
         
         return extendedBooking;
+    }
+    
+    /**
+     * 计算从指定时间开始的总收入
+     */
+    public Double calculateTotalRevenueSince(LocalDateTime startDate) {
+        return bookingRepository.calculateTotalRevenueSince(startDate);
+    }
+    
+    /**
+     * 获取按租用时长分类的收入统计
+     */
+    public Map<String, Double> getRevenueByDurationTypeSince(LocalDateTime startDate) {
+        List<Object[]> results = bookingRepository.findRevenueByDurationTypeSince(startDate);
+        Map<String, Double> revenueByDuration = new HashMap<>();
+        
+        // 初始化所有可能的租用时长类型
+        revenueByDuration.put("1h", 0.0);
+        revenueByDuration.put("4h", 0.0);
+        revenueByDuration.put("1d", 0.0);
+        revenueByDuration.put("1w", 0.0);
+        
+        // 填充实际数据
+        for (Object[] result : results) {
+            String durationType = (String) result[0];
+            Double revenue = (Double) result[1];
+            if (revenue != null) {
+                revenueByDuration.put(durationType, revenue);
+            }
+        }
+        
+        return revenueByDuration;
+    }
+    
+    /**
+     * 获取每日收入统计
+     */
+    public Map<String, Double> getDailyRevenueSince(LocalDateTime startDate) {
+        List<Object[]> results = bookingRepository.findDailyRevenueSince(startDate);
+        Map<String, Double> dailyRevenue = new HashMap<>();
+        
+        // 生成过去7天的日期
+        for (int i = 6; i >= 0; i--) {
+            LocalDateTime date = LocalDateTime.now().minusDays(i);
+            String dateKey = date.toLocalDate().toString();
+            dailyRevenue.put(dateKey, 0.0);
+        }
+        
+        // 填充实际数据
+        for (Object[] result : results) {
+            LocalDateTime startTime = (LocalDateTime) result[0];
+            Double revenue = (Double) result[1];
+            if (revenue != null && startTime != null) {
+                String dateKey = startTime.toLocalDate().toString();
+                dailyRevenue.put(dateKey, dailyRevenue.getOrDefault(dateKey, 0.0) + revenue);
+            }
+        }
+        
+        return dailyRevenue;
     }
 }

@@ -34,7 +34,7 @@ public class AdminController {
     @PostMapping("/bookings")
     public ResponseEntity<Booking> createBookingForUser(@Valid @RequestBody AdminBookingRequest request) {
         User user = userService.findByEmail(request.getUserEmail())
-                .orElseThrow(() -> new RuntimeException("用户不存在"));
+                .orElseThrow(() -> new RuntimeException("用户不存在：" + request.getUserEmail()));
         
         Scooter scooter = scooterService.getScooterById(request.getScooterId());
         
@@ -49,15 +49,15 @@ public class AdminController {
     public ResponseEntity<Map<String, Object>> getWeeklyRevenue() {
         LocalDateTime weekAgo = LocalDateTime.now().minusWeeks(1);
         
-        // 这里需要从BookingRepository获取数据，暂时返回模拟数据
-        Map<String, Object> response = new HashMap<>();
-        response.put("totalRevenue", 1250.50);
+        // 获取一周内的总收入
+        Double totalRevenue = bookingService.calculateTotalRevenueSince(weekAgo);
+        if (totalRevenue == null) totalRevenue = 0.0;
         
-        Map<String, Double> revenueByDuration = new HashMap<>();
-        revenueByDuration.put("1h", 250.0);
-        revenueByDuration.put("4h", 450.0);
-        revenueByDuration.put("1d", 350.0);
-        revenueByDuration.put("1w", 200.5);
+        // 获取按租用时长分类的收入
+        Map<String, Double> revenueByDuration = bookingService.getRevenueByDurationTypeSince(weekAgo);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalRevenue", totalRevenue);
         response.put("revenueByDuration", revenueByDuration);
         
         return ResponseEntity.ok(response);
@@ -65,15 +65,10 @@ public class AdminController {
     
     @GetMapping("/revenue/daily")
     public ResponseEntity<Map<String, Object>> getDailyRevenue() {
-        // 返回模拟数据
-        Map<String, Double> revenueByDay = new HashMap<>();
-        revenueByDay.put("2024-01-01", 180.0);
-        revenueByDay.put("2024-01-02", 220.5);
-        revenueByDay.put("2024-01-03", 195.0);
-        revenueByDay.put("2024-01-04", 210.0);
-        revenueByDay.put("2024-01-05", 245.0);
-        revenueByDay.put("2024-01-06", 200.0);
-        revenueByDay.put("2024-01-07", 180.0);
+        LocalDateTime weekAgo = LocalDateTime.now().minusWeeks(1);
+        
+        // 获取一周内的每日收入
+        Map<String, Double> revenueByDay = bookingService.getDailyRevenueSince(weekAgo);
         
         Map<String, Object> response = new HashMap<>();
         response.put("dailyRevenue", revenueByDay);
@@ -90,5 +85,11 @@ public class AdminController {
     public ResponseEntity<Feedback> updateFeedbackPriority(@PathVariable Long id,
                                                           @RequestParam String priority) {
         return ResponseEntity.ok(feedbackService.updatePriority(id, priority));
+    }
+    
+    @PutMapping("/feedback/{id}/status")
+    public ResponseEntity<Feedback> updateFeedbackStatus(@PathVariable Long id,
+                                                        @RequestParam String status) {
+        return ResponseEntity.ok(feedbackService.updateStatus(id, status));
     }
 }
