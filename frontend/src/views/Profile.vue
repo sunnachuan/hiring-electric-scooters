@@ -74,6 +74,17 @@
         </el-card>
 
         <el-card class="function-card" shadow="hover">
+          <div class="card-content" @click="activeTab = 'insurance'">
+            <el-icon class="card-icon"><Document /></el-icon>
+            <div class="card-text">
+              <h3>保险与条款</h3>
+              <p>查看交通保险和免责条款</p>
+            </div>
+            <el-icon class="card-arrow"><ArrowRight /></el-icon>
+          </div>
+        </el-card>
+
+        <el-card class="function-card" shadow="hover">
           <div class="card-content" @click="handleLogout">
             <el-icon class="card-icon logout-icon"><SwitchButton /></el-icon>
             <div class="card-text">
@@ -225,16 +236,123 @@
             </el-form-item>
           </el-form>
         </div>
+
+        <!-- 保险与条款 -->
+        <div v-else-if="activeTab === 'insurance'" class="tab-panel">
+          <div class="tab-header">
+            <h3>保险与条款</h3>
+            <el-button type="primary" @click="downloadTerms">
+              <el-icon><Download /></el-icon>
+              下载条款文档
+            </el-button>
+          </div>
+          
+          <div class="insurance-content">
+            <!-- 保险状态 -->
+            <el-card class="insurance-card">
+              <template #header>
+                <div class="card-header">
+                  <el-icon><Medal /></el-icon>
+                  <span>当前保险状态</span>
+                </div>
+              </template>
+              <div class="insurance-status">
+                <div class="status-item">
+                  <span class="label">保险类型：</span>
+                  <span class="value">基础交通意外险</span>
+                </div>
+                <div class="status-item">
+                  <span class="label">生效时间：</span>
+                  <span class="value">{{ userInfo.createTime || '注册时生效' }}</span>
+                </div>
+                <div class="status-item">
+                  <span class="label">保障范围：</span>
+                  <span class="value">第三方人身伤害、财产损失、用户意外伤害</span>
+                </div>
+                <div class="status-item">
+                  <span class="label">保险状态：</span>
+                  <el-tag type="success">有效</el-tag>
+                </div>
+              </div>
+            </el-card>
+
+            <!-- 免责条款 -->
+            <el-card class="terms-card">
+              <template #header>
+                <div class="card-header">
+                  <el-icon><Warning /></el-icon>
+                  <span>重要免责条款</span>
+                </div>
+              </template>
+              <div class="terms-list">
+                <div class="term-item" v-for="(term, index) in importantTerms" :key="index">
+                  <el-icon class="term-icon"><InfoFilled /></el-icon>
+                  <span class="term-text">{{ term }}</span>
+                </div>
+              </div>
+            </el-card>
+
+            <!-- 超时处理说明 -->
+            <el-card class="overtime-card">
+              <template #header>
+                <div class="card-header">
+                  <el-icon><Clock /></el-icon>
+                  <span>超时未还车处理方案</span>
+                </div>
+              </template>
+              <div class="overtime-steps">
+                <div class="step-item" v-for="(step, index) in overtimeSteps" :key="index">
+                  <div class="step-number">{{ index + 1 }}</div>
+                  <div class="step-content">
+                    <div class="step-title">{{ step.title }}</div>
+                    <div class="step-desc">{{ step.description }}</div>
+                  </div>
+                </div>
+              </div>
+            </el-card>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
+
+// 重要免责条款
+const importantTerms = [
+  '用户未满16周岁或未取得相应驾驶资格时发生的事故',
+  '用户酒后驾驶、吸毒后驾驶或疲劳驾驶导致的事故',
+  '用户违反交通规则（如闯红灯、逆行等）造成的事故',
+  '用户故意损坏车辆或进行危险操作导致的损失',
+  '用户未在规定区域内使用车辆发生的事故',
+  '用户未按规定佩戴安全护具造成的人身伤害',
+  '不可抗力因素（如自然灾害、战争等）导致的损失'
+]
+
+// 超时处理步骤
+const overtimeSteps = [
+  {
+    title: '超时15分钟',
+    description: '系统自动发送短信/邮件提醒用户及时还车'
+  },
+  {
+    title: '超时30分钟', 
+    description: '按原费率1.5倍自动续费计费'
+  },
+  {
+    title: '超时1小时',
+    description: '按原费率2倍计费，客服人员电话联系用户'
+  },
+  {
+    title: '超时2小时以上',
+    description: '按原费率3倍计费，可能暂停账户使用，启动车辆定位'
+  }
+]
 import api from '@/api'
 import { 
   Star, Document, Setting, SwitchButton, ArrowRight, Plus, 
@@ -388,6 +506,10 @@ const changePassword = async () => {
       ElMessage.error('密码修改失败，请重试')
     }
   }
+}
+
+const downloadTerms = () => {
+  ElMessage.info('条款文档下载功能即将上线')
 }
 
 // 重置密码表单
@@ -786,6 +908,131 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* 保险与条款样式 */
+.insurance-content {
+  display: grid;
+  gap: 20px;
+}
+
+.insurance-card,
+.terms-card,
+.overtime-card {
+  transition: transform 0.3s ease;
+}
+
+.insurance-card:hover,
+.terms-card:hover,
+.overtime-card:hover {
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #409EFF;
+}
+
+.insurance-status {
+  display: grid;
+  gap: 12px;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.status-item:last-child {
+  border-bottom: none;
+}
+
+.status-item .label {
+  color: #606266;
+  font-weight: 500;
+}
+
+.status-item .value {
+  color: #303133;
+  text-align: right;
+}
+
+.terms-list {
+  display: grid;
+  gap: 12px;
+}
+
+.term-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #e6a23c;
+}
+
+.term-icon {
+  color: #e6a23c;
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.term-text {
+  color: #606266;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.overtime-steps {
+  display: grid;
+  gap: 16px;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e4e7ed;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  background: #409EFF;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-title {
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 4px;
+}
+
+.step-desc {
+  color: #606266;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .profile-header {
@@ -818,6 +1065,26 @@ onMounted(() => {
   
   .tab-content {
     padding: 16px;
+  }
+  
+  .status-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .status-item .value {
+    text-align: left;
+  }
+  
+  .step-item {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+  
+  .step-number {
+    align-self: center;
   }
 }
 </style>

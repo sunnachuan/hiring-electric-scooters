@@ -236,10 +236,6 @@
                       ></div>
                     </div>
                   </div>
-                  <!-- 电量数字 -->
-                  <div class="premium-battery-number" :class="getBatteryTextClass(row.batteryLevel)">
-                    {{ Math.round(row.batteryLevel) }}
-                  </div>
                 </div>
                 <!-- 电量百分比 -->
                 <span class="battery-percentage" :class="getBatteryTextClass(row.batteryLevel)">

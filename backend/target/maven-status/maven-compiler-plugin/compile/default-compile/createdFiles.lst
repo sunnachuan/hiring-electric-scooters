@@ -20,7 +20,6 @@ com\scooter\repository\OperationTaskRepository.class
 com\scooter\repository\ScooterLocationRepository.class
 com\scooter\service\UserService.class
 com\scooter\controller\FeedbackController.class
-com\scooter\service\EmailService.class
 com\scooter\service\OperationService.class
 com\scooter\service\DeviceService.class
 com\scooter\entity\BankCard.class
@@ -29,7 +28,6 @@ com\scooter\dto\RegisterRequest.class
 com\scooter\repository\ScooterRepository.class
 com\scooter\dto\FeedbackRequest.class
 com\scooter\util\SecurityUtils.class
-com\scooter\controller\BookingController.class
 com\scooter\service\BillingService.class
 com\scooter\controller\AuthController.class
 com\scooter\repository\UserRepository.class
@@ -37,12 +35,10 @@ com\scooter\entity\Operator.class
 com\scooter\controller\DeviceController.class
 com\scooter\dto\BookingRequest.class
 com\scooter\dto\AdminBookingRequest.class
-com\scooter\service\BookingService.class
 com\scooter\controller\ScooterController.class
 com\scooter\config\SecurityConfig.class
 com\scooter\entity\Booking.class
 com\scooter\entity\Feedback.class
 com\scooter\repository\BookingRepository.class
 com\scooter\repository\BankCardRepository.class
-com\scooter\controller\AdminController.class
 com\scooter\entity\Scooter.class

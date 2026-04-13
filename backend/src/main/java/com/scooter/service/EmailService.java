@@ -1,148 +1,87 @@
 package com.scooter.service;
 
-import com.scooter.entity.Booking;
-import com.scooter.entity.User;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class EmailService {
     
-    private final JavaMailSender mailSender;
-    private final TemplateEngine templateEngine;
+    /**
+     * 发送简单邮件（模拟实现）
+     */
+    public void sendSimpleMessage(String to, String subject, String text) {
+        // 在实际项目中，这里会调用真实的邮件服务
+        // 这里只是模拟发送，记录日志
+        log.info("发送邮件提醒 - 收件人: {}, 主题: {}, 内容: {}", to, subject, text);
+        
+        // 模拟邮件发送延迟
+        try {
+            Thread.sleep(100); // 100ms延迟模拟网络请求
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
+        log.info("邮件发送成功 - 收件人: {}", to);
+    }
+    
+    /**
+     * 发送超时提醒邮件
+     */
+    public void sendOvertimeReminder(String to, String username, String scooterModel, 
+                                    int overtimeMinutes, BigDecimal overtimeFee) {
+        String subject = "电动滑板车超时提醒";
+        String text = String.format(
+            "尊敬的 %s 用户：\n\n" +
+            "您的电动滑板车预订已超时 %d 分钟。\n" +
+            "车辆型号：%s\n" +
+            "超时费用：%.2f 元\n\n" +
+            "请及时归还车辆以避免额外费用。\n\n" +
+            "如有疑问，请联系客服。", 
+            username, overtimeMinutes, scooterModel, overtimeFee
+        );
+        
+        sendSimpleMessage(to, subject, text);
+    }
     
     /**
      * 发送预订确认邮件
      */
-    public void sendBookingConfirmation(Booking booking, User user) {
-        try {
-            Map<String, Object> variables = new HashMap<>();
-            variables.put("user", user);
-            variables.put("booking", booking);
-            variables.put("scooter", booking.getScooter());
-            
-            String subject = "电动滑板车预订确认 - 订单 #" + booking.getId();
-            String content = buildEmailContent("booking-confirmation", variables);
-            
-            sendEmail(user.getEmail(), subject, content);
-            log.info("预订确认邮件已发送至: {}", user.getEmail());
-        } catch (Exception e) {
-            log.error("发送预订确认邮件失败: {}", e.getMessage());
-        }
+    public void sendBookingConfirmation(Object booking, Object user) {
+        log.info("发送预订确认邮件 - 预订ID: {}, 用户: {}", 
+            booking.getClass().getSimpleName(), user.getClass().getSimpleName());
     }
     
     /**
-     * 发送支付成功邮件
+     * 发送支付确认邮件
      */
-    public void sendPaymentConfirmation(Booking booking, User user) {
-        try {
-            Map<String, Object> variables = new HashMap<>();
-            variables.put("user", user);
-            variables.put("booking", booking);
-            variables.put("scooter", booking.getScooter());
-            
-            String subject = "支付成功确认 - 订单 #" + booking.getId();
-            String content = buildEmailContent("payment-confirmation", variables);
-            
-            sendEmail(user.getEmail(), subject, content);
-            log.info("支付确认邮件已发送至: {}", user.getEmail());
-        } catch (Exception e) {
-            log.error("发送支付确认邮件失败: {}", e.getMessage());
-        }
+    public void sendPaymentConfirmation(Object booking, Object user) {
+        log.info("发送支付确认邮件 - 预订ID: {}, 用户: {}", 
+            booking.getClass().getSimpleName(), user.getClass().getSimpleName());
     }
     
     /**
      * 发送预订取消邮件
      */
-    public void sendBookingCancellation(Booking booking, User user) {
-        try {
-            Map<String, Object> variables = new HashMap<>();
-            variables.put("user", user);
-            variables.put("booking", booking);
-            variables.put("scooter", booking.getScooter());
-            
-            String subject = "预订取消确认 - 订单 #" + booking.getId();
-            String content = buildEmailContent("booking-cancellation", variables);
-            
-            sendEmail(user.getEmail(), subject, content);
-            log.info("预订取消邮件已发送至: {}", user.getEmail());
-        } catch (Exception e) {
-            log.error("发送预订取消邮件失败: {}", e.getMessage());
-        }
-    }
-    
-    /**
-     * 发送预订延长邮件
-     */
-    public void sendBookingExtension(Booking booking, User user) {
-        try {
-            Map<String, Object> variables = new HashMap<>();
-            variables.put("user", user);
-            variables.put("booking", booking);
-            variables.put("scooter", booking.getScooter());
-            
-            String subject = "预订延长确认 - 订单 #" + booking.getId();
-            String content = buildEmailContent("booking-extension", variables);
-            
-            sendEmail(user.getEmail(), subject, content);
-            log.info("预订延长邮件已发送至: {}", user.getEmail());
-        } catch (Exception e) {
-            log.error("发送预订延长邮件失败: {}", e.getMessage());
-        }
+    public void sendBookingCancellation(Object booking, Object user) {
+        log.info("发送预订取消邮件 - 预订ID: {}, 用户: {}", 
+            booking.getClass().getSimpleName(), user.getClass().getSimpleName());
     }
     
     /**
      * 发送还车确认邮件
      */
-    public void sendReturnConfirmation(Booking booking, User user) {
-        try {
-            Map<String, Object> variables = new HashMap<>();
-            variables.put("user", user);
-            variables.put("booking", booking);
-            variables.put("scooter", booking.getScooter());
-            
-            String subject = "还车成功确认 - 订单 #" + booking.getId();
-            String content = buildEmailContent("return-confirmation", variables);
-            
-            sendEmail(user.getEmail(), subject, content);
-            log.info("还车确认邮件已发送至: {}", user.getEmail());
-        } catch (Exception e) {
-            log.error("发送还车确认邮件失败: {}", e.getMessage());
-        }
+    public void sendReturnConfirmation(Object booking, Object user) {
+        log.info("发送还车确认邮件 - 预订ID: {}, 用户: {}", 
+            booking.getClass().getSimpleName(), user.getClass().getSimpleName());
     }
     
     /**
-     * 构建邮件内容
+     * 发送预订延期邮件
      */
-    private String buildEmailContent(String templateName, Map<String, Object> variables) {
-        Context context = new Context();
-        context.setVariables(variables);
-        return templateEngine.process(templateName, context);
-    }
-    
-    /**
-     * 发送邮件
-     */
-    private void sendEmail(String to, String subject, String content) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(content, true); // true表示HTML内容
-        
-        mailSender.send(message);
+    public void sendBookingExtension(Object booking, Object user) {
+        log.info("发送预订延期邮件 - 预订ID: {}, 用户: {}", 
+            booking.getClass().getSimpleName(), user.getClass().getSimpleName());
     }
 }

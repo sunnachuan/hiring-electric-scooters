@@ -73,6 +73,24 @@ public class Booking {
     @Column(name = "distance_rate", precision = 10, scale = 2)
     private BigDecimal distanceRate; // 距离费率
     
+    @Column(name = "actual_end_time")
+    private LocalDateTime actualEndTime; // 实际结束时间
+    
+    @Column(name = "overtime_minutes")
+    private Integer overtimeMinutes = 0; // 超时分钟数
+    
+    @Column(name = "overtime_fee", precision = 10, scale = 2)
+    private BigDecimal overtimeFee = BigDecimal.ZERO; // 超时费用
+    
+    @Column(name = "last_reminder_sent")
+    private LocalDateTime lastReminderSent; // 最后提醒发送时间
+    
+    @Column(name = "reminder_count")
+    private Integer reminderCount = 0; // 提醒次数
+    
+    @Column(name = "is_auto_extended")
+    private Boolean isAutoExtended = false; // 是否已自动续费
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

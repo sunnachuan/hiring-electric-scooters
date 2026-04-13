@@ -58,4 +58,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     
     @Query("SELECT b FROM Booking b WHERE b.scooter.id = :scooterId AND b.status = 'IN_PROGRESS'")
     Optional<Booking> findActiveBookingByScooterId(@Param("scooterId") Long scooterId);
+    
+    /**
+     * 查找所有已超时的活跃预订
+     */
+    @Query("SELECT b FROM Booking b WHERE b.status = 'ACTIVE' AND b.endTime < :currentTime")
+    List<Booking> findOvertimeBookings(@Param("currentTime") LocalDateTime currentTime);
+    
+    /**
+     * 查找用户的所有超时预订
+     */
+    @Query("SELECT b FROM Booking b WHERE b.user.id = :userId AND b.status = 'ACTIVE' AND b.endTime < :currentTime")
+    List<Booking> findUserOvertimeBookings(@Param("userId") Long userId, @Param("currentTime") LocalDateTime currentTime);
 }
