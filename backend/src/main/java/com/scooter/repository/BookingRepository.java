@@ -7,8 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -37,4 +39,23 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     
     @Query("SELECT b.startTime, SUM(b.totalPrice) FROM Booking b WHERE b.status = 'COMPLETED' AND b.startTime >= :startDate GROUP BY b.startTime")
     List<Object[]> findDailyRevenueSince(@Param("startDate") LocalDateTime startDate);
+    
+    // 新增查询方法 - 智能计费功能
+    @Query("SELECT SUM(b.totalPrice) FROM Booking b WHERE b.status = 'COMPLETED' AND b.endTime BETWEEN :startTime AND :endTime")
+    Optional<BigDecimal> calculateRevenueBetween(@Param("startTime") LocalDateTime startTime, 
+                                                @Param("endTime") LocalDateTime endTime);
+    
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.status = 'COMPLETED' AND b.endTime BETWEEN :startTime AND :endTime")
+    Long countCompletedBookingsBetween(@Param("startTime") LocalDateTime startTime, 
+                                       @Param("endTime") LocalDateTime endTime);
+    
+    @Query("SELECT b.durationType, SUM(b.totalPrice) FROM Booking b WHERE b.status = 'COMPLETED' AND b.endTime BETWEEN :startTime AND :endTime GROUP BY b.durationType")
+    List<Object[]> getRevenueByDurationType(@Param("startTime") LocalDateTime startTime, 
+                                           @Param("endTime") LocalDateTime endTime);
+    
+    @Query("SELECT b FROM Booking b WHERE b.status = 'IN_PROGRESS'")
+    List<Booking> findActiveBookings();
+    
+    @Query("SELECT b FROM Booking b WHERE b.scooter.id = :scooterId AND b.status = 'IN_PROGRESS'")
+    Optional<Booking> findActiveBookingByScooterId(@Param("scooterId") Long scooterId);
 }

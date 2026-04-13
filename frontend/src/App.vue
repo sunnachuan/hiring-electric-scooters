@@ -123,6 +123,17 @@
                 <span>反馈管理</span>
               </template>
             </el-menu-item>
+            <el-menu-item 
+              v-if="isAdmin" 
+              index="/admin/device-monitor"
+              @mouseenter="(e) => showTooltip(e, '设备监控')"
+              @click="hideTooltip"
+            >
+              <el-icon><Monitor /></el-icon>
+              <template #title>
+                <span>设备监控</span>
+              </template>
+            </el-menu-item>
           </el-menu>
         </el-aside>
         
@@ -182,7 +193,7 @@ import { useAuthStore } from '@/stores/auth'
 import Footer from '@/components/Footer.vue'
 import { 
   MapLocation, Location, User, ChatDotRound,
-  DataAnalysis, Setting, ChatLineRound 
+  DataAnalysis, Setting, ChatLineRound, Monitor
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -217,7 +228,8 @@ const mobileMenuItems = ref([
   { index: '/admin/dashboard', text: '管理仪表盘', icon: 'DataAnalysis' },
   { index: '/admin/scooters', text: '滑板车管理', icon: 'Setting' },
   { index: '/admin/locations', text: '点位管理', icon: 'MapLocation' },
-  { index: '/admin/feedback', text: '反馈管理', icon: 'ChatLineRound' }
+  { index: '/admin/feedback', text: '反馈管理', icon: 'ChatLineRound' },
+  { index: '/admin/device-monitor', text: '设备监控', icon: 'Monitor' }
 ])
 
 // 计算侧边栏宽度

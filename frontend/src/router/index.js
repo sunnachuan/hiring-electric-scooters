@@ -71,6 +71,24 @@ const routes = [
     name: 'AdminFeedback',
     component: () => import('@/views/admin/Feedback.vue'),
     meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/device-monitor',
+    name: 'DeviceMonitor',
+    component: () => import('@/views/admin/DeviceMonitor.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/operations',
+    name: 'Operations',
+    component: () => import('@/views/admin/Operations.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/unlock',
+    name: 'Unlock',
+    component: () => import('@/views/Unlock.vue'),
+    meta: { requiresAuth: true }
   }
 ]
 

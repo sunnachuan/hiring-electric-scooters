@@ -81,6 +81,36 @@
           </el-tag>
         </div>
         
+        <!-- 新增设备状态信息 -->
+            <div class="device-status" v-if="scooter.batteryLevel !== undefined">
+              <div class="status-item">
+                <div class="battery-display">
+                  <div class="battery-icon" :class="getBatteryClass(scooter.batteryLevel)">
+                    <el-icon><Bicycle /></el-icon>
+                  </div>
+                  <span class="battery-text">{{ scooter.batteryLevel }}%</span>
+                </div>
+              </div>
+          <div class="status-item">
+            <el-tag 
+              :type="getOnlineTagType(scooter)" 
+              size="small"
+              class="status-tag"
+            >
+              {{ getOnlineStatusText(scooter) }}
+            </el-tag>
+          </div>
+          <div class="status-item">
+            <el-tag 
+              :type="getLockedTagType(scooter)" 
+              size="small"
+              class="status-tag"
+            >
+              {{ getLockedStatusText(scooter) }}
+            </el-tag>
+          </div>
+        </div>
+        
         <div class="scooter-details">
           <div class="price-info">
             <div class="price-item">
@@ -454,7 +484,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Plus, Bicycle, ShoppingCart, Location, InfoFilled, PriceTag } from '@element-plus/icons-vue'
+import { Plus, Bicycle, ShoppingCart, Location, InfoFilled, PriceTag, Picture, Collection, CreditCard, Coin, Goods } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/api'
 import { ElMessage } from 'element-plus'
@@ -551,7 +581,10 @@ const groupedScooters = computed(() => {
         totalQuantity: 0,
         totalAvailableQuantity: 0,
         locations: [],
-        scooters: [] // 保存原始滑板车数据用于预订
+        scooters: [], // 保存原始滑板车数据用于预订
+        onlineCount: 0,
+        lowBatteryCount: 0,
+        unlockedCount: 0
       }
     }
     
@@ -559,15 +592,44 @@ const groupedScooters = computed(() => {
     group.totalQuantity += scooter.totalQuantity
     group.totalAvailableQuantity += scooter.availableQuantity
     
-    if (scooter.locationName && !group.locations.includes(scooter.locationName)) {
-      group.locations.push(scooter.locationName)
-    }
+    // 统计设备状态
+    if (scooter.isOnline) group.onlineCount++
+    if (scooter.batteryLevel < 20) group.lowBatteryCount++
+    if (!scooter.isLocked) group.unlockedCount++
     
-    group.scooters.push(scooter)
-  })
-  
-  return Object.values(grouped)
+    if (scooter.locationName && !group.locations.includes(scooter.locationName)) {
+        group.locations.push(scooter.locationName)
+      }
+      
+      group.scooters.push(scooter)
+    })
+    return Object.values(grouped)
 })
+
+// 设备状态相关函数
+const getBatteryClass = (level) => {
+  if (level >= 50) return 'high'
+  if (level >= 20) return 'medium'
+  return 'low'
+}
+
+const getOnlineTagType = (scooter) => {
+  if (!scooter.isOnline) return 'info'
+  return 'success'
+}
+
+const getOnlineStatusText = (scooter) => {
+  return scooter.isOnline ? '在线' : '离线'
+}
+
+const getLockedTagType = (scooter) => {
+  if (!scooter.isLocked) return 'warning'
+  return 'success'
+}
+
+const getLockedStatusText = (scooter) => {
+  return scooter.isLocked ? '已锁定' : '已解锁'
+}
 
 const selectedScooter = computed(() => 
   scooters.value.find(s => s.id === bookingForm.value.scooterId)

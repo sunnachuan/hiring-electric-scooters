@@ -58,30 +58,46 @@ public class DataInitializer implements CommandLineRunner {
     if (scooterRepository.count() == 0) {
         log.info("创建测试滑板车数据...");
         
-        // 城市通勤款 - 分散到3个位置
-        createScooter("城市通勤款", "https://example.com/scooter1.jpg", 5, 5.0, 25.0, 1);  // 市中心广场
-        createScooter("城市通勤款", "https://example.com/scooter1.jpg", 4, 5.0, 25.0, 3);  // 商业步行街
-        createScooter("城市通勤款", "https://example.com/scooter1.jpg", 3, 5.0, 25.0, 5);  // 公园入口
+        // 创建50个独立的滑板车实体
+        String[] models = {"城市通勤款", "校园轻便款", "商务精英款", "时尚潮流款", "休闲娱乐款"};
+        String[] imageUrls = {
+            "https://example.com/scooter1.jpg",
+            "https://example.com/scooter2.jpg", 
+            "https://example.com/scooter4.jpg",
+            "https://example.com/scooter5.jpg",
+            "https://example.com/scooter7.jpg"
+        };
+        double[] hourlyRates = {5.0, 4.5, 6.0, 5.5, 4.0};
+        double[] dailyRates = {25.0, 20.0, 30.0, 28.0, 20.0};
         
-        // 校园轻便款 - 分散到3个位置
-        createScooter("校园轻便款", "https://example.com/scooter2.jpg", 6, 4.5, 20.0, 2);  // 大学城校区
-        createScooter("校园轻便款", "https://example.com/scooter2.jpg", 2, 4.5, 20.0, 1);  // 市中心广场
-        createScooter("校园轻便款", "https://example.com/scooter2.jpg", 2, 4.5, 20.0, 4);  // 地铁站出口
-        
-        // 商务精英款 - 分散到3个位置
-        createScooter("商务精英款", "https://example.com/scooter4.jpg", 3, 6.0, 30.0, 3);  // 商业步行街
-        createScooter("商务精英款", "https://example.com/scooter4.jpg", 2, 6.0, 30.0, 1);  // 市中心广场
-        createScooter("商务精英款", "https://example.com/scooter4.jpg", 1, 6.0, 30.0, 2);  // 大学城校区
-        
-        // 时尚潮流款 - 分散到3个位置
-        createScooter("时尚潮流款", "https://example.com/scooter5.jpg", 4, 5.5, 28.0, 3);  // 商业步行街
-        createScooter("时尚潮流款", "https://example.com/scooter5.jpg", 2, 5.5, 28.0, 5);  // 公园入口
-        createScooter("时尚潮流款", "https://example.com/scooter5.jpg", 2, 5.5, 28.0, 4);  // 地铁站出口
-        
-        // 休闲娱乐款 - 分散到3个位置
-        createScooter("休闲娱乐款", "https://example.com/scooter7.jpg", 6, 4.0, 20.0, 5);  // 公园入口
-        createScooter("休闲娱乐款", "https://example.com/scooter7.jpg", 4, 4.0, 20.0, 2);  // 大学城校区
-        createScooter("休闲娱乐款", "https://example.com/scooter7.jpg", 4, 4.0, 20.0, 3);  // 商业步行街
+        for (int i = 0; i < 50; i++) {
+            int modelIndex = i % models.length;
+            int locationId = (i % 5) + 1; // 5个位置循环分配
+            
+            // 创建独立的滑板车实体
+            Scooter scooter = new Scooter();
+            scooter.setModel(models[modelIndex]);
+            scooter.setImageUrl(imageUrls[modelIndex]);
+            scooter.setTotalQuantity(1); // 每个实体代表一辆车
+            scooter.setAvailableQuantity(1);
+            scooter.setHourlyRate(new BigDecimal(hourlyRates[modelIndex]));
+            scooter.setDailyRate(new BigDecimal(dailyRates[modelIndex]));
+            scooter.setStatus("AVAILABLE");
+            
+            // 设置点位信息
+            scooter.setLocationId(locationId);
+            scooter.setLocationName(getLocationName(locationId));
+            scooter.setLatitude(getLocationLatitude(locationId));
+            scooter.setLongitude(getLocationLongitude(locationId));
+            
+            // 设置设备状态（更真实的数据）
+            scooter.setBatteryLevel(20.0 + Math.random() * 80.0); // 20-100%电量
+            scooter.setTotalMileage(Math.random() * 5000.0); // 0-5000公里
+            scooter.setIsOnline(Math.random() > 0.15); // 85%在线率
+            scooter.setIsLocked(scooter.getIsOnline() ? Math.random() > 0.1 : true); // 在线设备90%锁定
+            
+            scooterRepository.save(scooter);
+        }
         
         log.info("测试滑板车数据创建完成，共创建50辆滑板车");
     }
@@ -89,24 +105,7 @@ public class DataInitializer implements CommandLineRunner {
     log.info("数据初始化完成");
 }
 
-private void createScooter(String model, String imageUrl, int totalQuantity, double hourlyRate, double dailyRate, int locationId) {
-    Scooter scooter = new Scooter();
-    scooter.setModel(model);
-    scooter.setImageUrl(imageUrl);
-    scooter.setTotalQuantity(totalQuantity);
-    scooter.setAvailableQuantity(totalQuantity);
-    scooter.setHourlyRate(new BigDecimal(hourlyRate));
-    scooter.setDailyRate(new BigDecimal(dailyRate));
-    scooter.setStatus("AVAILABLE");
-    
-    // 设置点位信息
-    scooter.setLocationId(locationId);
-    scooter.setLocationName(getLocationName(locationId));
-    scooter.setLatitude(getLocationLatitude(locationId));
-    scooter.setLongitude(getLocationLongitude(locationId));
-    
-    scooterRepository.save(scooter);
-}
+
 
 private String getLocationName(int locationId) {
     switch (locationId) {

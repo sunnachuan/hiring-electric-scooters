@@ -49,6 +49,30 @@ public class Booking {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
+    @Column(name = "distance_traveled", precision = 10, scale = 2)
+    private Double distanceTraveled = 0.0; // 行驶距离（公里）
+    
+    @Column(name = "start_latitude", precision = 10, scale = 8)
+    private Double startLatitude; // 起始位置纬度
+    
+    @Column(name = "start_longitude", precision = 11, scale = 8)
+    private Double startLongitude; // 起始位置经度
+    
+    @Column(name = "end_latitude", precision = 10, scale = 8)
+    private Double endLatitude; // 结束位置纬度
+    
+    @Column(name = "end_longitude", precision = 11, scale = 8)
+    private Double endLongitude; // 结束位置经度
+    
+    @Column(name = "billing_type", length = 20)
+    private String billingType = "TIME_ONLY"; // 计费类型：TIME_ONLY, DISTANCE_ONLY, TIME_DISTANCE
+    
+    @Column(name = "time_rate", precision = 10, scale = 2)
+    private BigDecimal timeRate; // 时间费率
+    
+    @Column(name = "distance_rate", precision = 10, scale = 2)
+    private BigDecimal distanceRate; // 距离费率
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

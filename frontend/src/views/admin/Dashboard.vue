@@ -40,16 +40,36 @@
                 </template>
                 
                 <el-row :gutter="20">
-                  <el-col :span="8">
+                  <el-col :span="6">
                     <el-statistic title="总滑板车数量" :value="stats.totalScooters" />
                   </el-col>
-                  <el-col :span="8">
+                  <el-col :span="6">
                     <el-statistic title="可用滑板车" :value="stats.availableScooters" />
                   </el-col>
-                  <el-col :span="8">
+                  <el-col :span="6">
+                    <el-statistic title="在线设备" :value="stats.onlineScooters" />
+                  </el-col>
+                  <el-col :span="6">
+                    <el-statistic title="低电量设备" :value="stats.lowBatteryScooters" />
+                  </el-col>
+                </el-row>
+                
+                <el-row :gutter="20" style="margin-top: 20px;">
+                  <el-col :span="6">
                     <el-statistic title="本周总收入" :value="stats.weeklyRevenue" precision="2">
                       <template #prefix>¥</template>
                     </el-statistic>
+                  </el-col>
+                  <el-col :span="6">
+                    <el-statistic title="今日收入" :value="stats.todayRevenue" precision="2">
+                      <template #prefix>¥</template>
+                    </el-statistic>
+                  </el-col>
+                  <el-col :span="6">
+                    <el-statistic title="待处理任务" :value="stats.pendingTasks" />
+                  </el-col>
+                  <el-col :span="6">
+                    <el-statistic title="活跃运维" :value="stats.activeOperators" />
                   </el-col>
                 </el-row>
               </el-card>
