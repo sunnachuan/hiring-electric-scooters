@@ -155,9 +155,6 @@ public class BookingService {
             }
             
             finalCardNumber = bankCard.getCardNumber();
-            
-            // 更新银行卡的最后使用时间
-            bankCardService.updateLastUsedTime(bankCardId);
         } else if (cardNumber != null && !cardNumber.trim().isEmpty()) {
             // 使用直接输入的卡号
             finalCardNumber = cardNumber;

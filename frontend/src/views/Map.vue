@@ -192,6 +192,14 @@ export default {
     // 创建Leaflet地图实例
     const createLeafletMap = (locations) => {
       try {
+        // 确保地图容器存在
+        const mapContainer = document.getElementById('map-container')
+        if (!mapContainer) {
+          console.error('地图容器未找到')
+          createStaticMap(locations)
+          return
+        }
+        
         // 创建地图实例
         map.value = L.map('map-container').setView([39.9042, 116.4074], 13)
         
@@ -295,6 +303,10 @@ export default {
     // 创建静态地图（备用方案）
     const createStaticMap = (locations) => {
       const mapContainer = document.getElementById('map-container')
+      if (!mapContainer) {
+        console.error('静态地图容器未找到')
+        return
+      }
       mapContainer.innerHTML = `
         <div class="static-map">
           <div class="map-background">

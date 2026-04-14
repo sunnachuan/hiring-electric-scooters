@@ -55,6 +55,14 @@
             />
           </el-form-item>
           
+          <!-- 条款同意复选框 -->
+          <el-form-item prop="termsAgreed">
+            <el-checkbox v-model="loginForm.termsAgreed">
+              我已阅读并同意
+              <el-link type="primary" :underline="false" @click="showTermsDialog = true">《滑板车租赁服务协议》</el-link>
+            </el-checkbox>
+          </el-form-item>
+          
           <el-form-item>
             <el-button 
               type="primary" 
@@ -102,6 +110,63 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 条款协议弹窗 -->
+    <el-dialog 
+      v-model="showTermsDialog" 
+      title="滑板车租赁服务协议" 
+      width="800px"
+      top="5vh"
+    >
+      <div class="terms-dialog-content">
+        <div class="terms-section">
+          <p><strong>重要提示：</strong>在使用本滑板车租赁服务前，请仔细阅读以下条款。使用服务即表示您同意遵守本协议。</p>
+          
+          <div class="terms-item">
+            <h5>一、用户责任与义务</h5>
+            <ul>
+              <li>用户须年满16周岁并具备完全民事行为能力</li>
+              <li>用户应遵守交通法规，在指定区域内使用滑板车</li>
+              <li>禁止酒后驾驶、超载使用或进行危险操作</li>
+              <li>用户需妥善保管滑板车，承担使用期间的保管责任</li>
+            </ul>
+          </div>
+          
+          <div class="terms-item">
+            <h5>二、费用与支付</h5>
+            <ul>
+              <li>租赁费用按实际使用时间计算，不足1小时按1小时计费</li>
+              <li>用户需确保账户余额充足，逾期未支付将产生滞纳金</li>
+              <li>如发生设备损坏或遗失，需按实际维修或重置费用赔偿</li>
+            </ul>
+          </div>
+          
+          <div class="terms-item">
+            <h5>三、安全须知</h5>
+            <ul>
+              <li>骑行前请检查刹车、轮胎等关键部件是否正常</li>
+              <li>建议佩戴安全头盔，夜间骑行需开启车灯</li>
+              <li>禁止在雨天、雪天等恶劣天气条件下使用</li>
+              <li>如发现设备故障，请立即停止使用并联系客服</li>
+            </ul>
+          </div>
+          
+          <div class="terms-item">
+            <h5>四、免责声明</h5>
+            <ul>
+              <li>因用户违规操作造成的损失，平台不承担赔偿责任</li>
+              <li>不可抗力因素导致的设备损坏，平台可免除相应责任</li>
+              <li>用户应自行购买相关保险以覆盖潜在风险</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <template #footer>
+        <el-button @click="showTermsDialog = false">关闭</el-button>
+        <el-button type="primary" @click="agreeAndClose">同意并关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -118,11 +183,13 @@ const loginFormRef = ref()
 const forgotPasswordFormRef = ref()
 const loading = ref(false)
 const showForgotPasswordDialog = ref(false)
+const showTermsDialog = ref(false)
 const forgotPasswordLoading = ref(false)
 
 const loginForm = ref({
   username: '',
-  password: ''
+  password: '',
+  termsAgreed: false
 })
 
 const forgotPasswordForm = ref({
@@ -135,6 +202,18 @@ const rules = {
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' }
+  ],
+  termsAgreed: [
+    { 
+      validator: (rule, value, callback) => {
+        if (!value) {
+          callback(new Error('请同意服务协议'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'change'
+    }
   ]
 }
 
@@ -189,6 +268,11 @@ const handleForgotPassword = async () => {
   } finally {
     forgotPasswordLoading.value = false
   }
+}
+
+const agreeAndClose = () => {
+  loginForm.value.termsAgreed = true
+  showTermsDialog.value = false
 }
 </script>
 
@@ -248,5 +332,96 @@ const handleForgotPassword = async () => {
 .register-link span {
   margin-right: 8px;
   color: #606266;
+}
+
+/* 条款弹窗样式 */
+.terms-dialog-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 0 10px;
+}
+
+.terms-section {
+  line-height: 1.8;
+  color: #495057;
+}
+
+.terms-section > p {
+  margin-bottom: 20px;
+  font-size: 15px;
+  padding: 15px;
+  background: #f0f7ff;
+  border-radius: 8px;
+  border-left: 4px solid #409EFF;
+}
+
+.terms-item {
+  margin-bottom: 25px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.terms-item h5 {
+  color: #2c3e50;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.terms-item h5::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #409EFF;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.terms-item ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.terms-item li {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #666;
+  position: relative;
+}
+
+.terms-item li::before {
+  content: '•';
+  color: #409EFF;
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .terms-dialog-content {
+    max-height: 50vh;
+    padding: 0 5px;
+  }
+  
+  .terms-item {
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .terms-item h5 {
+    font-size: 15px;
+  }
+  
+  .terms-item li {
+    font-size: 13px;
+  }
 }
 </style>

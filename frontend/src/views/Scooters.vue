@@ -173,10 +173,10 @@
         <el-form-item label="取车位置" prop="scooterId" v-if="bookingForm.scooterModel">
           <el-select v-model="bookingForm.scooterId" placeholder="请选择取车位置" style="width: 100%">
             <el-option
-              v-for="scooter in filteredScooters"
-              :key="scooter.id"
-              :label="`${scooter.locationName} - 剩余${scooter.availableQuantity}辆`"
-              :value="scooter.id"
+              v-for="location in filteredScooters"
+              :key="location.locationName"
+              :label="`${location.locationName} - 剩余${location.count}辆`"
+              :value="location.scooters[0].id"
             />
           </el-select>
         </el-form-item>
@@ -558,12 +558,30 @@ const availableModels = computed(() => {
   return [...new Set(models)]
 })
 
-// 根据选择的型号筛选滑板车
+// 根据选择的型号筛选滑板车，并按位置分组
 const filteredScooters = computed(() => {
-  if (!bookingForm.value.scooterModel) {
+  if (!bookingForm.value.scooterModel || !availableScooters.value) {
     return []
   }
-  return availableScooters.value.filter(s => s.model === bookingForm.value.scooterModel)
+  
+  // 按位置分组统计滑板车数量
+  const locationGroups = {}
+  const scootersByModel = availableScooters.value.filter(s => s.model === bookingForm.value.scooterModel)
+  
+  scootersByModel.forEach(scooter => {
+    if (!locationGroups[scooter.locationName]) {
+      locationGroups[scooter.locationName] = {
+        locationName: scooter.locationName,
+        count: 0,
+        scooters: []
+      }
+    }
+    locationGroups[scooter.locationName].count += scooter.availableQuantity
+    locationGroups[scooter.locationName].scooters.push(scooter)
+  })
+  
+  // 返回按位置分组的滑板车列表
+  return Object.values(locationGroups)
 })
 
 // 聚合同款滑板车数据
@@ -601,9 +619,9 @@ const groupedScooters = computed(() => {
         group.locations.push(scooter.locationName)
       }
       
-      group.scooters.push(scooter)
-    })
-    return Object.values(grouped)
+    group.scooters.push(scooter)
+  })
+  return Object.values(grouped)
 })
 
 // 设备状态相关函数
@@ -1382,11 +1400,13 @@ onMounted(() => {
 }
 
 .scooter-card {
-  border-radius: 16px;
-  border: none;
+  border-radius: 12px;
+  border: 2px solid #e0e0e0;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .scooter-card::before {
@@ -1401,12 +1421,14 @@ onMounted(() => {
 
 .scooter-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
 }
 
 .scooter-card.unavailable {
   opacity: 0.6;
   filter: grayscale(0.3);
+  border-color: #dcdfe6;
 }
 
 /* 滑板车图片样式 */
@@ -1788,4 +1810,6 @@ onMounted(() => {
   font-size: 14px;
   margin: 0;
 }
+
+
 </style>

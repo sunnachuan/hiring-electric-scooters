@@ -167,37 +167,183 @@
             <h3>账户设置</h3>
           </div>
           
-          <el-form :model="userForm" label-width="100px" class="settings-form">
-            <el-form-item label="用户名">
-              <el-input v-model="userForm.username" placeholder="请输入用户名" />
-            </el-form-item>
-            <el-form-item label="邮箱">
-              <el-input v-model="userForm.email" placeholder="请输入邮箱" />
-            </el-form-item>
-            <el-form-item label="手机号">
-              <el-input v-model="userForm.phone" placeholder="请输入手机号" />
-            </el-form-item>
+          <el-tabs v-model="settingsTab" class="settings-tabs">
+            <!-- 基本信息 -->
+            <el-tab-pane label="基本信息" name="basic">
+              <el-form :model="userForm" label-width="100px" class="settings-form">
+                <el-form-item label="用户名">
+                  <el-input v-model="userForm.username" placeholder="请输入用户名" />
+                </el-form-item>
+                <el-form-item label="邮箱">
+                  <el-input v-model="userForm.email" placeholder="请输入邮箱" />
+                </el-form-item>
+                <el-form-item label="手机号">
+                  <el-input v-model="userForm.phone" placeholder="请输入手机号" />
+                </el-form-item>
+                
+                <!-- 认证按钮区域 -->
+                <el-form-item label="身份认证">
+                  <div class="certification-buttons">
+                    <el-button type="primary" class="certification-btn" @click="handleStudentCertification">
+                      <el-icon><User /></el-icon>
+                      学生认证
+                    </el-button>
+                    <el-button type="success" class="certification-btn" @click="handleSeniorCertification">
+                      <el-icon><UserFilled /></el-icon>
+                      长者认证
+                    </el-button>
+                  </div>
+                </el-form-item>
+                
+                <el-form-item>
+                  <el-button type="primary" @click="updateProfile">保存修改</el-button>
+                  <el-button>取消</el-button>
+                </el-form-item>
+              </el-form>
+            </el-tab-pane>
             
-            <!-- 认证按钮区域 -->
-            <el-form-item label="身份认证">
-              <div class="certification-buttons">
-                <el-button type="primary" class="certification-btn" @click="handleStudentCertification">
-                  <el-icon><User /></el-icon>
-                  学生认证
-                </el-button>
-                <el-button type="success" class="certification-btn" @click="handleSeniorCertification">
-                  <el-icon><UserFilled /></el-icon>
-                  长者认证
-                </el-button>
+            <!-- 银行卡管理 -->
+            <el-tab-pane label="银行卡管理" name="bankCards">
+              <div class="bank-cards-section">
+                <div class="section-header">
+                  <h4>我的银行卡</h4>
+                  <el-button type="primary" @click="showAddBankCardDialog = true">
+                    <el-icon><Plus /></el-icon>
+                    添加银行卡
+                  </el-button>
+                </div>
+                
+                <!-- 银行卡列表 -->
+                <div class="bank-cards-list" v-if="bankCards.length > 0">
+                  <el-card 
+                    v-for="card in bankCards" 
+                    :key="card.id" 
+                    class="bank-card-item"
+                    :class="{ 'default-card': card.isDefault }"
+                  >
+                    <div class="card-content">
+                      <div class="card-info">
+                        <div class="bank-name">{{ card.bankName }}</div>
+                        <div class="card-type">{{ card.cardType === 'DEBIT' ? '借记卡' : '信用卡' }}</div>
+                        <div class="card-number">{{ card.cardNumberDisplay }}</div>
+                        <div class="cardholder-name">持卡人：{{ card.cardholderName }}</div>
+                        <div class="expiry-date" v-if="card.expiryDate">有效期：{{ card.expiryDate }}</div>
+                      </div>
+                      <div class="card-actions">
+                        <el-tag v-if="card.isDefault" type="success" size="small">默认</el-tag>
+                        <el-button 
+                          v-else 
+                          type="text" 
+                          size="small" 
+                          @click="setDefaultCard(card.id)"
+                        >
+                          设为默认
+                        </el-button>
+                        <el-button type="text" size="small" @click="editBankCard(card)">编辑</el-button>
+                        <el-button type="text" size="small" @click="deleteBankCard(card.id)" class="delete-btn">删除</el-button>
+                      </div>
+                    </div>
+                  </el-card>
+                </div>
+                
+                <!-- 空状态 -->
+                <el-empty v-else description="暂无银行卡" :image-size="100">
+                  <el-button type="primary" @click="showAddBankCardDialog = true">添加银行卡</el-button>
+                </el-empty>
               </div>
+            </el-tab-pane>
+          </el-tabs>
+        </div>
+
+        <!-- 添加银行卡对话框 -->
+        <el-dialog 
+          v-model="showAddBankCardDialog" 
+          title="添加银行卡" 
+          width="500px"
+          @close="resetBankCardForm"
+        >
+          <el-form :model="bankCardForm" :rules="bankCardRules" ref="bankCardFormRef" label-width="100px">
+            <el-form-item label="银行卡号" prop="cardNumber">
+              <el-input 
+                v-model="bankCardForm.cardNumber" 
+                placeholder="请输入16-19位银行卡号" 
+                maxlength="19"
+              />
             </el-form-item>
-            
-            <el-form-item>
-              <el-button type="primary" @click="updateProfile">保存修改</el-button>
-              <el-button>取消</el-button>
+            <el-form-item label="银行名称" prop="bankName">
+              <el-input v-model="bankCardForm.bankName" placeholder="请输入银行名称" />
+            </el-form-item>
+            <el-form-item label="持卡人姓名" prop="cardholderName">
+              <el-input v-model="bankCardForm.cardholderName" placeholder="请输入持卡人姓名" />
+            </el-form-item>
+            <el-form-item label="卡片类型" prop="cardType">
+              <el-radio-group v-model="bankCardForm.cardType">
+                <el-radio label="DEBIT">借记卡</el-radio>
+                <el-radio label="CREDIT">信用卡</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="有效期" prop="expiryDate">
+              <el-input 
+                v-model="bankCardForm.expiryDate" 
+                placeholder="MM/YY（信用卡必填）" 
+                maxlength="5"
+              />
+            </el-form-item>
+            <el-form-item label="默认卡片">
+              <el-switch v-model="bankCardForm.isDefault" />
+              <span class="tip-text">设为默认支付卡片</span>
             </el-form-item>
           </el-form>
-        </div>
+          <template #footer>
+            <el-button @click="showAddBankCardDialog = false">取消</el-button>
+            <el-button type="primary" @click="addBankCard">确认添加</el-button>
+          </template>
+        </el-dialog>
+
+        <!-- 编辑银行卡对话框 -->
+        <el-dialog 
+          v-model="showEditBankCardDialog" 
+          title="编辑银行卡" 
+          width="500px"
+          @close="resetBankCardForm"
+        >
+          <el-form :model="bankCardForm" :rules="bankCardRules" ref="bankCardFormRef" label-width="100px">
+            <el-form-item label="银行卡号" prop="cardNumber">
+              <el-input 
+                v-model="bankCardForm.cardNumber" 
+                placeholder="请输入16-19位银行卡号" 
+                maxlength="19"
+              />
+            </el-form-item>
+            <el-form-item label="银行名称" prop="bankName">
+              <el-input v-model="bankCardForm.bankName" placeholder="请输入银行名称" />
+            </el-form-item>
+            <el-form-item label="持卡人姓名" prop="cardholderName">
+              <el-input v-model="bankCardForm.cardholderName" placeholder="请输入持卡人姓名" />
+            </el-form-item>
+            <el-form-item label="卡片类型" prop="cardType">
+              <el-radio-group v-model="bankCardForm.cardType">
+                <el-radio label="DEBIT">借记卡</el-radio>
+                <el-radio label="CREDIT">信用卡</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="有效期" prop="expiryDate">
+              <el-input 
+                v-model="bankCardForm.expiryDate" 
+                placeholder="MM/YY（信用卡必填）" 
+                maxlength="5"
+              />
+            </el-form-item>
+            <el-form-item label="默认卡片">
+              <el-switch v-model="bankCardForm.isDefault" />
+              <span class="tip-text">设为默认支付卡片</span>
+            </el-form-item>
+          </el-form>
+          <template #footer>
+            <el-button @click="showEditBankCardDialog = false">取消</el-button>
+            <el-button type="primary" @click="updateBankCard">确认更新</el-button>
+          </template>
+        </el-dialog>
 
         <!-- 更改密码 -->
         <div v-if="activeTab === 'changePassword'" class="tab-panel">
@@ -321,7 +467,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 重要免责条款
 const importantTerms = [
@@ -574,20 +720,33 @@ const extendBookingTime = async (bookingId) => {
   }
 }
 
-// 提前还车
+// 提前还车（增强版：包含损坏检查）
 const returnScooterEarly = async (bookingId) => {
   try {
     returningBookingId.value = bookingId
     
-    await ElMessageBox.confirm('确定要提前还车吗？还车后滑板车将重新变为可用状态。', '确认还车', {
-      confirmButtonText: '确定还车',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
+    // 检查是否已有损坏记录
+    const hasDamage = await checkExistingDamage(bookingId)
+    if (hasDamage) {
+      ElMessage.warning('该预订已有损坏记录，请等待管理员处理后再尝试还车')
+      return
+    }
     
-    // 调用还车API
+    // 显示还车确认和损坏检查弹窗
+    const result = await showReturnConfirmationDialog(bookingId)
+    if (!result) {
+      return // 用户取消还车
+    }
+    
+    // 如果有损坏报告，先提交损坏报告
+    if (result.hasDamage) {
+      await submitDamageReport(result.damageData, bookingId)
+      ElMessage.success('损坏报告已提交，请等待管理员审核。还车流程暂停。')
+      return
+    }
+    
+    // 正常还车流程
     await api.put(`/bookings/${bookingId}/return`)
-    
     ElMessage.success('还车成功！滑板车已重新变为可用状态')
     
     // 重新加载预订数据
@@ -608,6 +767,236 @@ const returnScooterEarly = async (bookingId) => {
     }
   } finally {
     returningBookingId.value = null
+  }
+}
+
+// 检查是否已有损坏记录
+const checkExistingDamage = async (bookingId) => {
+  try {
+    const response = await api.get(`/damage/booking/${bookingId}/has-damage`)
+    return response.data
+  } catch (error) {
+    console.error('检查损坏记录失败:', error)
+    // 临时解决方案：如果后端不可用，默认返回false
+    return false
+  }
+}
+
+// 显示还车确认和损坏检查弹窗
+const showReturnConfirmationDialog = (bookingId) => {
+  return new Promise((resolve) => {
+    // 使用简单的Element Plus弹窗
+    ElMessageBox.confirm(
+      '请仔细检查车辆状况，如实报告损坏情况。\n\n选择车辆状况：',
+      '还车确认',
+      {
+        distinguishCancelAndClose: true,
+        confirmButtonText: '完好无损',
+        cancelButtonText: '有损坏',
+        showClose: false
+      }
+    ).then(() => {
+      // 用户选择"完好无损"
+      resolve({ hasDamage: false })
+    }).catch((action) => {
+      if (action === 'cancel') {
+        // 用户选择"有损坏"
+        ElMessageBox.prompt('请描述损坏情况：', '损坏报告', {
+          confirmButtonText: '提交',
+          cancelButtonText: '取消',
+          inputPlaceholder: '请详细描述损坏部位和程度...',
+          inputType: 'textarea'
+        }).then(({ value }) => {
+          resolve({
+            hasDamage: true,
+            damageData: {
+              damageLevel: 'MINOR',
+              damagedParts: ['其他'],
+              description: value || '',
+              imageUrls: []
+            }
+          })
+        }).catch(() => {
+          resolve(null)
+        })
+      } else {
+        resolve(null)
+      }
+    })
+  })
+}
+
+// 提交损坏报告
+const submitDamageReport = async (damageData, bookingId) => {
+  try {
+    // 获取当前预订的滑板车信息
+    const currentBooking = bookings.value.find(b => b.id === bookingId)
+    if (!currentBooking) {
+      throw new Error('预订信息不存在')
+    }
+    
+    const reportData = {
+      bookingId: bookingId,
+      scooterId: currentBooking.scooterId,
+      damageLevel: damageData.damageLevel,
+      damagedParts: damageData.damagedParts,
+      description: damageData.description,
+      imageUrls: damageData.imageUrls || []
+    }
+    
+    await api.post('/damage/report', reportData)
+    
+  } catch (error) {
+    console.error('提交损坏报告失败:', error)
+    throw error
+  }
+}
+
+// 银行卡管理相关状态
+const settingsTab = ref('basic')
+const bankCards = ref([])
+const showAddBankCardDialog = ref(false)
+const showEditBankCardDialog = ref(false)
+const currentEditingCard = ref(null)
+const bankCardFormRef = ref()
+
+// 银行卡表单
+const bankCardForm = ref({
+  cardNumber: '',
+  bankName: '',
+  cardholderName: '',
+  cardType: 'DEBIT',
+  expiryDate: '',
+  isDefault: false
+})
+
+// 银行卡验证规则
+const bankCardRules = {
+  cardNumber: [
+    { required: true, message: '请输入银行卡号', trigger: 'blur' },
+    { pattern: /^[0-9]{16,19}$/, message: '银行卡号格式不正确（16-19位数字）', trigger: 'blur' }
+  ],
+  bankName: [
+    { required: true, message: '请输入银行名称', trigger: 'blur' }
+  ],
+  cardholderName: [
+    { required: true, message: '请输入持卡人姓名', trigger: 'blur' }
+  ],
+  expiryDate: [
+    { pattern: /^(0[1-9]|1[0-2])\/[0-9]{2}$/, message: '有效期格式不正确（MM/YY）', trigger: 'blur' }
+  ]
+}
+
+// 加载银行卡列表
+const loadBankCards = async () => {
+  try {
+    const response = await api.get('/bank-cards')
+    bankCards.value = response.data
+  } catch (error) {
+    console.error('加载银行卡列表失败:', error)
+    bankCards.value = []
+  }
+}
+
+// 添加银行卡
+const addBankCard = async () => {
+  try {
+    const response = await api.post('/bank-cards', bankCardForm.value)
+    if (response.data.success) {
+      ElMessage.success('银行卡添加成功')
+      showAddBankCardDialog.value = false
+      resetBankCardForm()
+      await loadBankCards()
+    } else {
+      ElMessage.error(response.data.message)
+    }
+  } catch (error) {
+    console.error('添加银行卡失败:', error)
+    ElMessage.error(error.response?.data?.message || '添加银行卡失败')
+  }
+}
+
+// 编辑银行卡
+const editBankCard = (card) => {
+  currentEditingCard.value = card
+  bankCardForm.value = {
+    cardNumber: card.cardNumber,
+    bankName: card.bankName,
+    cardholderName: card.cardholderName,
+    cardType: card.cardType,
+    expiryDate: card.expiryDate || '',
+    isDefault: card.isDefault
+  }
+  showEditBankCardDialog.value = true
+}
+
+// 更新银行卡
+const updateBankCard = async () => {
+  try {
+    const response = await api.put(`/bank-cards/${currentEditingCard.value.id}`, bankCardForm.value)
+    if (response.data.success) {
+      ElMessage.success('银行卡更新成功')
+      showEditBankCardDialog.value = false
+      resetBankCardForm()
+      await loadBankCards()
+    } else {
+      ElMessage.error(response.data.message)
+    }
+  } catch (error) {
+    console.error('更新银行卡失败:', error)
+    ElMessage.error(error.response?.data?.message || '更新银行卡失败')
+  }
+}
+
+// 删除银行卡
+const deleteBankCard = async (cardId) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这张银行卡吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    
+    const response = await api.delete(`/bank-cards/${cardId}`)
+    if (response.data.success) {
+      ElMessage.success('银行卡删除成功')
+      await loadBankCards()
+    } else {
+      ElMessage.error(response.data.message)
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除银行卡失败:', error)
+      ElMessage.error(error.response?.data?.message || '删除银行卡失败')
+    }
+  }
+}
+
+// 设置默认银行卡
+const setDefaultCard = async (cardId) => {
+  try {
+    const response = await api.post(`/bank-cards/${cardId}/set-default`)
+    if (response.data.success) {
+      ElMessage.success('默认银行卡设置成功')
+      await loadBankCards()
+    } else {
+      ElMessage.error(response.data.message)
+    }
+  } catch (error) {
+    console.error('设置默认银行卡失败:', error)
+    ElMessage.error(error.response?.data?.message || '设置默认银行卡失败')
+  }
+}
+
+// 重置银行卡表单
+const resetBankCardForm = () => {
+  bankCardForm.value = {
+    cardNumber: '',
+    bankName: '',
+    cardholderName: '',
+    cardType: 'DEBIT',
+    expiryDate: '',
+    isDefault: false
   }
 }
 
@@ -657,6 +1046,9 @@ onMounted(() => {
   
   // 加载真实预订数据
   loadBookings()
+  
+  // 加载银行卡数据
+  loadBankCards()
 })
 </script>
 
@@ -956,6 +1348,138 @@ onMounted(() => {
   font-weight: 500;
 }
 
+/* 银行卡管理样式 */
+.settings-tabs {
+  margin-top: 20px;
+}
+
+.bank-cards-section {
+  padding: 20px 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #EBEEF5;
+}
+
+.section-header h4 {
+  margin: 0;
+  color: #303133;
+  font-size: 18px;
+}
+
+.bank-cards-list {
+  display: grid;
+  gap: 16px;
+}
+
+.bank-card-item {
+  transition: all 0.3s ease;
+  border: 1px solid #EBEEF5;
+}
+
+.bank-card-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.bank-card-item.default-card {
+  border-color: #409EFF;
+  background: linear-gradient(135deg, #f0f8ff 0%, #e6f7ff 100%);
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+}
+
+.card-info {
+  flex: 1;
+}
+
+.bank-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 8px;
+}
+
+.card-type {
+  display: inline-block;
+  background: #f0f2f5;
+  color: #606266;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.card-number {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.cardholder-name,
+.expiry-date {
+  font-size: 14px;
+  color: #606266;
+  margin-bottom: 4px;
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.delete-btn {
+  color: #F56C6C;
+}
+
+.delete-btn:hover {
+  color: #f78989;
+}
+
+/* 对话框样式 */
+.tip-text {
+  margin-left: 8px;
+  color: #909399;
+  font-size: 12px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .card-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .card-actions {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
+
 .status-item .value {
   color: #303133;
   text-align: right;
@@ -1085,6 +1609,417 @@ onMounted(() => {
   
   .step-number {
     align-self: center;
+  }
+}
+
+/* 还车确认弹窗样式 - 精致版 */
+.return-confirm-dialog-wrapper .el-message-box {
+  width: 700px;
+  max-width: 95vw;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.return-confirm-dialog {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* 弹窗头部 */
+.dialog-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px;
+  border-radius: 12px 12px 0 0;
+  text-align: center;
+}
+
+.dialog-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.dialog-subtitle {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+/* 内容区域 */
+.vehicle-condition-section,
+.damage-report-section {
+  padding: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.section-title .icon {
+  font-size: 18px;
+}
+
+/* 车辆状况选项 */
+.condition-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.condition-option {
+  position: relative;
+}
+
+.condition-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+}
+
+.condition-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #e4e7ed;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.condition-label:hover {
+  border-color: #409EFF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.1);
+}
+
+.condition-option input[type="radio"]:checked + .condition-label {
+  border-color: #409EFF;
+  background: #f0f7ff;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15);
+}
+
+.condition-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.condition-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.condition-title {
+  font-weight: 600;
+  color: #303133;
+}
+
+.condition-desc {
+  font-size: 12px;
+  color: #909399;
+}
+
+/* 损坏报告区域 */
+.damage-report-section {
+  background: #f8f9fa;
+  border-radius: 0 0 12px 12px;
+  margin-top: 0;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #303133;
+  font-size: 14px;
+}
+
+/* 损坏部位网格 */
+.damage-parts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.damage-part {
+  position: relative;
+}
+
+.damage-part input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+}
+
+.part-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px;
+  border: 2px solid #e4e7ed;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.part-label:hover {
+  border-color: #409EFF;
+  transform: translateY(-1px);
+}
+
+.damage-part input[type="checkbox"]:checked + .part-label {
+  border-color: #409EFF;
+  background: #f0f7ff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
+}
+
+.part-icon {
+  font-size: 20px;
+}
+
+/* 表单元素 */
+.form-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e4e7ed;
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #409EFF;
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
+}
+
+/* 文件上传区域 */
+.upload-tips {
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #909399;
+  background: #f0f2f5;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.upload-area {
+  position: relative;
+  border: 2px dashed #dcdfe6;
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.upload-area:hover {
+  border-color: #409EFF;
+  background: #f0f7ff;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #909399;
+}
+
+.upload-icon {
+  font-size: 32px;
+}
+
+.upload-text {
+  font-size: 14px;
+}
+
+.file-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-list {
+  margin-top: 12px;
+}
+
+/* 按钮样式 */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel {
+  background: #f5f7fa;
+  color: #606266;
+  border: 1px solid #dcdfe6;
+}
+
+.btn-cancel:hover {
+  background: #ebeef5;
+  color: #409EFF;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #409EFF, #66b1ff);
+  color: white;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
+}
+
+/* 损坏记录样式 */
+.damage-records {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.damage-record {
+  transition: all 0.3s ease;
+}
+
+.damage-record:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.record-header .scooter-model {
+  font-weight: 600;
+  color: #303133;
+}
+
+.record-details {
+  line-height: 1.6;
+}
+
+.record-details p {
+  margin: 4px 0;
+  color: #606266;
+}
+
+.record-details strong {
+  color: #303133;
+}
+
+/* 损坏状态标签样式 */
+.damage-status-reported {
+  background-color: #e6f7ff;
+  border-color: #91d5ff;
+  color: #1890ff;
+}
+
+.damage-status-under-review {
+  background-color: #fff7e6;
+  border-color: #ffd591;
+  color: #fa8c16;
+}
+
+.damage-status-approved {
+  background-color: #f6ffed;
+  border-color: #b7eb8f;
+  color: #52c41a;
+}
+
+.damage-status-compensated {
+  background-color: #f9f0ff;
+  border-color: #d3adf7;
+  color: #722ed1;
+}
+
+.damage-status-repaired {
+  background-color: #e6fffb;
+  border-color: #87e8de;
+  color: #13c2c2;
+}
+
+.damage-status-rejected {
+  background-color: #fff2f0;
+  border-color: #ffccc7;
+  color: #ff4d4f;
+}
+
+.damage-status-cancelled {
+  background-color: #f5f5f5;
+  border-color: #d9d9d9;
+  color: #8c8c8c;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .return-confirm-dialog-wrapper .el-message-box {
+    width: 95vw;
+    margin: 0 auto;
+  }
+  
+  .vehicle-condition-section .el-radio-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .damage-report-section .el-checkbox-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .dialog-footer {
+    flex-direction: column;
+  }
+  
+  .record-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 </style>
