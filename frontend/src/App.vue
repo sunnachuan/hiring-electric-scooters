@@ -28,7 +28,7 @@
           :class="{ 'sidebar-collapsed': isCollapsed }"
         >
           <el-menu
-            :default-active="$route.path"
+            :default-active="activeMenu"
             router
             class="sidebar-menu"
             :collapse="isCollapsed"
@@ -187,8 +187,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import Footer from '@/components/Footer.vue'
 import { 
@@ -197,11 +197,39 @@ import {
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const userInfo = computed(() => authStore.userInfo)
 const isAdmin = computed(() => userInfo.value?.role === 'ADMIN')
+
+// 动态计算激活的菜单项
+const activeMenu = computed(() => {
+  const path = route.path
+  
+  // 如果是个人中心相关的页面，都激活个人中心菜单
+  if (path.startsWith('/profile') || 
+      path.startsWith('/my-bookings') || 
+      path.startsWith('/account-settings') || 
+      path.startsWith('/change-password') || 
+      path.startsWith('/insurance-terms')) {
+    return '/profile'
+  }
+  
+  // 如果是管理员相关的页面，根据路径激活对应的管理员菜单
+  if (path.startsWith('/admin')) {
+    if (path.startsWith('/admin/dashboard')) return '/admin/dashboard'
+    if (path.startsWith('/admin/scooters')) return '/admin/scooters'
+    if (path.startsWith('/admin/locations')) return '/admin/locations'
+    if (path.startsWith('/admin/feedback')) return '/admin/feedback'
+    if (path.startsWith('/admin/device-monitor')) return '/admin/device-monitor'
+    return '/admin/dashboard'
+  }
+  
+  // 其他情况返回当前路径
+  return path
+})
 
 // 导航栏收起/展开状态
 const isCollapsed = ref(false)

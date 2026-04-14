@@ -64,6 +64,11 @@
             />
           </el-form-item>
           
+          <!-- 密码要求提示 -->
+          <div class="password-requirements">
+            <span class="requirements-text">密码要求：6位以上字符，含小写字母和数字</span>
+          </div>
+          
           <el-form-item prop="confirmPassword">
             <el-input
               v-model="registerForm.confirmPassword"
@@ -303,6 +308,19 @@ const agreeAndClose = () => {
 .login-link span {
   margin-right: 8px;
   color: #606266;
+}
+
+/* 密码要求提示样式 */
+.password-requirements {
+  margin: -8px 0 16px 0;
+  padding: 0 12px;
+}
+
+.requirements-text {
+  font-size: 13px;
+  color: #909399;
+  line-height: 1.4;
+  display: block;
 }
 
 /* 条款弹窗样式 */
