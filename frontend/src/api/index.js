@@ -11,6 +11,16 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // 添加用户认证信息到请求头
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+    if (userInfo && userInfo.id) {
+      config.headers['X-User-Id'] = userInfo.id
+      config.headers['X-Username'] = userInfo.username || ''
+      config.headers['X-Email'] = userInfo.email || ''
+      config.headers['X-Role'] = userInfo.role || 'USER'
+    }
+    
     return config
   },
   (error) => {

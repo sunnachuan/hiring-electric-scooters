@@ -350,14 +350,79 @@ public class BookingService {
         
         // 填充实际数据
         for (Object[] result : results) {
-            LocalDateTime startTime = (LocalDateTime) result[0];
-            Double revenue = (Double) result[1];
-            if (revenue != null && startTime != null) {
-                String dateKey = startTime.toLocalDate().toString();
-                dailyRevenue.put(dateKey, dailyRevenue.getOrDefault(dateKey, 0.0) + revenue);
+            try {
+                LocalDateTime startTime = (LocalDateTime) result[0];
+                Double revenue = (Double) result[1];
+                if (revenue != null && startTime != null) {
+                    String dateKey = startTime.toLocalDate().toString();
+                    dailyRevenue.put(dateKey, dailyRevenue.getOrDefault(dateKey, 0.0) + revenue);
+                }
+            } catch (Exception e) {
+                // 如果类型转换失败，使用默认值
+                System.err.println("Error processing daily revenue data: " + e.getMessage());
             }
         }
         
         return dailyRevenue;
+    }
+    
+    /**
+     * 为临时用户创建预订
+     */
+    @Transactional
+    public Booking createTemporaryUserBooking(com.scooter.entity.TemporaryUser temporaryUser, Scooter scooter, Integer hours) {
+        // 检查滑板车是否可用
+        if (!"AVAILABLE".equals(scooter.getStatus())) {
+            throw new RuntimeException("滑板车不可用");
+        }
+        
+        // 计算开始和结束时间
+        LocalDateTime startTime = LocalDateTime.now();
+        LocalDateTime endTime = startTime.plusHours(hours);
+        
+        // 检查时间冲突
+        List<Booking> overlappingBookings = bookingRepository.findOverlappingBookings(
+                scooter.getId(), startTime, endTime);
+        if (!overlappingBookings.isEmpty()) {
+            throw new RuntimeException("该时间段内滑板车已被预订");
+        }
+        
+        // 计算价格（使用分层定价）
+        BigDecimal totalPrice = calculateTieredPrice(scooter.getHourlyRate(), hours);
+        
+        // 创建预订
+        Booking booking = new Booking();
+        booking.setScooter(scooter);
+        booking.setStartTime(startTime);
+        booking.setEndTime(endTime);
+        booking.setTotalPrice(totalPrice);
+        booking.setStatus("ACTIVE");
+        
+        // 设置临时用户信息（特殊处理）
+        booking.setTemporaryUserId(temporaryUser.getId());
+        booking.setUserType("TEMPORARY");
+        booking.setUserInfo(temporaryUser.getRealName() + " (临时用户)");
+        
+        // 保存预订
+        Booking savedBooking = bookingRepository.save(booking);
+        
+        // 减少滑板车可用数量
+        scooterService.decrementAvailableQuantity(scooter.getId());
+        
+        // 创建支付记录（使用临时用户的银行卡）
+        Payment payment = new Payment();
+        payment.setBooking(savedBooking);
+        payment.setAmount(totalPrice);
+        
+        // 设置银行卡信息
+        if (temporaryUser.getBankCard() != null) {
+            payment.setCardLastFour(temporaryUser.getBankCard().getCardNumberDisplay().substring(temporaryUser.getBankCard().getCardNumberDisplay().length() - 4));
+        } else {
+            payment.setCardLastFour("1234"); // 默认值
+        }
+        
+        paymentRepository.save(payment);
+        
+        return savedBooking;
     }
 }

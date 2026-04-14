@@ -1,45 +1,153 @@
 package com.scooter.util;
 
-import com.scooter.config.JwtUtils;
 import com.scooter.entity.User;
-import com.scooter.service.UserService;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Base64;
 
+/**
+ * 安全工具类（增强版）
+ */
 @Component
-@RequiredArgsConstructor
+@Slf4j
 public class SecurityUtils {
     
-    private final JwtUtils jwtUtils;
-    private final UserService userService;
+    private static final String SECRET_KEY = "scooter_rental_key_2024"; // 生产环境应从配置读取
+    private static final String ALGORITHM = "AES";
     
     /**
-     * 从请求中获取当前用户
+     * 加密敏感数据
      */
-    public User getCurrentUser(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            String username = jwtUtils.extractUsername(token);
-            return userService.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("用户不存在"));
+    public static String encrypt(String data) {
+        try {
+            SecretKeySpec secretKey = generateKey();
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            byte[] encryptedBytes = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(encryptedBytes);
+        } catch (Exception e) {
+            log.error("数据加密失败", e);
+            throw new RuntimeException("数据加密失败");
         }
-        throw new RuntimeException("未找到认证信息");
     }
     
     /**
-     * 从当前请求上下文中获取当前用户
+     * 解密敏感数据
      */
-    public User getCurrentUser() {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attributes != null) {
-            HttpServletRequest request = attributes.getRequest();
-            return getCurrentUser(request);
+    public static String decrypt(String encryptedData) {
+        try {
+            SecretKeySpec secretKey = generateKey();
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            byte[] decodedBytes = Base64.getDecoder().decode(encryptedData);
+            byte[] decryptedBytes = cipher.doFinal(decodedBytes);
+            return new String(decryptedBytes, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.error("数据解密失败", e);
+            throw new RuntimeException("数据解密失败");
         }
-        throw new RuntimeException("无法获取请求上下文");
+    }
+    
+    /**
+     * 生成密钥
+     */
+    private static SecretKeySpec generateKey() throws Exception {
+        byte[] key = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
+        MessageDigest sha = MessageDigest.getInstance("SHA-256");
+        key = sha.digest(key);
+        key = java.util.Arrays.copyOf(key, 16); // AES-128
+        return new SecretKeySpec(key, ALGORITHM);
+    }
+    
+    /**
+     * 生成银行卡显示号码（只显示后4位）
+     */
+    public static String maskCardNumber(String cardNumber) {
+        if (cardNumber == null || cardNumber.length() < 4) {
+            return "****";
+        }
+        return "**** **** **** " + cardNumber.substring(cardNumber.length() - 4);
+    }
+    
+    /**
+     * 生成身份证显示号码
+     */
+    public static String maskIdCard(String idCard) {
+        if (idCard == null || idCard.length() < 6) {
+            return "****";
+        }
+        return idCard.substring(0, 6) + "****" + idCard.substring(idCard.length() - 4);
+    }
+    
+    /**
+     * 生成手机号显示号码
+     */
+    public static String maskPhone(String phone) {
+        if (phone == null || phone.length() < 7) {
+            return "****";
+        }
+        return phone.substring(0, 3) + "****" + phone.substring(phone.length() - 4);
+    }
+    
+    /**
+     * 验证银行卡号格式
+     */
+    public static boolean isValidCardNumber(String cardNumber) {
+        if (cardNumber == null || cardNumber.length() < 16 || cardNumber.length() > 19) {
+            return false;
+        }
+        return cardNumber.matches("^[0-9]{16,19}$");
+    }
+    
+    /**
+     * 验证身份证号格式
+     */
+    public static boolean isValidIdCard(String idCard) {
+        if (idCard == null) {
+            return false;
+        }
+        return idCard.matches("^[1-9]\\d{5}(18|19|20)\\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$");
+    }
+    
+    /**
+     * 验证手机号格式
+     */
+    public static boolean isValidPhone(String phone) {
+        if (phone == null) {
+            return false;
+        }
+        return phone.matches("^1[3-9]\\d{9}$");
+    }
+    
+    /**
+     * 获取当前登录用户（从HttpServletRequest）
+     */
+    public User getCurrentUser(HttpServletRequest request) {
+        // 从请求头中获取用户ID
+        String userIdHeader = request.getHeader("X-User-Id");
+        String usernameHeader = request.getHeader("X-Username");
+        String emailHeader = request.getHeader("X-Email");
+        String roleHeader = request.getHeader("X-Role");
+        
+        if (userIdHeader == null || usernameHeader == null) {
+            throw new RuntimeException("用户认证信息缺失");
+        }
+        
+        try {
+            User user = new User();
+            user.setId(Long.parseLong(userIdHeader));
+            user.setUsername(usernameHeader);
+            user.setEmail(emailHeader != null ? emailHeader : "");
+            user.setRole(roleHeader != null ? roleHeader : "USER");
+            return user;
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("用户ID格式错误");
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.scooter.service;
 import com.scooter.dto.BankCardDTO;
 import com.scooter.entity.BankCard;
 import com.scooter.repository.BankCardRepository;
+import com.scooter.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,11 @@ public class BankCardService {
      */
     @Transactional
     public BankCard addBankCard(Long userId, BankCardDTO bankCardDTO) {
+        // 验证银行卡号格式
+        if (!SecurityUtils.isValidCardNumber(bankCardDTO.getCardNumber())) {
+            throw new RuntimeException("银行卡号格式不正确");
+        }
+        
         // 检查银行卡号是否已存在
         if (bankCardRepository.existsByUserIdAndCardNumberAndStatus(userId, bankCardDTO.getCardNumber(), "ACTIVE")) {
             throw new RuntimeException("该银行卡已存在");
@@ -38,11 +44,13 @@ public class BankCardService {
         
         BankCard bankCard = new BankCard();
         bankCard.setUserId(userId);
-        bankCard.setCardNumber(bankCardDTO.getCardNumber());
+        
+        // 加密存储银行卡号
+        String encryptedCardNumber = SecurityUtils.encrypt(bankCardDTO.getCardNumber());
+        bankCard.setCardNumber(encryptedCardNumber);
         
         // 生成显示卡号（只显示后4位）
-        String cardNumber = bankCardDTO.getCardNumber();
-        String displayNumber = "**** **** **** " + cardNumber.substring(cardNumber.length() - 4);
+        String displayNumber = SecurityUtils.maskCardNumber(bankCardDTO.getCardNumber());
         bankCard.setCardNumberDisplay(displayNumber);
         
         bankCard.setBankName(bankCardDTO.getBankName());

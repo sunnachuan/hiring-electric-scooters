@@ -22,7 +22,7 @@ public class BankCard {
     private Long userId;
     
     /** 银行卡号（加密存储） */
-    @Column(name = "card_number", nullable = false, length = 50)
+    @Column(name = "card_number", nullable = false, length = 200)
     private String cardNumber;
     
     /** 银行卡号显示（只显示后4位） */

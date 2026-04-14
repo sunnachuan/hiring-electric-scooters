@@ -18,8 +18,20 @@ public class Booking {
     private Long id;
     
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
+    
+    /** 临时用户ID（当user_id为null时使用） */
+    @Column(name = "temporary_user_id")
+    private Long temporaryUserId;
+    
+    /** 用户类型：REGULAR-普通用户，TEMPORARY-临时用户 */
+    @Column(name = "user_type", nullable = false, length = 20)
+    private String userType = "REGULAR";
+    
+    /** 用户信息（用于显示） */
+    @Column(name = "user_info", length = 100)
+    private String userInfo;
     
     @ManyToOne
     @JoinColumn(name = "scooter_id", nullable = false)

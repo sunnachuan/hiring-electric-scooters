@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/damage")
+@RequestMapping("/api/upload")
 @Slf4j
 public class FileUploadController {
     

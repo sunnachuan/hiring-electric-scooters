@@ -230,17 +230,43 @@
                         <div class="expiry-date" v-if="card.expiryDate">有效期：{{ card.expiryDate }}</div>
                       </div>
                       <div class="card-actions">
-                        <el-tag v-if="card.isDefault" type="success" size="small">默认</el-tag>
+                        <el-tag 
+                          v-if="card.isDefault" 
+                          type="success" 
+                          size="small"
+                          class="default-tag"
+                        >
+                          <el-icon><StarFilled /></el-icon>
+                          默认
+                        </el-tag>
                         <el-button 
                           v-else 
-                          type="text" 
+                          type="primary" 
                           size="small" 
                           @click="setDefaultCard(card.id)"
+                          class="set-default-btn"
                         >
+                          <el-icon><Star /></el-icon>
                           设为默认
                         </el-button>
-                        <el-button type="text" size="small" @click="editBankCard(card)">编辑</el-button>
-                        <el-button type="text" size="small" @click="deleteBankCard(card.id)" class="delete-btn">删除</el-button>
+                        <el-button 
+                          type="primary" 
+                          size="small" 
+                          @click="editBankCard(card)"
+                          class="edit-btn"
+                        >
+                          <el-icon><Edit /></el-icon>
+                          编辑
+                        </el-button>
+                        <el-button 
+                          type="danger" 
+                          size="small" 
+                          @click="deleteBankCard(card.id)" 
+                          class="delete-btn"
+                        >
+                          <el-icon><Delete /></el-icon>
+                          删除
+                        </el-button>
                       </div>
                     </div>
                   </el-card>
@@ -501,8 +527,8 @@ const overtimeSteps = [
 ]
 import api from '@/api'
 import { 
-  Star, Document, Setting, SwitchButton, ArrowRight, Plus, 
-  Location, Clock, Coin, Lock, Switch, User, UserFilled
+  Star, StarFilled, Document, Setting, SwitchButton, ArrowRight, Plus, 
+  Location, Clock, Coin, Lock, Switch, User, UserFilled, Edit, Delete
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -1443,12 +1469,90 @@ onMounted(() => {
   align-items: flex-end;
 }
 
+/* 默认标签样式 */
+.default-tag {
+  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+  border: none;
+  color: white;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(102, 194, 58, 0.2);
+}
+
+.default-tag .el-icon {
+  margin-right: 4px;
+  font-size: 12px;
+}
+
+/* 设为默认按钮样式 */
+.set-default-btn {
+  background: linear-gradient(135deg, #409EFF 0%, #66b1ff 100%);
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(64, 158, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.set-default-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(64, 158, 255, 0.3);
+}
+
+.set-default-btn .el-icon {
+  margin-right: 4px;
+  font-size: 12px;
+}
+
+/* 编辑按钮样式 */
+.edit-btn {
+  background: linear-gradient(135deg, #E6A23C 0%, #ebb563 100%);
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(230, 162, 60, 0.2);
+  transition: all 0.3s ease;
+}
+
+.edit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(230, 162, 60, 0.3);
+}
+
+.edit-btn .el-icon {
+  margin-right: 4px;
+  font-size: 12px;
+}
+
+/* 删除按钮样式 */
 .delete-btn {
-  color: #F56C6C;
+  background: linear-gradient(135deg, #F56C6C 0%, #f78989 100%);
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(245, 108, 108, 0.2);
+  transition: all 0.3s ease;
 }
 
 .delete-btn:hover {
-  color: #f78989;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(245, 108, 108, 0.3);
+  background: linear-gradient(135deg, #f56c6c 0%, #f9a7a7 100%);
+}
+
+.delete-btn .el-icon {
+  margin-right: 4px;
+  font-size: 12px;
 }
 
 /* 对话框样式 */

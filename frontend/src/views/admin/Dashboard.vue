@@ -83,28 +83,90 @@
     <el-dialog 
       v-model="showCreateBookingDialog" 
       title="代用户下单" 
-      width="500px"
+      width="600px"
     >
       <el-form :model="adminBookingForm" :rules="adminBookingRules" ref="adminBookingFormRef">
-        <el-form-item label="用户邮箱" prop="userEmail">
-          <el-input 
-            v-model="adminBookingForm.userEmail" 
-            placeholder="输入用户邮箱" 
-            :suffix-icon="getEmailStatusIcon()"
-            @blur="validateEmailOnBlur"
-          />
-          <template #error>
-            <div class="email-help">
-              <p v-if="adminBookingForm.userEmail && !isKnownEmail()" class="email-warning">
-                <el-icon><Warning /></el-icon>
-                此邮箱可能未注册
-              </p>
-              <p v-else-if="!adminBookingForm.userEmail" class="email-tip">
-                请输入已注册用户的邮箱地址
-              </p>
-            </div>
-          </template>
+        <!-- 用户类型选择 -->
+        <el-form-item label="用户类型" prop="userType">
+          <el-radio-group v-model="adminBookingForm.userType" @change="handleUserTypeChange">
+            <el-radio label="EXISTING">已注册用户</el-radio>
+            <el-radio label="NEW">新用户</el-radio>
+            <el-radio label="GUEST">访客模式</el-radio>
+          </el-radio-group>
         </el-form-item>
+        
+        <!-- 已注册用户 -->
+        <div v-if="adminBookingForm.userType === 'EXISTING'">
+          <el-form-item label="用户邮箱" prop="userEmail">
+            <el-input 
+              v-model="adminBookingForm.userEmail" 
+              placeholder="输入用户邮箱" 
+              :suffix-icon="getEmailStatusIcon()"
+              @blur="validateEmailOnBlur"
+            />
+            <template #error>
+              <div class="email-help">
+                <p v-if="adminBookingForm.userEmail && !isKnownEmail()" class="email-warning">
+                  <el-icon><Warning /></el-icon>
+                  此邮箱可能未注册
+                </p>
+                <p v-else-if="!adminBookingForm.userEmail" class="email-tip">
+                  请输入已注册用户的邮箱地址
+                </p>
+              </div>
+            </template>
+          </el-form-item>
+        </div>
+        
+        <!-- 新用户信息 -->
+         <div v-if="adminBookingForm.userType === 'NEW'">
+           <el-form-item label="真实姓名" prop="realName">
+             <el-input v-model="adminBookingForm.realName" placeholder="请输入真实姓名" />
+           </el-form-item>
+           <el-form-item label="手机号" prop="phone">
+             <el-input v-model="adminBookingForm.phone" placeholder="请输入手机号" maxlength="11" />
+           </el-form-item>
+           <el-form-item label="身份证号" prop="idCard">
+             <el-input v-model="adminBookingForm.idCard" placeholder="请输入身份证号（可选）" maxlength="18" />
+           </el-form-item>
+           <el-form-item label="紧急联系人" prop="emergencyContact">
+             <el-input v-model="adminBookingForm.emergencyContact" placeholder="请输入紧急联系人姓名（可选）" />
+           </el-form-item>
+           <el-form-item label="紧急联系人电话" prop="emergencyPhone">
+             <el-input v-model="adminBookingForm.emergencyPhone" placeholder="请输入紧急联系人电话（可选）" maxlength="11" />
+           </el-form-item>
+           
+           <!-- 银行卡绑定 -->
+           <el-divider>信用卡绑定</el-divider>
+           <el-form-item label="银行卡号" prop="bankCardNumber">
+             <el-input v-model="adminBookingForm.bankCardNumber" placeholder="请输入银行卡号" maxlength="19" />
+           </el-form-item>
+           <el-form-item label="银行名称" prop="bankName">
+             <el-input v-model="adminBookingForm.bankName" placeholder="请输入银行名称" />
+           </el-form-item>
+           <el-form-item label="持卡人姓名" prop="cardholderName">
+             <el-input v-model="adminBookingForm.cardholderName" placeholder="请输入持卡人姓名" />
+           </el-form-item>
+           <el-form-item label="卡片类型" prop="cardType">
+             <el-select v-model="adminBookingForm.cardType" placeholder="请选择卡片类型">
+               <el-option label="借记卡" value="DEBIT" />
+               <el-option label="信用卡" value="CREDIT" />
+             </el-select>
+           </el-form-item>
+           <el-form-item label="有效期" prop="expiryDate">
+             <el-input v-model="adminBookingForm.expiryDate" placeholder="MM/YY" maxlength="5" />
+           </el-form-item>
+         </div>
+        
+        <!-- 访客模式 -->
+        <div v-if="adminBookingForm.userType === 'GUEST'">
+          <el-form-item label="姓名" prop="guestName">
+            <el-input v-model="adminBookingForm.guestName" placeholder="请输入姓名" />
+          </el-form-item>
+          <el-form-item label="联系方式" prop="guestPhone">
+            <el-input v-model="adminBookingForm.guestPhone" placeholder="请输入手机号" maxlength="11" />
+          </el-form-item>
+        </div>
         
         <el-form-item label="滑板车" prop="scooterId">
           <el-select v-model="adminBookingForm.scooterId" placeholder="选择滑板车" style="width: 100%">
@@ -164,7 +226,20 @@ const stats = ref({
 const availableScooters = ref([])
 
 const adminBookingForm = ref({
+  userType: 'EXISTING',
   userEmail: '',
+  realName: '',
+  phone: '',
+  idCard: '',
+  emergencyContact: '',
+  emergencyPhone: '',
+  guestName: '',
+  guestPhone: '',
+  bankCardNumber: '',
+  bankName: '',
+  cardholderName: '',
+  cardType: 'DEBIT',
+  expiryDate: '',
   scooterId: null,
   durationType: ''
 })
@@ -194,10 +269,37 @@ const validateEmailExists = async (rule, value, callback) => {
 }
 
 const adminBookingRules = {
+  userType: [{ required: true, message: '请选择用户类型', trigger: 'change' }],
   userEmail: [
     { required: true, message: '请输入用户邮箱', trigger: 'blur' },
     { type: 'email', message: '邮箱格式不正确', trigger: 'blur' },
     { validator: validateEmailExists, trigger: 'blur' }
+  ],
+  realName: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }
+  ],
+  idCard: [
+    { pattern: /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/, 
+      message: '身份证号格式不正确', trigger: 'blur' }
+  ],
+  emergencyPhone: [
+    { pattern: /^1[3-9]\d{9}$/, message: '紧急联系人手机号格式不正确', trigger: 'blur' }
+  ],
+  guestPhone: [
+    { required: true, message: '请输入联系方式', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }
+  ],
+  bankCardNumber: [
+    { required: true, message: '请输入银行卡号', trigger: 'blur' },
+    { pattern: /^[0-9]{16,19}$/, message: '银行卡号格式不正确（16-19位数字）', trigger: 'blur' }
+  ],
+  bankName: [{ required: true, message: '请输入银行名称', trigger: 'blur' }],
+  cardholderName: [{ required: true, message: '请输入持卡人姓名', trigger: 'blur' }],
+  cardType: [{ required: true, message: '请选择卡片类型', trigger: 'change' }],
+  expiryDate: [
+    { pattern: /^(0[1-9]|1[0-2])\/[0-9]{2}$/, message: '有效期格式不正确（MM/YY）', trigger: 'blur' }
   ],
   scooterId: [{ required: true, message: '请选择滑板车', trigger: 'change' }],
   durationType: [{ required: true, message: '请选择租赁时长', trigger: 'change' }]
@@ -214,6 +316,14 @@ const getEmailStatusIcon = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(adminBookingForm.value.userEmail)) return 'CircleClose'
   return isKnownEmail() ? 'CircleCheck' : 'Warning'
+}
+
+// 用户类型变更处理
+const handleUserTypeChange = () => {
+  // 重置表单验证状态
+  if (adminBookingFormRef.value) {
+    adminBookingFormRef.value.clearValidate()
+  }
 }
 
 // 邮箱失去焦点时的验证
@@ -453,41 +563,12 @@ const initChartsWithMockData = () => {
 }
 
 const handleAdminBooking = async () => {
-  if (!adminBookingFormRef.value) return
-  
-  const valid = await adminBookingFormRef.value.validate()
-  if (!valid) return
-  
-  // 提交前再次检查邮箱格式
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(adminBookingForm.value.userEmail)) {
-    ElMessage.error('邮箱格式不正确，请重新输入')
-    return
-  }
-  
-  // 检查是否使用了已知的测试邮箱
-  if (!knownEmails.includes(adminBookingForm.value.userEmail)) {
-    // 显示确认弹框
-    try {
-      await ElMessageBox.confirm(
-        `邮箱 "${adminBookingForm.value.userEmail}" 可能未在系统中注册。\n\n是否继续使用此邮箱下单？`,
-        '邮箱验证提示',
-        {
-          confirmButtonText: '继续下单',
-          cancelButtonText: '重新输入',
-          type: 'warning',
-          center: true
-        }
-      )
-    } catch (cancel) {
-      // 用户选择重新输入
-      return
-    }
-  }
-  
-  adminBookingLoading.value = true
-  
   try {
+    adminBookingLoading.value = true
+    
+    // 表单验证
+    await adminBookingFormRef.value.validate()
+    
     // 将durationType转换为hours数值
     const durationTypeToHours = {
       '1h': 1,
@@ -496,21 +577,69 @@ const handleAdminBooking = async () => {
       '1w': 168
     }
     
+    // 构建请求数据
     const requestData = {
+      userType: adminBookingForm.value.userType,
       userEmail: adminBookingForm.value.userEmail,
       scooterId: adminBookingForm.value.scooterId,
       hours: durationTypeToHours[adminBookingForm.value.durationType] || 1
     }
     
+    // 根据用户类型添加额外数据
+    if (adminBookingForm.value.userType === 'NEW') {
+      requestData.temporaryUser = {
+        realName: adminBookingForm.value.realName,
+        phone: adminBookingForm.value.phone,
+        idCard: adminBookingForm.value.idCard,
+        emergencyContact: adminBookingForm.value.emergencyContact,
+        emergencyPhone: adminBookingForm.value.emergencyPhone,
+        bankCard: {
+          cardNumber: adminBookingForm.value.bankCardNumber,
+          bankName: adminBookingForm.value.bankName,
+          cardholderName: adminBookingForm.value.cardholderName,
+          cardType: adminBookingForm.value.cardType,
+          expiryDate: adminBookingForm.value.expiryDate,
+          isDefault: true
+        }
+      }
+    } else if (adminBookingForm.value.userType === 'GUEST') {
+      requestData.guestInfo = {
+        name: adminBookingForm.value.guestName,
+        phone: adminBookingForm.value.guestPhone
+      }
+    }
+    
     await api.post('/admin/bookings', requestData)
     ElMessage.success('代下单成功')
     showCreateBookingDialog.value = false
-    adminBookingForm.value = { userEmail: '', scooterId: null, durationType: '' }
+    
+    // 重置表单
+    adminBookingForm.value = {
+      userType: 'EXISTING',
+      userEmail: '',
+      realName: '',
+      phone: '',
+      idCard: '',
+      emergencyContact: '',
+      emergencyPhone: '',
+      guestName: '',
+      guestPhone: '',
+      bankCardNumber: '',
+      bankName: '',
+      cardholderName: '',
+      cardType: 'DEBIT',
+      expiryDate: '',
+      scooterId: null,
+      durationType: ''
+    }
+    
     loadStats()
   } catch (error) {
     // 静默处理错误，避免控制台报错
     if (error.response?.status === 500 && error.response?.data?.includes?.('用户不存在')) {
       ElMessage.error(`用户不存在：${adminBookingForm.value.userEmail}`)
+    } else if (error.response?.status === 400) {
+      ElMessage.error(error.response.data.message || '代下单失败')
     } else {
       ElMessage.error('代下单失败')
     }

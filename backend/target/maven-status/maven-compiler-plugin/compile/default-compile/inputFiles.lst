@@ -1,11 +1,14 @@
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\BankCardRepository.java
+C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\TemporaryUserDTO.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\BankCardController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\UserRepository.java
+C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\TemporaryUserService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\RegisterRequest.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\BankCardDTO.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\BankCardService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\ScooterRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\BookingController.java
+C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\AdminBookingController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\BookingService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\PaymentRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\ScooterController.java
@@ -25,6 +28,7 @@ C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\UserService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\AuthResponse.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\ScooterLocation.java
+C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\TemporaryUserRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\VehicleDamageController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\config\SecurityConfig.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\DeviceController.java
@@ -37,6 +41,7 @@ C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\Booking.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\DamageReportRequest.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\VehicleDamageRecord.java
+C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\TemporaryUser.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\config\JwtAuthTokenFilter.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\DamageLevel.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\DamageStatus.java

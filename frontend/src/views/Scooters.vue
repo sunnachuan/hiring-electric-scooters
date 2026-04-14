@@ -228,7 +228,7 @@
             <el-option
               v-for="card in bankCards"
               :key="card.id"
-              :label="`${card.cardHolderName} - ****${card.cardNumber.slice(-4)}`"
+              :label="`${card.cardholderName} - ${card.cardNumberDisplay}`"
               :value="card.id"
             />
           </el-select>
@@ -441,14 +441,14 @@
               <div class="card-info">
                 <div class="card-number">
                   <el-icon><CreditCard /></el-icon>
-                  **** **** **** {{ card.cardNumber.slice(-4) }}
+                  {{ card.cardNumberDisplay }}
                   <el-tag v-if="card.isDefault" size="small" type="success" style="margin-left: 10px;">
                     默认
                   </el-tag>
                 </div>
                 <div class="card-details">
-                  <span class="card-holder">{{ card.cardHolderName }}</span>
-                  <span class="card-expiry">{{ card.expiryMonth }}/{{ card.expiryYear }}</span>
+                  <span class="card-holder">{{ card.cardholderName }}</span>
+                  <span class="card-expiry">{{ card.expiryDate }}</span>
                 </div>
               </div>
               
@@ -953,7 +953,9 @@ const addBankCard = async () => {
   try {
     const bankCardData = {
       cardNumber: bankCardForm.value.cardNumber,
-      cardHolderName: bankCardForm.value.cardHolderName
+      cardholderName: bankCardForm.value.cardHolderName,
+      bankName: '中国银行', // 默认银行名称
+      cardType: 'DEBIT' // 默认借记卡
     }
     const response = await api.post('/bank-cards', bankCardData)
     ElMessage.success('银行卡添加成功')
@@ -1050,7 +1052,9 @@ const handleBooking = async () => {
         try {
           const bankCardData = {
             cardNumber: bookingForm.value.cardNumber,
-            cardHolderName: bookingForm.value.cardHolderName
+            cardholderName: bookingForm.value.cardHolderName,
+            bankName: '中国银行', // 默认银行名称
+            cardType: 'DEBIT' // 默认借记卡
           }
           await api.post('/bank-cards', bankCardData)
           ElMessage.success('银行卡已保存')
@@ -1087,6 +1091,8 @@ const handleBooking = async () => {
 
 onMounted(() => {
   loadScooters()
+  // 预加载银行卡数据
+  loadBankCards()
 })
 </script>
 
