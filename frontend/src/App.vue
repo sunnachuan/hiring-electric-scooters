@@ -445,6 +445,18 @@ onUnmounted(() => {
   margin-right: 0;
 }
 
+/* 修复收起状态下图标居中显示 */
+.sidebar-menu.el-menu--collapse .el-menu-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 !important;
+}
+
+.sidebar-menu.el-menu--collapse .el-menu-item .el-icon {
+  margin: 0 auto;
+}
+
 /* 气泡提示样式 */
 .tooltip {
   position: fixed;

@@ -16,6 +16,7 @@ C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\BankCardRequest.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\AdminController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\ScooterService.java
+C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\ChangePasswordRequest.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\VehicleDamageService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\Scooter.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\ScooterLocationRepository.java

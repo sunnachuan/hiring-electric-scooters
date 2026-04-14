@@ -31,6 +31,30 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/my-bookings',
+    name: 'MyBookings',
+    component: () => import('@/views/MyBookings.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/account-settings',
+    name: 'AccountSettings',
+    component: () => import('@/views/AccountSettings.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/change-password',
+    name: 'ChangePassword',
+    component: () => import('@/views/ChangePassword.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/insurance-terms',
+    name: 'InsuranceTerms',
+    component: () => import('@/views/InsuranceTerms.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/bookings',
     name: 'Bookings',
     component: () => import('@/views/Bookings.vue'),

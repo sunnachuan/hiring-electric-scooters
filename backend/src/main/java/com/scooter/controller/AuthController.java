@@ -2,6 +2,7 @@ package com.scooter.controller;
 
 import com.scooter.dto.AuthRequest;
 import com.scooter.dto.AuthResponse;
+import com.scooter.dto.ChangePasswordRequest;
 import com.scooter.dto.RegisterRequest;
 import com.scooter.entity.User;
 import com.scooter.service.UserService;
@@ -51,5 +52,19 @@ public class AuthController {
         
         return ResponseEntity.ok(new AuthResponse(jwt, user.getId(), user.getUsername(), 
                 user.getEmail(), user.getRole()));
+    }
+    
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        try {
+            userService.changePassword(
+                changePasswordRequest.getUsername(),
+                changePasswordRequest.getCurrentPassword(),
+                changePasswordRequest.getNewPassword()
+            );
+            return ResponseEntity.ok("密码修改成功");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

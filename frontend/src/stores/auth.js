@@ -64,6 +64,23 @@ export const useAuthStore = defineStore('auth', () => {
     delete api.defaults.headers.common['Authorization']
   }
 
+  const changePassword = async (passwordData) => {
+    try {
+      const response = await api.post('/auth/change-password', {
+        username: userInfo.value?.username,
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      })
+      
+      return { success: true, message: response.data }
+    } catch (error) {
+      return { 
+        success: false, 
+        message: error.response?.data || '密码修改失败' 
+      }
+    }
+  }
+
   const initializeAuth = () => {
     if (token.value) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
@@ -77,6 +94,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
+    changePassword,
     initializeAuth
   }
 })

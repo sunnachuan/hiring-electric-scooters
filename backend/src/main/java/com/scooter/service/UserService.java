@@ -65,4 +65,18 @@ public class UserService implements UserDetailsService {
     public User updateUser(User user) {
         return userRepository.save(user);
     }
+    
+    public boolean changePassword(String username, String currentPassword, String newPassword) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+        
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new RuntimeException("当前密码错误");
+        }
+        
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        
+        return true;
+    }
 }

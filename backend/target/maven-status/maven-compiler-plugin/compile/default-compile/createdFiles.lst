@@ -49,7 +49,6 @@ com\scooter\dto\FeedbackRequest.class
 com\scooter\util\SecurityUtils.class
 com\scooter\controller\BookingController.class
 com\scooter\service\BillingService.class
-com\scooter\controller\AuthController.class
 com\scooter\service\TemporaryUserService.class
 com\scooter\repository\UserRepository.class
 com\scooter\entity\Operator.class
