@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册成功 - 电动滑板车租赁服务</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 30px;
+        }
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .welcome-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .user-info {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .info-value {
+            color: #212529;
+        }
+        .features-section {
+            margin: 30px 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #667eea;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 12px;
+        }
+        .next-steps {
+            background-color: #e8f5e8;
+            border-left: 4px solid #28a745;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            margin: 10px 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 欢迎加入电动滑板车租赁服务！</h1>
+            <p>您的账户已成功创建</p>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-section">
+                <div class="welcome-icon">🛴</div>
+                <h2>尊敬的 <span th:text="${username}">用户</span>，欢迎您！</h2>
+                <p>感谢您选择我们的电动滑板车租赁服务。您的账户已成功创建，现在可以开始使用我们的服务了。</p>
+            </div>
+            
+            <div class="user-info">
+                <h3>账户信息</h3>
+                <div class="info-item">
+                    <span class="info-label">用户名：</span>
+                    <span class="info-value" th:text="${username}"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">邮箱：</span>
+                    <span class="info-value" th:text="${email}"></span>
+                </div>
+                <div class="info-item" th:if="${fullName}">
+                    <span class="info-label">姓名：</span>
+                    <span class="info-value" th:text="${fullName}"></span>
+                </div>
+                <div class="info-item" th:if="${phone}">
+                    <span class="info-label">手机号：</span>
+                    <span class="info-value" th:text="${phone}"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">注册时间：</span>
+                    <span class="info-value" th:text="${registrationTime}"></span>
+                </div>
+            </div>
+            
+            <div class="features-section">
+                <h3>服务特色</h3>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>便捷的电动滑板车租赁服务</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>多种车型选择，满足不同需求</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>灵活的租赁时长，按需付费</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>完善的保险保障，安全可靠</span>
+                </div>
+            </div>
+            
+            <div class="next-steps">
+                <h4>接下来您可以：</h4>
+                <p>• 浏览可用的电动滑板车</p>
+                <p>• 查看附近的租赁点</p>
+                <p>• 开始您的第一次租赁体验</p>
+            </div>
+            
+
+        </div>
+        
+        <div class="footer">
+            <p>如果您有任何问题，请联系我们的客服团队：<a href="mailto:support@scooter.com">support@scooter.com</a></p>
+            <p>© 2024 电动滑板车租赁服务. 保留所有权利.</p>
+            <p style="font-size: 12px; color: #adb5bd;">此邮件为系统自动发送，请勿回复。</p>
+        </div>
+    </div>
+</body>
+</html>

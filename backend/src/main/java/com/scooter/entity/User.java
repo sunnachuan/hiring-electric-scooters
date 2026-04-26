@@ -34,6 +34,12 @@ public class User {
     @Column(name = "is_senior")
     private Boolean isSenior = false;
     
+    @Column(name = "phone", length = 20)
+    private String phone;
+    
+    @Column(name = "full_name", length = 50)
+    private String fullName;
+    
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     

@@ -37,7 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://127.0.0.1:5174", "http://10.69.211.223:5173", "http://10.69.161.181:5173", "http://10.167.239.187:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5500", "http://localhost:5500", "http://10.69.211.223:5173", "http://10.69.161.181:5173", "http://10.167.239.187:5173"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -57,6 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable()
             .authorizeRequests()
             .antMatchers("/api/auth/**").permitAll()
+            .antMatchers("/api/email/**").permitAll()
             .antMatchers("/api/**").authenticated()
             .anyRequest().permitAll()
             .and()

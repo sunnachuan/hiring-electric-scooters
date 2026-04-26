@@ -53,6 +53,8 @@
             />
           </el-form-item>
           
+
+          
           <el-form-item prop="password">
             <el-input
               v-model="registerForm.password"
@@ -168,7 +170,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { ElMessage } from 'element-plus'
@@ -185,6 +187,9 @@ const registerForm = ref({
   email: '',
   password: '',
   confirmPassword: '',
+  role: 'USER',
+  isStudent: false,
+  isSenior: false,
   termsAgreed: false
 })
 
@@ -196,6 +201,7 @@ const rules = {
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
   ],
+
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
@@ -255,6 +261,24 @@ const agreeAndClose = () => {
   registerForm.value.termsAgreed = true
   showTermsDialog.value = false
 }
+
+const handleKeydown = (event) => {
+  if (event.key === 'Enter') {
+    if (showTermsDialog.value) {
+      agreeAndClose()
+    } else {
+      handleRegister()
+    }
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <style scoped>

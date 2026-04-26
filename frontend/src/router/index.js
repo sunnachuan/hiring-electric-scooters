@@ -49,6 +49,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/email-test',
+    name: 'EmailTest',
+    component: () => import('@/views/EmailTest.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/insurance-terms',
     name: 'InsuranceTerms',
     component: () => import('@/views/InsuranceTerms.vue'),

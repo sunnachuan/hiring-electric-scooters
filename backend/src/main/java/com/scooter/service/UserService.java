@@ -2,6 +2,7 @@ package com.scooter.service;
 
 import com.scooter.entity.User;
 import com.scooter.repository.UserRepository;
+import com.scooter.util.PasswordPolicy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,6 +18,7 @@ public class UserService implements UserDetailsService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordPolicy passwordPolicy;
     
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -31,12 +33,18 @@ public class UserService implements UserDetailsService {
     }
     
     public User createUser(String username, String email, String password, String role, 
-                          Boolean isStudent, Boolean isSenior) {
+                          Boolean isStudent, Boolean isSenior, String phone, String fullName) {
         if (userRepository.existsByUsername(username)) {
             throw new RuntimeException("用户名已存在");
         }
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("邮箱已存在");
+        }
+        
+        // 验证密码策略
+        var passwordValidation = passwordPolicy.validatePassword(password);
+        if (!passwordValidation.isValid()) {
+            throw new RuntimeException(passwordValidation.getMessage());
         }
         
         User user = new User();
@@ -46,6 +54,8 @@ public class UserService implements UserDetailsService {
         user.setRole(role);
         user.setIsStudent(isStudent);
         user.setIsSenior(isSenior);
+        user.setPhone(phone);
+        user.setFullName(fullName);
         
         return userRepository.save(user);
     }
@@ -72,6 +82,17 @@ public class UserService implements UserDetailsService {
         
         if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
             throw new RuntimeException("当前密码错误");
+        }
+        
+        // 验证新密码策略
+        var passwordValidation = passwordPolicy.validatePassword(newPassword);
+        if (!passwordValidation.isValid()) {
+            throw new RuntimeException(passwordValidation.getMessage());
+        }
+        
+        // 检查新密码是否与旧密码相同
+        if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+            throw new RuntimeException("新密码不能与当前密码相同");
         }
         
         user.setPasswordHash(passwordEncoder.encode(newPassword));

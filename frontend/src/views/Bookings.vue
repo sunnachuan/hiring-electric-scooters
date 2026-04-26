@@ -172,7 +172,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Bicycle, Close, Clock } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
@@ -311,7 +311,22 @@ const handleExtend = async () => {
 
 onMounted(() => {
   loadBookings()
+  
+  // 添加键盘事件监听
+  document.addEventListener('keydown', handleKeydown)
 })
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
+
+const handleKeydown = (event) => {
+  if (event.key === 'Enter') {
+    if (showExtendDialog.value) {
+      handleExtend()
+    }
+  }
+}
 </script>
 
 <style scoped>

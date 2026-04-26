@@ -19,4 +19,7 @@ public class RegisterRequest {
     private String role = "USER";
     private Boolean isStudent = false;
     private Boolean isSenior = false;
+    
+    private String phone;
+    private String fullName;
 }

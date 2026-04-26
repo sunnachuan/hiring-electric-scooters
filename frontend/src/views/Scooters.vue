@@ -483,7 +483,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Plus, Bicycle, ShoppingCart, Location, InfoFilled, PriceTag, Picture, Collection, CreditCard, Coin, Goods } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/api'
@@ -1093,7 +1093,22 @@ onMounted(() => {
   loadScooters()
   // 预加载银行卡数据
   loadBankCards()
+  
+  // 添加键盘事件监听
+  document.addEventListener('keydown', handleKeydown)
 })
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
+
+const handleKeydown = (event) => {
+  if (event.key === 'Enter') {
+    if (showBookingDialog.value) {
+      handleBooking()
+    }
+  }
+}
 </script>
 
 <style scoped>

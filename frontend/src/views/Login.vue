@@ -171,7 +171,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { ElMessage } from 'element-plus'
@@ -274,6 +274,26 @@ const agreeAndClose = () => {
   loginForm.value.termsAgreed = true
   showTermsDialog.value = false
 }
+
+const handleKeydown = (event) => {
+  if (event.key === 'Enter') {
+    if (showForgotPasswordDialog.value) {
+      handleForgotPassword()
+    } else if (showTermsDialog.value) {
+      agreeAndClose()
+    } else {
+      handleLogin()
+    }
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <style scoped>

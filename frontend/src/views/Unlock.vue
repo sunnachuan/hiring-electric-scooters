@@ -230,7 +230,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { 
-  Camera, Scan, Bicycle, Unlock, Lock, Monitor, Refresh 
+  Camera, Search, Bicycle, Unlock, Lock, Monitor, Refresh 
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
@@ -383,12 +383,26 @@ const fetchScooterByQRCode = async (qrCode) => {
 // 生命周期
 onMounted(() => {
   ElMessage.info('请扫描滑板车上的二维码开始使用')
+  
+  // 添加键盘事件监听
+  document.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
   // 清理资源
   isCameraActive.value = false
+  document.removeEventListener('keydown', handleKeydown)
 })
+
+const handleKeydown = (event) => {
+  if (event.key === 'Enter') {
+    if (showUnlockConfirm.value) {
+      confirmUnlock()
+    } else if (showLockConfirm.value) {
+      confirmLock()
+    }
+  }
+}
 </script>
 
 <style scoped>

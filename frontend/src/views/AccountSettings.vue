@@ -18,8 +18,11 @@
       <!-- 基本信息 -->
       <el-tab-pane label="基本信息" name="basic">
         <el-form :model="userForm" label-width="100px" class="settings-form">
+          <el-form-item label="姓名">
+            <el-input v-model="userForm.fullName" placeholder="请输入真实姓名" />
+          </el-form-item>
           <el-form-item label="用户名">
-            <el-input v-model="userForm.username" placeholder="请输入用户名" />
+            <el-input v-model="userForm.username" placeholder="请输入用户名" disabled />
           </el-form-item>
           <el-form-item label="邮箱">
             <el-input v-model="userForm.email" placeholder="请输入邮箱" />
@@ -220,21 +223,28 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import api from '@/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Plus, Star, StarFilled, Edit, Delete, User, UserFilled } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 // 当前激活的选项卡
 const activeTab = ref('basic')
 
-// 用户表单数据
-const userForm = reactive({
-  username: '张三',
-  email: 'zhangsan@example.com',
-  phone: '13800138000'
+// 用户表单数据 - 使用真实的用户数据
+const userForm = computed(() => {
+  const userInfo = authStore.userInfo || {}
+  return {
+    username: userInfo.username || '',
+    email: userInfo.email || '',
+    phone: userInfo.phone || '',
+    fullName: userInfo.fullName || ''
+  }
 })
 
 // 银行卡相关数据
@@ -249,6 +259,9 @@ const bankCardForm = reactive({
   expiryDate: '',
   isDefault: false
 })
+
+// 银行卡表单引用
+const bankCardFormRef = ref()
 
 // 银行卡表单验证规则
 const bankCardRules = {
@@ -286,11 +299,7 @@ const updateProfile = () => {
 
 // 重置表单
 const resetForm = () => {
-  Object.assign(userForm, {
-    username: '张三',
-    email: 'zhangsan@example.com',
-    phone: '13800138000'
-  })
+  // 不再重置为硬编码数据，而是保持当前用户数据
 }
 
 // 重置银行卡表单
@@ -305,27 +314,106 @@ const resetBankCardForm = () => {
   })
 }
 
+// 加载用户银行卡数据
+const loadBankCards = async () => {
+  try {
+    const response = await api.get('/bank-cards')
+    bankCards.value = response.data
+  } catch (error) {
+    console.error('加载银行卡数据失败:', error)
+    bankCards.value = [] // 设置为空数组而不是硬编码数据
+  }
+}
+
 // 添加银行卡
-const addBankCard = () => {
-  showAddBankCardDialog.value = false
-  ElMessage.success('银行卡添加成功')
+const addBankCard = async () => {
+  try {
+    await bankCardFormRef.value.validate()
+    
+    const response = await api.post('/bank-cards', {
+      cardNumber: bankCardForm.cardNumber,
+      bankName: bankCardForm.bankName,
+      cardholderName: bankCardForm.cardholderName,
+      cardType: bankCardForm.cardType,
+      expiryDate: bankCardForm.expiryDate,
+      isDefault: bankCardForm.isDefault
+    })
+    
+    if (response.data.success) {
+      ElMessage.success('银行卡添加成功')
+      showAddBankCardDialog.value = false
+      resetBankCardForm()
+      await loadBankCards() // 重新加载银行卡列表
+    } else {
+      ElMessage.error(response.data.message || '银行卡添加失败')
+    }
+  } catch (error) {
+    if (error.response?.data?.message) {
+      ElMessage.error(error.response.data.message)
+    } else {
+      ElMessage.error('银行卡添加失败，请重试')
+    }
+  }
 }
 
 // 编辑银行卡
 const editBankCard = (card) => {
-  Object.assign(bankCardForm, card)
+  Object.assign(bankCardForm, {
+    ...card,
+    cardNumber: card.cardNumber.replace(/\*/g, '') // 移除掩码显示真实卡号
+  })
   showEditBankCardDialog.value = true
 }
 
 // 更新银行卡
-const updateBankCard = () => {
-  showEditBankCardDialog.value = false
-  ElMessage.success('银行卡更新成功')
+const updateBankCard = async () => {
+  try {
+    await bankCardFormRef.value.validate()
+    
+    const response = await api.put(`/bank-cards/${bankCardForm.id}`, {
+      cardNumber: bankCardForm.cardNumber,
+      bankName: bankCardForm.bankName,
+      cardholderName: bankCardForm.cardholderName,
+      cardType: bankCardForm.cardType,
+      expiryDate: bankCardForm.expiryDate,
+      isDefault: bankCardForm.isDefault
+    })
+    
+    if (response.data.success) {
+      ElMessage.success('银行卡更新成功')
+      showEditBankCardDialog.value = false
+      resetBankCardForm()
+      await loadBankCards() // 重新加载银行卡列表
+    } else {
+      ElMessage.error(response.data.message || '银行卡更新失败')
+    }
+  } catch (error) {
+    if (error.response?.data?.message) {
+      ElMessage.error(error.response.data.message)
+    } else {
+      ElMessage.error('银行卡更新失败，请重试')
+    }
+  }
 }
 
 // 设为默认银行卡
-const setDefaultCard = (cardId) => {
-  ElMessage.success('默认银行卡设置成功')
+const setDefaultCard = async (cardId) => {
+  try {
+    const response = await api.put(`/bank-cards/${cardId}`, { isDefault: true })
+    
+    if (response.data.success) {
+      ElMessage.success('默认银行卡设置成功')
+      await loadBankCards() // 重新加载银行卡列表
+    } else {
+      ElMessage.error(response.data.message || '设置默认银行卡失败')
+    }
+  } catch (error) {
+    if (error.response?.data?.message) {
+      ElMessage.error(error.response.data.message)
+    } else {
+      ElMessage.error('设置默认银行卡失败，请重试')
+    }
+  }
 }
 
 // 删除银行卡
@@ -336,27 +424,32 @@ const deleteBankCard = async (cardId) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    ElMessage.success('银行卡删除成功')
-  } catch {
-    // 用户取消删除
+    
+    const response = await api.delete(`/bank-cards/${cardId}`)
+    
+    if (response.data.success) {
+      ElMessage.success('银行卡删除成功')
+      await loadBankCards() // 重新加载银行卡列表
+    } else {
+      ElMessage.error(response.data.message || '银行卡删除失败')
+    }
+  } catch (error) {
+    if (error === 'cancel') {
+      // 用户取消删除
+      return
+    }
+    
+    if (error.response?.data?.message) {
+      ElMessage.error(error.response.data.message)
+    } else {
+      ElMessage.error('银行卡删除失败，请重试')
+    }
   }
 }
 
 // 初始化数据
 onMounted(() => {
-  // 模拟银行卡数据
-  bankCards.value = [
-    {
-      id: 1,
-      cardNumber: '622588******1234',
-      cardNumberDisplay: '622588******1234',
-      bankName: '招商银行',
-      cardholderName: '张三',
-      cardType: 'DEBIT',
-      expiryDate: '12/25',
-      isDefault: true
-    }
-  ]
+  loadBankCards() // 加载真实的银行卡数据
 })
 </script>
 

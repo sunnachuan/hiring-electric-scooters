@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
@@ -77,8 +78,8 @@ public class BookingService {
         
         // 发送预订确认邮件（可选，失败不影响主要流程）
         try {
-            emailService.sendBookingConfirmation(savedBooking, user);
-            emailService.sendPaymentConfirmation(savedBooking, user);
+            sendBookingConfirmationEmail(savedBooking, user);
+            // emailService.sendPaymentConfirmation(savedBooking, user); // 暂时注释掉，需要实现
         } catch (Exception e) {
             // 邮件发送失败不应影响主要业务流程
             System.err.println("邮件发送失败（不影响预订）: " + e.getMessage());
@@ -424,5 +425,28 @@ public class BookingService {
         paymentRepository.save(payment);
         
         return savedBooking;
+    }
+    
+    /**
+     * 发送预订确认邮件
+     */
+    private void sendBookingConfirmationEmail(Booking booking, User user) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            String startTime = booking.getStartTime().format(formatter);
+            String endTime = booking.getEndTime().format(formatter);
+            
+            emailService.sendBookingConfirmation(
+                user.getEmail(),
+                user.getUsername(),
+                booking.getId().toString(),
+                booking.getScooter().getModel(),
+                startTime,
+                endTime,
+                booking.getTotalPrice()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("发送预订确认邮件失败: " + e.getMessage());
+        }
     }
 }

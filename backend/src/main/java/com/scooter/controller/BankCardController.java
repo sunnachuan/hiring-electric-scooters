@@ -4,8 +4,10 @@ import com.scooter.dto.BankCardDTO;
 import com.scooter.entity.BankCard;
 import com.scooter.entity.User;
 import com.scooter.service.BankCardService;
+import com.scooter.util.DataPermissionValidator;
 import com.scooter.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,10 +23,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/bank-cards")
 @RequiredArgsConstructor
+@Slf4j
 public class BankCardController {
     
     private final BankCardService bankCardService;
     private final SecurityUtils securityUtils;
+    private final DataPermissionValidator dataPermissionValidator;
     
     /**
      * 获取用户的银行卡列表
