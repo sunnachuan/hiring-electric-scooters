@@ -5,7 +5,10 @@ import com.scooter.dto.AuthResponse;
 import com.scooter.dto.ChangePasswordRequest;
 import com.scooter.dto.RegisterRequest;
 import com.scooter.dto.TwoFactorAuthRequest;
+import com.scooter.dto.UpdateProfileRequest;
 import com.scooter.dto.TwoFactorAuthResponse;
+import java.util.HashMap;
+import java.util.Map;
 import com.scooter.entity.TwoFactorAuth;
 import com.scooter.entity.User;
 import com.scooter.service.EmailService;
@@ -127,22 +130,25 @@ public class AuthController {
         
         String jwt = jwtUtils.generateToken(user.getUsername());
         
-        // 发送注册成功邮件
-        try {
-            String registrationTime = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm:ss"));
-            emailService.sendRegistrationSuccess(
-                registerRequest.getEmail(),
-                registerRequest.getUsername(),
-                registerRequest.getFullName(),
-                registerRequest.getPhone(),
-                registrationTime
-            );
-            log.info("注册成功邮件已发送至: {}", registerRequest.getEmail());
-        } catch (Exception e) {
-            log.error("发送注册成功邮件失败: {}", e.getMessage());
-            // 邮件发送失败不影响注册流程，继续返回成功响应
-        }
+        // 异步发送注册成功邮件，避免阻塞注册响应
+        new Thread(() -> {
+            try {
+                String registrationTime = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm:ss"));
+                emailService.sendRegistrationSuccess(
+                    registerRequest.getEmail(),
+                    registerRequest.getUsername(),
+                    registerRequest.getFullName(),
+                    registerRequest.getPhone(),
+                    registrationTime
+                );
+                log.info("注册成功邮件已发送至: {}", registerRequest.getEmail());
+            } catch (Exception e) {
+                log.error("发送注册成功邮件失败: {}", e.getMessage());
+                // 邮件发送失败不影响注册流程，记录日志即可
+            }
+        }).start();
         
+        log.info("用户注册成功: {}", registerRequest.getUsername());
         return ResponseEntity.ok(new AuthResponse(jwt, user.getId(), user.getUsername(), 
                 user.getEmail(), user.getRole(), user.getPhone(), user.getFullName()));
     }
@@ -196,6 +202,49 @@ public class AuthController {
                     twoFactorAuth.getSecretKey(), qrCodeUrl, "2FA已启用，请使用验证器应用扫描二维码"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody UpdateProfileRequest updateProfileRequest,
+                                          HttpServletRequest request) {
+        try {
+            // 获取当前登录用户
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.badRequest().body("缺少有效的认证令牌");
+            }
+            
+            String token = authHeader.substring(7);
+            
+            // 验证JWT令牌有效性
+            String username = jwtUtils.extractUsername(token);
+            if (!jwtUtils.validateToken(token, username)) {
+                return ResponseEntity.badRequest().body("认证令牌无效或已过期");
+            }
+            User currentUser = userService.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("用户不存在"));
+            
+            // 更新用户信息
+            User updatedUser = userService.updateUserProfile(
+                currentUser.getId(),
+                updateProfileRequest.getFullName(),
+                updateProfileRequest.getEmail(),
+                updateProfileRequest.getPhone()
+            );
+            
+            // 返回更新后的用户信息
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "用户信息更新成功");
+            response.put("user", updatedUser);
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         }
     }
     

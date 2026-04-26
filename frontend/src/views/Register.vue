@@ -195,7 +195,31 @@ const registerForm = ref({
 
 const rules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    {
+      validator: (rule, value, callback) => {
+        // 检查是否包含中文字符
+        const chineseRegex = /[\u4e00-\u9fa5]/;
+        if (chineseRegex.test(value)) {
+          callback(new Error('用户名不能包含中文'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    },
+    {
+      validator: (rule, value, callback) => {
+        // 检查是否只包含字母、数字、下划线
+        const validRegex = /^[a-zA-Z0-9_]+$/;
+        if (!validRegex.test(value)) {
+          callback(new Error('用户名只能包含字母、数字和下划线'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
   ],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
@@ -242,15 +266,31 @@ const handleRegister = async () => {
   loading.value = true
   
   try {
-    const result = await authStore.register(registerForm.value)
+    // 准备注册数据，移除confirmPassword字段
+    const registerData = {
+      username: registerForm.value.username,
+      email: registerForm.value.email,
+      password: registerForm.value.password,
+      role: 'USER',
+      isStudent: false,
+      isSenior: false,
+      phone: registerForm.value.phone || '',
+      fullName: registerForm.value.fullName || ''
+    }
+    
+    const result = await authStore.register(registerData)
     
     if (result.success) {
-      ElMessage.success('注册成功')
-      router.push('/login')
+      ElMessage.success('注册成功，正在自动登录...')
+      // 注册成功后直接跳转到主页，因为已经自动登录了
+      setTimeout(() => {
+        router.push('/')
+      }, 1000)
     } else {
       ElMessage.error(result.message)
     }
   } catch (error) {
+    console.error('注册错误:', error)
     ElMessage.error('注册失败，请重试')
   } finally {
     loading.value = false

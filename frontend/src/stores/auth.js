@@ -32,8 +32,15 @@ export const useAuthStore = defineStore('auth', () => {
 
   const register = async (userData) => {
     try {
+      console.log('发送注册请求:', userData)
       const response = await api.post('/auth/register', userData)
+      console.log('注册响应:', response.data)
+      
       const { token: newToken, ...userInfoData } = response.data
+      
+      if (!newToken) {
+        throw new Error('注册成功但未返回token')
+      }
       
       token.value = newToken
       userInfo.value = userInfoData
@@ -44,11 +51,17 @@ export const useAuthStore = defineStore('auth', () => {
       
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
       
+      console.log('注册成功，用户信息已保存')
       return { success: true }
     } catch (error) {
+      console.error('注册错误详情:', {
+        error: error,
+        response: error.response,
+        data: error.response?.data
+      })
       return { 
         success: false, 
-        message: error.response?.data?.message || '注册失败' 
+        message: error.response?.data?.message || error.message || '注册失败' 
       }
     }
   }

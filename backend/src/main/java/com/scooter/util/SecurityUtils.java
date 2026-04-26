@@ -1,6 +1,8 @@
 package com.scooter.util;
 
 import com.scooter.entity.User;
+import com.scooter.service.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +17,11 @@ import java.util.Base64;
  * 安全工具类（增强版）
  */
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class SecurityUtils {
+    
+    private final UserService userService;
     
     private static final String SECRET_KEY = "scooter_rental_key_2024"; // 生产环境应从配置读取
     private static final String ALGORITHM = "AES";
@@ -131,21 +136,39 @@ public class SecurityUtils {
     public User getCurrentUser(HttpServletRequest request) {
         // 从请求头中获取用户ID
         String userIdHeader = request.getHeader("X-User-Id");
-        String usernameHeader = request.getHeader("X-Username");
-        String emailHeader = request.getHeader("X-Email");
-        String roleHeader = request.getHeader("X-Role");
         
-        if (userIdHeader == null || usernameHeader == null) {
+        if (userIdHeader == null) {
             throw new RuntimeException("用户认证信息缺失");
         }
         
         try {
+            Long userId = Long.parseLong(userIdHeader);
+            
+            // 优先从数据库加载完整的用户信息
+            var userOptional = userService.findByUsername(request.getHeader("X-Username"));
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                if (user.getId().equals(userId)) {
+                    return user;
+                }
+            }
+            
+            // 如果数据库中没有找到用户，尝试通过ID查找
+            var userByIdOptional = userService.findByUsername(userId.toString());
+            if (userByIdOptional.isPresent()) {
+                return userByIdOptional.get();
+            }
+            
+            // 如果数据库中没有用户信息，使用请求头中的信息（兼容旧逻辑）
             User user = new User();
-            user.setId(Long.parseLong(userIdHeader));
-            user.setUsername(usernameHeader);
-            user.setEmail(emailHeader != null ? emailHeader : "");
-            user.setRole(roleHeader != null ? roleHeader : "USER");
+            user.setId(userId);
+            user.setUsername(request.getHeader("X-Username") != null ? request.getHeader("X-Username") : "unknown");
+            user.setEmail(request.getHeader("X-Email") != null ? request.getHeader("X-Email") : "");
+            user.setRole(request.getHeader("X-Role") != null ? request.getHeader("X-Role") : "USER");
+            
+            log.warn("用户ID {} 在数据库中未找到，使用请求头信息", userId);
             return user;
+            
         } catch (NumberFormatException e) {
             throw new RuntimeException("用户ID格式错误");
         }

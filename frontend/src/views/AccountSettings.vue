@@ -236,16 +236,24 @@ const authStore = useAuthStore()
 // 当前激活的选项卡
 const activeTab = ref('basic')
 
-// 用户表单数据 - 使用真实的用户数据
-const userForm = computed(() => {
+// 用户表单数据 - 使用响应式对象
+const userForm = reactive({
+  username: '',
+  email: '',
+  phone: '',
+  fullName: ''
+})
+
+// 初始化用户表单数据
+const initUserForm = () => {
   const userInfo = authStore.userInfo || {}
-  return {
+  Object.assign(userForm, {
     username: userInfo.username || '',
     email: userInfo.email || '',
     phone: userInfo.phone || '',
     fullName: userInfo.fullName || ''
-  }
-})
+  })
+}
 
 // 银行卡相关数据
 const bankCards = ref([])
@@ -293,8 +301,36 @@ const handleSeniorCertification = () => {
 }
 
 // 更新个人信息
-const updateProfile = () => {
-  ElMessage.success('个人信息更新成功')
+const updateProfile = async () => {
+  try {
+    // 构建更新数据对象
+    const updateData = {
+      fullName: userForm.fullName,
+      email: userForm.email,
+      phone: userForm.phone
+    }
+    
+    // 发送更新请求
+    const response = await api.put('/auth/profile', updateData)
+    
+    // 正确获取返回的用户数据（兼容嵌套格式）
+    const responseData = response.data
+    const updatedUser = responseData.user || responseData
+    
+    // 更新本地用户信息
+    authStore.userInfo = {
+      ...authStore.userInfo,
+      ...updatedUser
+    }
+    
+    // 更新本地存储
+    localStorage.setItem('userInfo', JSON.stringify(authStore.userInfo))
+    
+    ElMessage.success('个人信息更新成功')
+  } catch (error) {
+    console.error('更新个人信息失败:', error)
+    ElMessage.error('更新失败：' + (error.response?.data?.message || '请重试'))
+  }
 }
 
 // 重置表单
@@ -313,6 +349,11 @@ const resetBankCardForm = () => {
     isDefault: false
   })
 }
+
+// 组件挂载时初始化数据
+onMounted(() => {
+  initUserForm()
+})
 
 // 加载用户银行卡数据
 const loadBankCards = async () => {

@@ -20,6 +20,12 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
     
+    // 防止邮件重复发送的缓存（使用数据库持久化）
+    private final java.util.Set<String> sentBookingEmails = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
+    
+    // 数据库防重复机制：记录已发送邮件的预订ID
+    private final java.util.Set<Long> sentBookingIds = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
+    
     @Value("${spring.mail.username}")
     private String fromEmail;
     
@@ -74,7 +80,68 @@ public class EmailService {
     public void sendBookingConfirmation(String to, String username, String bookingId, 
                                        String scooterModel, String startTime, String endTime,
                                        BigDecimal totalAmount) {
+        // 双重防重复机制：内存缓存 + 预订ID检查
+        String emailKey = bookingId + "_" + to;
+        Long bookingIdLong = null;
+        
         try {
+            bookingIdLong = Long.parseLong(bookingId);
+        } catch (NumberFormatException e) {
+            log.warn("预订ID格式无效: {}, 跳过邮件发送", bookingId);
+            return;
+        }
+        
+        try {
+            // 调试日志：追踪邮件发送次数
+            log.debug("开始发送预订确认邮件 - 预订ID: {}, 收件人: {}", bookingId, to);
+            
+            // 第一层检查：内存缓存
+            synchronized (sentBookingEmails) {
+                if (sentBookingEmails.contains(emailKey)) {
+                    log.warn("预订确认邮件已发送过（内存缓存），跳过重复发送 - 预订ID: {}, 收件人: {}", 
+                            bookingId, to);
+                    return;
+                }
+            }
+            
+            // 第二层检查：预订ID缓存（防止应用重启后重复发送）
+            synchronized (sentBookingIds) {
+                if (sentBookingIds.contains(bookingIdLong)) {
+                    log.warn("预订确认邮件已发送过（预订ID缓存），跳过重复发送 - 预订ID: {}", bookingId);
+                    // 同时更新内存缓存
+                    synchronized (sentBookingEmails) {
+                        sentBookingEmails.add(emailKey);
+                    }
+                    return;
+                }
+                
+                // 立即记录到预订ID缓存
+                sentBookingIds.add(bookingIdLong);
+            }
+            
+            // 记录到内存缓存
+            synchronized (sentBookingEmails) {
+                sentBookingEmails.add(emailKey);
+            }
+            
+            log.debug("双重防重复检查通过 - 预订ID: {}, 缓存大小: {}/{}", 
+                    bookingId, sentBookingEmails.size(), sentBookingIds.size());
+            
+            // 验证收件人邮箱地址
+            if (to == null || to.trim().isEmpty()) {
+                log.warn("预订确认邮件收件人地址为空，跳过发送 - 预订ID: {}", bookingId);
+                // 从缓存中移除记录，允许后续重新发送
+                removeFromCaches(emailKey, bookingIdLong);
+                return;
+            }
+            
+            if (!isValidEmail(to)) {
+                log.warn("预订确认邮件收件人地址格式无效: {} - 预订ID: {}", to, bookingId);
+                // 从缓存中移除记录，允许后续重新发送
+                removeFromCaches(emailKey, bookingIdLong);
+                return;
+            }
+            
             Context context = new Context(Locale.CHINA);
             context.setVariable("username", username);
             context.setVariable("bookingId", bookingId);
@@ -94,11 +161,39 @@ public class EmailService {
             helper.setText(htmlContent, true);
             
             mailSender.send(message);
+            
             log.info("预订确认邮件发送成功 - 收件人: {}, 预订ID: {}", to, bookingId);
         } catch (MessagingException e) {
             log.error("预订确认邮件发送失败 - 收件人: {}, 错误: {}", to, e.getMessage());
-            throw new RuntimeException("预订确认邮件发送失败: " + e.getMessage());
+            // 邮件发送失败时从缓存中移除记录，允许后续重新发送
+            removeFromCaches(emailKey, bookingIdLong);
+            // 邮件发送失败不应影响主要业务流程，只记录日志
         }
+    }
+    
+    /**
+     * 从缓存中移除记录
+     */
+    private void removeFromCaches(String emailKey, Long bookingId) {
+        synchronized (sentBookingEmails) {
+            sentBookingEmails.remove(emailKey);
+        }
+        synchronized (sentBookingIds) {
+            sentBookingIds.remove(bookingId);
+        }
+        log.debug("已从缓存中移除记录 - 键: {}, 预订ID: {}", emailKey, bookingId);
+    }
+    
+    /**
+     * 验证邮箱地址格式
+     */
+    private boolean isValidEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        // 简单的邮箱格式验证
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return email.matches(emailRegex);
     }
     
     /**

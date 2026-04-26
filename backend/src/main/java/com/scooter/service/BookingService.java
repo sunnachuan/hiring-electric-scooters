@@ -10,6 +10,7 @@ import com.scooter.repository.BookingRepository;
 import com.scooter.repository.PaymentRepository;
 import com.scooter.repository.ScooterRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BookingService {
     
     private final BookingRepository bookingRepository;
@@ -76,13 +78,24 @@ public class BookingService {
         // 更新滑板车可用数量
         scooterService.decrementAvailableQuantity(scooter.getId());
         
-        // 发送预订确认邮件（可选，失败不影响主要流程）
+        // 异步发送预订确认邮件（避免阻塞主流程）
         try {
-            sendBookingConfirmationEmail(savedBooking, user);
-            // emailService.sendPaymentConfirmation(savedBooking, user); // 暂时注释掉，需要实现
+            log.debug("BookingService: 异步发送预订确认邮件 - 预订ID: {}, 用户: {}", savedBooking.getId(), user.getUsername());
+            
+            // 使用新线程异步发送邮件
+            new Thread(() -> {
+                try {
+                    sendBookingConfirmationEmail(savedBooking, user);
+                    log.debug("BookingService: 异步邮件发送完成 - 预订ID: {}", savedBooking.getId());
+                } catch (Exception e) {
+                    log.error("异步邮件发送失败: {}", e.getMessage());
+                }
+            }).start();
+            
+            log.debug("BookingService: 异步邮件发送任务已启动 - 预订ID: {}", savedBooking.getId());
         } catch (Exception e) {
             // 邮件发送失败不应影响主要业务流程
-            System.err.println("邮件发送失败（不影响预订）: " + e.getMessage());
+            log.error("邮件发送任务启动失败（不影响预订）: {}", e.getMessage());
         }
         
         return savedBooking;
@@ -432,12 +445,28 @@ public class BookingService {
      */
     private void sendBookingConfirmationEmail(Booking booking, User user) {
         try {
+            log.debug("sendBookingConfirmationEmail: 开始处理邮件发送 - 预订ID: {}, 用户: {}", 
+                     booking.getId(), user.getUsername());
+            
+            // 验证邮箱地址是否有效
+            String userEmail = user.getEmail();
+            if (userEmail == null || userEmail.trim().isEmpty() || !isValidEmail(userEmail)) {
+                log.warn("用户邮箱地址无效或为空，跳过邮件发送 - 用户: {}, 邮箱: {}", 
+                        user.getUsername(), userEmail);
+                return;
+            }
+            
+            log.debug("sendBookingConfirmationEmail: 邮箱验证通过 - 预订ID: {}, 邮箱: {}", 
+                     booking.getId(), userEmail);
+            
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             String startTime = booking.getStartTime().format(formatter);
             String endTime = booking.getEndTime().format(formatter);
             
+            log.debug("sendBookingConfirmationEmail: 调用emailService.sendBookingConfirmation - 预订ID: {}", booking.getId());
+            
             emailService.sendBookingConfirmation(
-                user.getEmail(),
+                userEmail,
                 user.getUsername(),
                 booking.getId().toString(),
                 booking.getScooter().getModel(),
@@ -445,8 +474,23 @@ public class BookingService {
                 endTime,
                 booking.getTotalPrice()
             );
+            
+            log.debug("sendBookingConfirmationEmail: 邮件发送调用完成 - 预订ID: {}", booking.getId());
         } catch (Exception e) {
-            throw new RuntimeException("发送预订确认邮件失败: " + e.getMessage());
+            log.error("发送预订确认邮件失败: {}", e.getMessage());
+            // 邮件发送失败不应影响主要业务流程
         }
+    }
+    
+    /**
+     * 验证邮箱地址格式
+     */
+    private boolean isValidEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        // 简单的邮箱格式验证
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return email.matches(emailRegex);
     }
 }

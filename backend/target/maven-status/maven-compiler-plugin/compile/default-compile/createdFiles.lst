@@ -7,6 +7,7 @@ com\scooter\service\ScooterService.class
 com\scooter\dto\ChangePasswordRequest.class
 com\scooter\dto\TemporaryUserDTO.class
 com\scooter\config\JwtAuthTokenFilter.class
+com\scooter\controller\UserManagementController.class
 com\scooter\entity\User.class
 com\scooter\controller\VehicleDamageController.class
 com\scooter\controller\FileUploadController$UploadResponse.class
@@ -47,8 +48,11 @@ com\scooter\repository\VehicleDamageRecordRepository.class
 com\scooter\entity\TemporaryUser.class
 com\scooter\config\JwtUtils.class
 com\scooter\entity\VehicleDamageRecord.class
+com\scooter\controller\EmailTestController.class
+com\scooter\dto\UpdateProfileRequest.class
 com\scooter\ScooterRentalApplication.class
 com\scooter\entity\UserSession.class
+com\scooter\util\DataPermissionValidator.class
 com\scooter\service\TwoFactorAuthService.class
 com\scooter\service\QRCodeService.class
 com\scooter\repository\FeedbackRepository.class
@@ -80,6 +84,7 @@ com\scooter\dto\AdminBookingRequest.class
 com\scooter\service\BookingService.class
 com\scooter\controller\ScooterController.class
 com\scooter\config\SecurityConfig.class
+com\scooter\util\EncryptionUtils.class
 com\scooter\repository\BankCardRepository.class
 com\scooter\service\SessionManagementService.class
 com\scooter\controller\AdminController.class

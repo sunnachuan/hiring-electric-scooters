@@ -48,6 +48,11 @@ public class AdminBookingController {
             // 获取当前管理员用户
             User adminUser = securityUtils.getCurrentUser(request);
             
+            // 验证管理员权限
+            if (!adminUser.getRole().equals("ADMIN")) {
+                throw new RuntimeException("权限不足：只有管理员可以执行代下单操作");
+            }
+            
             // 根据用户类型处理
             User targetUser = null;
             TemporaryUser temporaryUser = null;

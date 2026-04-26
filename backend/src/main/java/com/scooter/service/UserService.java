@@ -34,6 +34,16 @@ public class UserService implements UserDetailsService {
     
     public User createUser(String username, String email, String password, String role, 
                           Boolean isStudent, Boolean isSenior, String phone, String fullName) {
+        // 验证用户名格式（不能包含中文）
+        if (username.matches(".*[\\u4e00-\\u9fa5].*")) {
+            throw new RuntimeException("用户名不能包含中文");
+        }
+        
+        // 验证用户名格式（只能包含字母、数字、下划线）
+        if (!username.matches("^[a-zA-Z0-9_]+$")) {
+            throw new RuntimeException("用户名只能包含字母、数字和下划线");
+        }
+        
         if (userRepository.existsByUsername(username)) {
             throw new RuntimeException("用户名已存在");
         }
@@ -99,5 +109,32 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
         
         return true;
+    }
+    
+    /**
+     * 更新用户个人信息
+     */
+    public User updateUserProfile(Long userId, String fullName, String email, String phone) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+        
+        // 检查邮箱是否已被其他用户使用
+        if (email != null && !email.equals(user.getEmail())) {
+            if (userRepository.existsByEmail(email)) {
+                throw new RuntimeException("邮箱已被其他用户使用");
+            }
+            user.setEmail(email);
+        }
+        
+        // 更新其他信息
+        if (fullName != null) {
+            user.setFullName(fullName);
+        }
+        
+        if (phone != null) {
+            user.setPhone(phone);
+        }
+        
+        return userRepository.save(user);
     }
 }

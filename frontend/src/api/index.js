@@ -12,7 +12,7 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
     
-    // 添加用户认证信息到请求头
+    // 添加用户认证信息到请求头（后端SecurityUtils需要）
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
     if (userInfo && userInfo.id) {
       config.headers['X-User-Id'] = userInfo.id

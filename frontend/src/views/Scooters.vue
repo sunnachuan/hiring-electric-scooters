@@ -588,7 +588,10 @@ const filteredScooters = computed(() => {
 const groupedScooters = computed(() => {
   const grouped = {}
   
-  availableScooters.value.forEach(scooter => {
+  // 使用所有滑板车数据，而不仅仅是可用的，以正确计算总数量
+  const allScooters = scooters.value || []
+  
+  allScooters.forEach(scooter => {
     if (!grouped[scooter.model]) {
       grouped[scooter.model] = {
         model: scooter.model,
@@ -607,7 +610,9 @@ const groupedScooters = computed(() => {
     }
     
     const group = grouped[scooter.model]
-    group.totalQuantity += scooter.totalQuantity
+    // 正确计算：每辆车的totalQuantity都是1，所以总数量就是车辆数量
+    group.totalQuantity += 1
+    // 可用数量根据每辆车的availableQuantity累加
     group.totalAvailableQuantity += scooter.availableQuantity
     
     // 统计设备状态

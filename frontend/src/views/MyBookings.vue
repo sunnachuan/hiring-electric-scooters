@@ -76,13 +76,15 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft, Plus, Location, Clock, Coin } from '@element-plus/icons-vue'
+import api from '../api'
 
 const router = useRouter()
 
-// 模拟数据
+// 真实数据
 const bookings = ref([])
 const extendingBookingId = ref(null)
 const returningBookingId = ref(null)
+const loading = ref(false)
 
 // 返回个人中心
 const goBack = () => {
@@ -122,11 +124,34 @@ const formatDate = (dateString) => {
   })
 }
 
+// 加载预订数据
+const loadBookings = async () => {
+  loading.value = true
+  try {
+    const response = await api.get('/bookings/user')
+    bookings.value = response.data.map(booking => ({
+      id: booking.id,
+      scooterModel: booking.scooter?.model || '未知型号',
+      location: booking.scooter?.locationName || '未知位置',
+      startTime: booking.startTime,
+      endTime: booking.endTime,
+      amount: booking.totalPrice || 0,
+      status: booking.status
+    }))
+  } catch (error) {
+    console.error('加载预订数据失败:', error)
+    ElMessage.error('加载预订数据失败')
+    bookings.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
 // 延长用车时间
 const extendBookingTime = async (bookingId) => {
   extendingBookingId.value = bookingId
   try {
-    // 模拟API调用
+    // TODO: 实现延长用车时间的API调用
     await new Promise(resolve => setTimeout(resolve, 1000))
     ElMessage.success('用车时间已延长')
   } catch (error) {
@@ -140,11 +165,14 @@ const extendBookingTime = async (bookingId) => {
 const returnScooterEarly = async (bookingId) => {
   returningBookingId.value = bookingId
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 调用真实API提前还车
+    await api.put(`/bookings/${bookingId}/return`)
     ElMessage.success('滑板车已归还')
+    // 重新加载数据
+    await loadBookings()
   } catch (error) {
-    ElMessage.error('归还失败')
+    console.error('提前还车失败:', error)
+    ElMessage.error('归还失败: ' + (error.response?.data?.message || error.message))
   } finally {
     returningBookingId.value = null
   }
@@ -152,27 +180,7 @@ const returnScooterEarly = async (bookingId) => {
 
 // 初始化数据
 onMounted(() => {
-  // 模拟获取预订数据
-  bookings.value = [
-    {
-      id: 1,
-      scooterModel: '小米电动滑板车 Pro',
-      location: '北京市朝阳区三里屯',
-      startTime: '2024-01-15T10:00:00',
-      endTime: '2024-01-15T12:00:00',
-      amount: 30.00,
-      status: 'COMPLETED'
-    },
-    {
-      id: 2,
-      scooterModel: '九号电动滑板车',
-      location: '北京市海淀区中关村',
-      startTime: '2024-01-16T14:00:00',
-      endTime: '2024-01-16T16:00:00',
-      amount: 40.00,
-      status: 'ACTIVE'
-    }
-  ]
+  loadBookings()
 })
 </script>
 

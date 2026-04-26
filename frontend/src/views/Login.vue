@@ -289,6 +289,11 @@ const handleKeydown = (event) => {
 
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown)
+  
+  // 检查用户是否已登录，如果已登录则直接跳转到主页
+  if (authStore.isAuthenticated) {
+    router.push('/')
+  }
 })
 
 onUnmounted(() => {
