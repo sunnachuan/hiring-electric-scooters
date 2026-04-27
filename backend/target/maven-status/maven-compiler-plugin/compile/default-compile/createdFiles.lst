@@ -48,7 +48,6 @@ com\scooter\repository\VehicleDamageRecordRepository.class
 com\scooter\entity\TemporaryUser.class
 com\scooter\config\JwtUtils.class
 com\scooter\entity\VehicleDamageRecord.class
-com\scooter\controller\EmailTestController.class
 com\scooter\dto\UpdateProfileRequest.class
 com\scooter\ScooterRentalApplication.class
 com\scooter\entity\UserSession.class

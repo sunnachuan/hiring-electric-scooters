@@ -14,7 +14,24 @@
             <h1>电动滑板车租赁系统</h1>
           </div>
           <div class="user-info">
-            <span>欢迎, {{ userInfo?.username }}</span>
+            <div class="welcome-card">
+              <div class="user-avatar">
+                <el-avatar 
+                  :size="36" 
+                  :src="userInfo?.avatar" 
+                  :style="{ background: getAvatarColor(userInfo?.username) }"
+                >
+                  <span class="avatar-text">{{ getAvatarInitial(userInfo?.username) }}</span>
+                </el-avatar>
+              </div>
+              <div class="welcome-content">
+                <span class="welcome-text">欢迎回来，</span>
+                <span class="username">{{ userInfo?.username }}</span>
+              </div>
+              <div class="status-indicator">
+                <div class="status-dot"></div>
+              </div>
+            </div>
           </div>
         </div>
       </el-header>
@@ -185,6 +202,27 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreenSize)
 })
 
+// 获取用户头像颜色
+const getAvatarColor = (username) => {
+  if (!username) return '#667eea'
+  const colors = [
+    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+    'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
+  ]
+  const index = username.charCodeAt(0) % colors.length
+  return colors[index]
+}
+
+// 获取用户头像首字母
+const getAvatarInitial = (username) => {
+  if (!username) return 'U'
+  return username.charAt(0).toUpperCase()
+}
+
 
 </script>
 
@@ -265,9 +303,148 @@ onUnmounted(() => {
   gap: 12px;
 }
 
-.user-info span {
-  font-size: 14px;
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.welcome-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  max-width: 280px;
+  min-width: 160px;
+}
+
+.welcome-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.welcome-card:hover::before {
+  left: 100%;
+}
+
+.welcome-card:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.user-avatar {
+  position: relative;
+}
+
+.user-avatar .el-avatar {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.welcome-card:hover .user-avatar .el-avatar {
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.05);
+}
+
+.avatar-text {
+  font-weight: 600;
+  color: white;
+  font-size: 16px;
+}
+
+.welcome-content {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.welcome-text {
+  font-size: 13px;
   opacity: 0.9;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.username {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+  letter-spacing: 0.5px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #52c41a;
+  border-radius: 50%;
+  position: relative;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.status-dot::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: #52c41a;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: ripple 2s infinite;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
 }
 
 .sidebar {

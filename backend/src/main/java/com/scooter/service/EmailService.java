@@ -258,34 +258,4 @@ public class EmailService {
             throw new RuntimeException("注册成功邮件发送失败: " + e.getMessage());
         }
     }
-    
-    /**
-     * 发送测试邮件
-     */
-    public void sendTestEmail(String to, String subject, String message, String sentTime) {
-        try {
-            Context context = new Context(Locale.CHINA);
-            context.setVariable("toEmail", to);
-            context.setVariable("subject", subject);
-            context.setVariable("message", message);
-            context.setVariable("sentTime", sentTime);
-            context.setVariable("fromEmail", fromEmail);
-            
-            String htmlContent = templateEngine.process("test-email", context);
-            
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            
-            helper.setFrom(fromEmail);
-            helper.setTo(to);
-            helper.setSubject("测试邮件 - " + subject);
-            helper.setText(htmlContent, true);
-            
-            mailSender.send(mimeMessage);
-            log.info("测试邮件发送成功 - 收件人: {}, 主题: {}", to, subject);
-        } catch (MessagingException e) {
-            log.error("测试邮件发送失败 - 收件人: {}, 错误: {}", to, e.getMessage());
-            throw new RuntimeException("测试邮件发送失败: " + e.getMessage());
-        }
-    }
 }
