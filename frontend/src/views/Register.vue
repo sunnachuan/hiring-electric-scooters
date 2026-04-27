@@ -187,9 +187,6 @@ const registerForm = ref({
   email: '',
   password: '',
   confirmPassword: '',
-  role: 'USER',
-  isStudent: false,
-  isSenior: false,
   termsAgreed: false
 })
 
@@ -252,7 +249,7 @@ const rules = {
           callback()
         }
       },
-      trigger: 'change'
+      trigger: ['change', 'blur']
     }
   ]
 }
@@ -287,7 +284,14 @@ const handleRegister = async () => {
         router.push('/')
       }, 1000)
     } else {
-      ElMessage.error(result.message)
+      // 显示具体的错误信息，包括邮箱重复等
+      if (result.message.includes('邮箱已存在') || result.message.includes('邮箱已被其他用户使用')) {
+        ElMessage.error('该邮箱已被注册，请使用其他邮箱或直接登录')
+      } else if (result.message.includes('用户名已存在')) {
+        ElMessage.error('该用户名已被使用，请选择其他用户名')
+      } else {
+        ElMessage.error(result.message || '注册失败，请重试')
+      }
     }
   } catch (error) {
     console.error('注册错误:', error)

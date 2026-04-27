@@ -59,9 +59,25 @@ export const useAuthStore = defineStore('auth', () => {
         response: error.response,
         data: error.response?.data
       })
+      
+      // 修复错误信息提取逻辑
+      let errorMessage = '注册失败'
+      if (error.response?.data) {
+        // 后端返回的错误信息可能是字符串或对象
+        if (typeof error.response.data === 'string') {
+          errorMessage = error.response.data
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message
+        } else if (error.response.data.error) {
+          errorMessage = error.response.data.error
+        }
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
       return { 
         success: false, 
-        message: error.response?.data?.message || error.message || '注册失败' 
+        message: errorMessage
       }
     }
   }

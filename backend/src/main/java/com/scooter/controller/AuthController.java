@@ -117,40 +117,48 @@ public class AuthController {
     
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        User user = userService.createUser(
-                registerRequest.getUsername(),
-                registerRequest.getEmail(),
-                registerRequest.getPassword(),
-                registerRequest.getRole(),
-                registerRequest.getIsStudent(),
-                registerRequest.getIsSenior(),
-                registerRequest.getPhone(),
-                registerRequest.getFullName()
-        );
-        
-        String jwt = jwtUtils.generateToken(user.getUsername());
-        
-        // 异步发送注册成功邮件，避免阻塞注册响应
-        new Thread(() -> {
-            try {
-                String registrationTime = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm:ss"));
-                emailService.sendRegistrationSuccess(
-                    registerRequest.getEmail(),
+        try {
+            User user = userService.createUser(
                     registerRequest.getUsername(),
-                    registerRequest.getFullName(),
+                    registerRequest.getEmail(),
+                    registerRequest.getPassword(),
+                    registerRequest.getRole(),
+                    registerRequest.getIsStudent(),
+                    registerRequest.getIsSenior(),
                     registerRequest.getPhone(),
-                    registrationTime
-                );
-                log.info("注册成功邮件已发送至: {}", registerRequest.getEmail());
-            } catch (Exception e) {
-                log.error("发送注册成功邮件失败: {}", e.getMessage());
-                // 邮件发送失败不影响注册流程，记录日志即可
-            }
-        }).start();
-        
-        log.info("用户注册成功: {}", registerRequest.getUsername());
-        return ResponseEntity.ok(new AuthResponse(jwt, user.getId(), user.getUsername(), 
-                user.getEmail(), user.getRole(), user.getPhone(), user.getFullName()));
+                    registerRequest.getFullName()
+            );
+            
+            String jwt = jwtUtils.generateToken(user.getUsername());
+            
+            // 异步发送注册成功邮件，避免阻塞注册响应
+            new Thread(() -> {
+                try {
+                    String registrationTime = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm:ss"));
+                    emailService.sendRegistrationSuccess(
+                        registerRequest.getEmail(),
+                        registerRequest.getUsername(),
+                        registerRequest.getFullName(),
+                        registerRequest.getPhone(),
+                        registrationTime
+                    );
+                    log.info("注册成功邮件已发送至: {}", registerRequest.getEmail());
+                } catch (Exception e) {
+                    log.error("发送注册成功邮件失败: {}", e.getMessage());
+                    // 邮件发送失败不影响注册流程，记录日志即可
+                }
+            }).start();
+            
+            log.info("用户注册成功: {}", registerRequest.getUsername());
+            return ResponseEntity.ok(new AuthResponse(jwt, user.getId(), user.getUsername(), 
+                    user.getEmail(), user.getRole(), user.getPhone(), user.getFullName()));
+        } catch (RuntimeException e) {
+            log.warn("用户注册失败: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("注册过程中发生未知错误: {}", e.getMessage());
+            return ResponseEntity.status(500).body("注册失败，请稍后重试");
+        }
     }
     
     @PostMapping("/change-password")
