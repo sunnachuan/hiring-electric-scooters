@@ -32,7 +32,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                          @Param("endTime") LocalDateTime endTime);
     
     @Query("SELECT SUM(b.totalPrice) FROM Booking b WHERE b.status = 'COMPLETED' AND b.startTime >= :startDate")
-    Double calculateTotalRevenueSince(@Param("startDate") LocalDateTime startDate);
+    BigDecimal calculateTotalRevenueSince(@Param("startDate") LocalDateTime startDate);
     
     @Query("SELECT b.durationType, SUM(b.totalPrice) FROM Booking b WHERE b.status = 'COMPLETED' AND b.startTime >= :startDate GROUP BY b.durationType")
     List<Object[]> findRevenueByDurationTypeSince(@Param("startDate") LocalDateTime startDate);

@@ -42,9 +42,7 @@
       >
         <el-table-column prop="id" label="ID" width="80" sortable />
         <el-table-column prop="name" label="点位名称" min-width="120" />
-        <el-table-column prop="address" label="地址" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="latitude" label="纬度" width="120" />
-        <el-table-column prop="longitude" label="经度" width="120" />
+        <el-table-column prop="address" label="地址（经纬度）" min-width="200" show-overflow-tooltip />
         <el-table-column prop="capacity" label="容量" width="100" />
         <el-table-column prop="availableCount" label="可用数量" width="100">
           <template #default="{ row }">
@@ -114,19 +112,20 @@ export default {
       try {
         loading.value = true
         
-        // 使用现有的滑板车接口获取数据并生成点位信息
-        const response = await api.get('/scooters')
-        const scooters = response.data
+        // 使用滑板车数据来计算点位信息，确保与地图页面使用同一数据源
+        const scootersResponse = await api.get('/scooters')
+        const scooters = scootersResponse.data
         
-        // 根据滑板车数据生成点位信息
+        // 根据滑板车数据生成点位信息（与地图页面相同的逻辑）
         const locationsMap = new Map()
         
+        // 先处理有滑板车的点位
         scooters.forEach(scooter => {
           const locationId = scooter.locationId || 1
           const locationName = scooter.locationName || `点位${locationId}`
-          const address = `点位${locationId}地址`
           const lat = scooter.latitude || 39.9042
           const lng = scooter.longitude || 116.4074
+          const address = `${lat.toFixed(4)}, ${lng.toFixed(4)}`
           
           if (!locationsMap.has(locationId)) {
             locationsMap.set(locationId, {
@@ -135,7 +134,7 @@ export default {
               address: address,
               latitude: lat,
               longitude: lng,
-              capacity: 10,
+              capacity: 50,
               availableCount: 0,
               bookedCount: 0,
               status: 'ACTIVE'
@@ -153,31 +152,69 @@ export default {
         
         let locationsData = Array.from(locationsMap.values())
         
-        // 如果没有数据，使用模拟数据
-        if (locationsData.length === 0) {
-          locationsData = [
-            { id: 1, name: '市中心广场', address: '北京市东城区王府井大街', latitude: 39.9042, longitude: 116.4074, capacity: 20, availableCount: 15, bookedCount: 5, status: 'ACTIVE' },
-            { id: 2, name: '大学城校区', address: '北京市海淀区中关村大街', latitude: 39.9896, longitude: 116.3509, capacity: 15, availableCount: 12, bookedCount: 3, status: 'ACTIVE' },
-            { id: 3, name: '商业步行街', address: '北京市西城区西单北大街', latitude: 39.9138, longitude: 116.3631, capacity: 10, availableCount: 8, bookedCount: 2, status: 'ACTIVE' },
-            { id: 4, name: '地铁站出口', address: '北京市朝阳区国贸地铁站', latitude: 39.9022, longitude: 116.3912, capacity: 12, availableCount: 10, bookedCount: 2, status: 'ACTIVE' },
-            { id: 5, name: '公园入口', address: '北京市海淀区颐和园东门', latitude: 39.9163, longitude: 116.3972, capacity: 8, availableCount: 6, bookedCount: 2, status: 'ACTIVE' }
-          ]
+        // 确保有10个点位，如果不足则补充（使用真实的点位名称）
+        const existingLocationIds = new Set(locationsData.map(loc => loc.id))
+        
+        // 定义10个点位的默认名称和坐标（容量统一为50）
+        const defaultLocations = [
+          { id: 1, name: '市中心广场', lat: 39.9042, lng: 116.4074, capacity: 50 },
+          { id: 2, name: '大学城校区', lat: 39.9896, lng: 116.3509, capacity: 50 },
+          { id: 3, name: '商业步行街', lat: 39.9138, lng: 116.3631, capacity: 50 },
+          { id: 4, name: '地铁站出口', lat: 39.9022, lng: 116.3912, capacity: 50 },
+          { id: 5, name: '公园入口', lat: 39.9163, lng: 116.3972, capacity: 50 },
+          { id: 6, name: '火车站北广场', lat: 39.9028, lng: 116.4278, capacity: 50 },
+          { id: 7, name: '科技园区', lat: 40.0412, lng: 116.2981, capacity: 50 },
+          { id: 8, name: '体育中心', lat: 39.9924, lng: 116.3912, capacity: 50 },
+          { id: 9, name: '购物中心', lat: 39.9334, lng: 116.4526, capacity: 50 },
+          { id: 10, name: '医院门口', lat: 39.9048, lng: 116.4076, capacity: 50 }
+        ]
+        
+        for (let i = 1; i <= 10; i++) {
+          if (!existingLocationIds.has(i)) {
+            const defaultLoc = defaultLocations.find(loc => loc.id === i) || { id: i, name: `点位${i}`, lat: 39.9042, lng: 116.4074, capacity: 10 }
+            const defaultLocation = {
+              id: defaultLoc.id,
+              name: defaultLoc.name,
+              address: `${defaultLoc.lat.toFixed(4)}, ${defaultLoc.lng.toFixed(4)}`,
+              latitude: defaultLoc.lat,
+              longitude: defaultLoc.lng,
+              capacity: defaultLoc.capacity,
+              availableCount: 0,
+              bookedCount: 0,
+              status: 'ACTIVE'
+            }
+            locationsData.push(defaultLocation)
+          }
         }
         
+        // 按ID排序
+        locationsData.sort((a, b) => a.id - b.id)
+        
         locations.value = locationsData
+        
       } catch (error) {
         console.error('加载点位数据失败:', error)
-        // 使用模拟数据
-        locations.value = [
-          { id: 1, name: '市中心广场', address: '北京市东城区王府井大街', latitude: 39.9042, longitude: 116.4074, capacity: 20, availableCount: 15, bookedCount: 5, status: 'ACTIVE' },
-          { id: 2, name: '大学城校区', address: '北京市海淀区中关村大街', latitude: 39.9896, longitude: 116.3509, capacity: 15, availableCount: 12, bookedCount: 3, status: 'ACTIVE' },
-          { id: 3, name: '商业步行街', address: '北京市西城区西单北大街', latitude: 39.9138, longitude: 116.3631, capacity: 10, availableCount: 8, bookedCount: 2, status: 'ACTIVE' },
-          { id: 4, name: '地铁站出口', address: '北京市朝阳区国贸地铁站', latitude: 39.9022, longitude: 116.3912, capacity: 12, availableCount: 10, bookedCount: 2, status: 'ACTIVE' },
-          { id: 5, name: '公园入口', address: '北京市海淀区颐和园东门', latitude: 39.9163, longitude: 116.3972, capacity: 8, availableCount: 6, bookedCount: 2, status: 'ACTIVE' }
-        ]
+        // API调用失败时使用模拟数据
+        locations.value = getMockLocations()
       } finally {
         loading.value = false
       }
+    }
+    
+    // 模拟点位数据（备用）
+    const getMockLocations = () => {
+      return [
+        { id: 1, name: '市中心广场', address: '北京市东城区王府井大街', latitude: 39.9042, longitude: 116.4074, capacity: 50, availableCount: 3, bookedCount: 2, status: 'ACTIVE' },
+        { id: 2, name: '大学城校区', address: '北京市海淀区中关村大街', latitude: 39.9896, longitude: 116.3509, capacity: 50, availableCount: 2, bookedCount: 1, status: 'ACTIVE' },
+        { id: 3, name: '商业步行街', address: '北京市西城区西单北大街', latitude: 39.9138, longitude: 116.3631, capacity: 50, availableCount: 2, bookedCount: 1, status: 'ACTIVE' },
+        { id: 4, name: '地铁站出口', address: '北京市朝阳区国贸地铁站', latitude: 39.9022, longitude: 116.3912, capacity: 50, availableCount: 2, bookedCount: 1, status: 'ACTIVE' },
+        { id: 5, name: '公园入口', address: '北京市海淀区颐和园东门', latitude: 39.9163, longitude: 116.3972, capacity: 50, availableCount: 2, bookedCount: 1, status: 'ACTIVE' },
+        { id: 6, name: '火车站北广场', address: '北京市西城区北京站', latitude: 39.9028, longitude: 116.4278, capacity: 50, availableCount: 2, bookedCount: 1, status: 'ACTIVE' },
+        { id: 7, name: '科技园区', address: '北京市海淀区上地信息产业基地', latitude: 40.0412, longitude: 116.2981, capacity: 50, availableCount: 2, bookedCount: 1, status: 'ACTIVE' },
+        { id: 8, name: '体育中心', address: '北京市朝阳区奥林匹克公园', latitude: 39.9924, longitude: 116.3912, capacity: 50, availableCount: 2, bookedCount: 1, status: 'ACTIVE' },
+        { id: 9, name: '购物中心', address: '北京市朝阳区三里屯', latitude: 39.9334, longitude: 116.4526, capacity: 50, availableCount: 2, bookedCount: 1, status: 'ACTIVE' },
+        { id: 10, name: '医院门口', address: '北京市西城区协和医院', latitude: 39.9048, longitude: 116.4076, capacity: 50, availableCount: 2, bookedCount: 1, status: 'ACTIVE' }
+      ]
     }
     
     // 查看点位详情（只读模式）

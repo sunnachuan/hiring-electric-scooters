@@ -32,4 +32,7 @@ public interface ScooterRepository extends JpaRepository<Scooter, Long> {
     
     @Query("SELECT s FROM Scooter s WHERE s.latitude IS NOT NULL AND s.longitude IS NOT NULL AND s.isOnline = true")
     List<Scooter> findOnlineScootersWithLocation();
+    
+    // 根据点位ID查找滑板车
+    List<Scooter> findByLocationId(Integer locationId);
 }

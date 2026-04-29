@@ -18,6 +18,8 @@ export const useAuthStore = defineStore('auth', () => {
       
       localStorage.setItem('token', newToken)
       localStorage.setItem('userInfo', JSON.stringify(userData))
+      // 记录token获取时间戳
+      localStorage.setItem('token_timestamp', Date.now().toString())
       
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
       
@@ -48,6 +50,8 @@ export const useAuthStore = defineStore('auth', () => {
       
       localStorage.setItem('token', newToken)
       localStorage.setItem('userInfo', JSON.stringify(userInfoData))
+      // 记录token获取时间戳
+      localStorage.setItem('token_timestamp', Date.now().toString())
       
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
       
@@ -89,6 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
     
     localStorage.removeItem('token')
     localStorage.removeItem('userInfo')
+    localStorage.removeItem('token_timestamp')
     
     delete api.defaults.headers.common['Authorization']
   }

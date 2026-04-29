@@ -26,13 +26,16 @@ com\scooter\dto\DamageReviewRequest.class
 com\scooter\service\EmailService.class
 com\scooter\entity\DamageStatus.class
 com\scooter\service\OperationService.class
+com\scooter\service\LocationService.class
 com\scooter\service\DeviceService.class
 com\scooter\controller\SessionController.class
 com\scooter\service\SecurityAuditService.class
 com\scooter\util\SecurityUtils.class
 com\scooter\controller\BookingController.class
 com\scooter\controller\AuthController.class
+com\scooter\repository\LocationRepository.class
 com\scooter\service\SecurityAuditService$EventTypes.class
+com\scooter\entity\Location.class
 com\scooter\entity\Booking.class
 com\scooter\entity\Feedback.class
 com\scooter\dto\AdminBookingRequest$TemporaryUserInfo.class
@@ -60,6 +63,7 @@ com\scooter\dto\BankCardRequest.class
 com\scooter\repository\TwoFactorAuthRepository.class
 com\scooter\dto\AdminBookingRequest$GuestInfo.class
 com\scooter\controller\FileUploadController.class
+com\scooter\controller\LocationController.class
 com\scooter\entity\ScooterLocation.class
 com\scooter\service\OvertimeBookingService.class
 com\scooter\dto\AuthRequest.class

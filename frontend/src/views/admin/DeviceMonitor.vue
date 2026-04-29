@@ -374,7 +374,7 @@ console.log('状态过滤器:', statusFilter.value)
 // 统计信息
 const stats = computed(() => {
   const onlineCount = scooters.value.filter(s => s.isOnline).length
-  const lowBatteryCount = scooters.value.filter(s => s.batteryLevel < 20).length
+  const lowBatteryCount = scooters.value.filter(s => s.batteryLevel < 30).length
   const unlockedCount = scooters.value.filter(s => !s.isLocked).length
   
   return {
@@ -406,7 +406,7 @@ const filteredScooters = computed(() => {
         filtered = filtered.filter(s => !s.isOnline)
         break
       case 'low-battery':
-        filtered = filtered.filter(s => s.batteryLevel < 20)
+        filtered = filtered.filter(s => s.batteryLevel < 30)
         break
       case 'unlocked':
         filtered = filtered.filter(s => !s.isLocked)
@@ -414,7 +414,8 @@ const filteredScooters = computed(() => {
     }
   }
   
-  return filtered
+  // 按ID升序排序
+  return filtered.sort((a, b) => a.id - b.id)
 })
 
 // 有位置信息的设备
@@ -1295,7 +1296,69 @@ onUnmounted(() => {
 
 /* 表格行高优化 */
 .list-section .el-table .el-table__row {
-  height: 40px;
+  height: 40px
+}
+
+/* 搜索框和筛选器样式优化 - 更明显的颜色 */
+.list-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.list-controls .el-input {
+  --el-input-bg-color: #ffffff;
+  --el-input-border-color: #409eff;
+  --el-input-hover-border-color: #409eff;
+  --el-input-focus-border-color: #409eff;
+}
+
+.list-controls .el-input__wrapper {
+  background-color: #ffffff !important;
+  border: 1px solid #409eff !important;
+  box-shadow: 0 0 0 1px #409eff inset, 0 0 0 1px rgba(64, 158, 255, 0.2) !important;
+}
+
+.list-controls .el-input__wrapper:hover {
+  border-color: #66b1ff !important;
+  box-shadow: 0 0 0 1px #66b1ff inset, 0 0 0 1px rgba(102, 177, 255, 0.3) !important;
+}
+
+.list-controls .el-input__wrapper.is-focus {
+  border-color: #409eff !important;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2) !important;
+}
+
+.list-controls .el-select {
+  --el-select-border-color-hover: #409eff;
+  --el-select-input-focus-border-color: #409eff;
+}
+
+.list-controls .el-select .el-input__wrapper {
+  background-color: #ffffff !important;
+  border: 1px solid #409eff !important;
+  box-shadow: 0 0 0 1px #409eff inset, 0 0 0 1px rgba(64, 158, 255, 0.2) !important;
+}
+
+.list-controls .el-select .el-input__wrapper:hover {
+  border-color: #66b1ff !important;
+  box-shadow: 0 0 0 1px #66b1ff inset, 0 0 0 1px rgba(102, 177, 255, 0.3) !important;
+}
+
+.list-controls .el-select .el-input__wrapper.is-focus {
+  border-color: #409eff !important;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2) !important;
+}
+
+/* 重置按钮样式优化 */
+.list-controls .el-button--primary.is-link {
+  color: #409eff !important;
+  font-weight: 500;
+}
+
+.list-controls .el-button--primary.is-link:hover {
+  color: #66b1ff !important;
+  text-decoration: underline;
 }
 
 .list-section .el-table .el-table__cell {

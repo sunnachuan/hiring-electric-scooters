@@ -194,13 +194,23 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 返回顶部悬浮块 -->
+    <div 
+      v-show="showBackToTop" 
+      class="back-to-top"
+      @click="scrollToTop"
+    >
+      <el-icon><Top /></el-icon>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import api from '@/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Top } from '@element-plus/icons-vue'
 
 const scooters = ref([])
 const loading = ref(false)
@@ -211,6 +221,7 @@ const editing = ref(false)
 const createFormRef = ref()
 const editFormRef = ref()
 const currentScooter = ref(null)
+const showBackToTop = ref(false)
 
 const createForm = ref({
   model: '',
@@ -241,7 +252,8 @@ const loadScooters = async () => {
   loading.value = true
   try {
     const response = await api.get('/scooters')
-    scooters.value = response.data
+    // 按ID升序排序
+    scooters.value = response.data.sort((a, b) => a.id - b.id)
   } catch (error) {
     ElMessage.error('加载滑板车失败')
   } finally {
@@ -344,8 +356,27 @@ const handleDelete = async (id) => {
   }
 }
 
+// 滚动监听
+const handleScroll = () => {
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+  showBackToTop.value = scrollTop > 300
+}
+
+// 返回顶部
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+}
+
 onMounted(() => {
   loadScooters()
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
@@ -354,5 +385,34 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* 返回顶部悬浮块样式 */
+.back-to-top {
+  position: fixed;
+  bottom: 60px;
+  right: 40px;
+  width: 50px;
+  height: 50px;
+  background: #409eff;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.back-to-top:hover {
+  background: #337ecc;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4);
+}
+
+.back-to-top .el-icon {
+  font-size: 20px;
 }
 </style>

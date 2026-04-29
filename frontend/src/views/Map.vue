@@ -62,13 +62,18 @@ export default {
     const map = ref(null)
     const markers = ref([])
     
-    // 5个固定点位的坐标（北京市中心区域）
+    // 10个固定点位的坐标（北京市中心区域）
     const locationCoordinates = {
       1: { lng: 116.4074, lat: 39.9042 }, // 市中心广场
       2: { lng: 116.3509, lat: 39.9896 }, // 大学城校区
       3: { lng: 116.3631, lat: 39.9138 }, // 商业步行街
       4: { lng: 116.3912, lat: 39.9022 }, // 地铁站出口
-      5: { lng: 116.3972, lat: 39.9163 }  // 公园入口
+      5: { lng: 116.3972, lat: 39.9163 }, // 公园入口
+      6: { lng: 116.3305, lat: 39.9786 }, // 科技园区
+      7: { lng: 116.3789, lat: 39.9542 }, // 住宅小区
+      8: { lng: 116.4201, lat: 39.9083 }, // 商务中心
+      9: { lng: 116.4327, lat: 39.8998 }, // 星级酒店
+      10: { lng: 116.3854, lat: 39.9247 }  // 购物中心
     }
     
     // 加载滑板车数据并生成点位信息
@@ -84,9 +89,10 @@ export default {
           // 只有当locationId为null或undefined时才使用默认值1
           const locationId = (scooter.locationId === null || scooter.locationId === undefined) ? 1 : scooter.locationId
           const locationName = scooter.locationName || `点位${locationId}`
-          const address = scooter.address || `点位${locationId}地址`
           const lat = scooter.latitude || locationCoordinates[locationId]?.lat || 39.9042
           const lng = scooter.longitude || locationCoordinates[locationId]?.lng || 116.4074
+          // 地址显示为经纬度格式
+          const address = `${lat.toFixed(6)}, ${lng.toFixed(6)}`
           
           if (!locationsMap.has(locationId)) {
             locationsMap.set(locationId, {
@@ -117,17 +123,19 @@ export default {
         console.log('从后端获取的滑板车数据:', scooters)
         console.log('计算后的点位数据:', locations)
         
-        // 确保至少有5个点位，如果不足则补充
+        // 确保至少有10个点位，如果不足则补充
         const existingLocationIds = new Set(locations.map(loc => loc.id))
         
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 10; i++) {
           if (!existingLocationIds.has(i)) {
+            const lat = locationCoordinates[i]?.lat || 39.9042
+            const lng = locationCoordinates[i]?.lng || 116.4074
             const defaultLocation = {
               id: i,
               name: getDefaultLocationName(i),
-              address: getDefaultLocationAddress(i),
-              lng: locationCoordinates[i]?.lng || 116.4074,
-              lat: locationCoordinates[i]?.lat || 39.9042,
+              address: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+              lng: lng,
+              lat: lat,
               availableCount: 0,
               bookedCount: 0,
               totalCount: 0
@@ -360,6 +368,11 @@ export default {
         case 3: return '商业步行街'
         case 4: return '地铁站出口'
         case 5: return '公园入口'
+        case 6: return '火车站北广场'
+        case 7: return '科技园区'
+        case 8: return '体育中心'
+        case 9: return '购物中心'
+        case 10: return '医院门口'
         default: return `点位${locationId}`
       }
     }

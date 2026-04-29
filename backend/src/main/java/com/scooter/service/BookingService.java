@@ -320,7 +320,8 @@ public class BookingService {
      * 计算从指定时间开始的总收入
      */
     public Double calculateTotalRevenueSince(LocalDateTime startDate) {
-        return bookingRepository.calculateTotalRevenueSince(startDate);
+        BigDecimal result = bookingRepository.calculateTotalRevenueSince(startDate);
+        return result != null ? result.doubleValue() : 0.0;
     }
     
     /**
@@ -339,9 +340,9 @@ public class BookingService {
         // 填充实际数据
         for (Object[] result : results) {
             String durationType = (String) result[0];
-            Double revenue = (Double) result[1];
+            BigDecimal revenue = (BigDecimal) result[1];
             if (revenue != null) {
-                revenueByDuration.put(durationType, revenue);
+                revenueByDuration.put(durationType, revenue.doubleValue());
             }
         }
         
@@ -366,10 +367,10 @@ public class BookingService {
         for (Object[] result : results) {
             try {
                 LocalDateTime startTime = (LocalDateTime) result[0];
-                Double revenue = (Double) result[1];
+                BigDecimal revenue = (BigDecimal) result[1];
                 if (revenue != null && startTime != null) {
                     String dateKey = startTime.toLocalDate().toString();
-                    dailyRevenue.put(dateKey, dailyRevenue.getOrDefault(dateKey, 0.0) + revenue);
+                    dailyRevenue.put(dateKey, dailyRevenue.getOrDefault(dateKey, 0.0) + revenue.doubleValue());
                 }
             } catch (Exception e) {
                 // 如果类型转换失败，使用默认值

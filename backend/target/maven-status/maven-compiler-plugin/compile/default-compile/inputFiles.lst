@@ -8,7 +8,9 @@ C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\BankCardDTO.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\BankCardService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\UserManagementController.java
+C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\LocationRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\ScooterRepository.java
+C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\LocationController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\BookingController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\AdminBookingController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\BookingService.java
@@ -36,6 +38,7 @@ C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\SessionManagementService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\TemporaryUserRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\VehicleDamageController.java
+C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\Location.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\config\SecurityConfig.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\DeviceController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\FeedbackRepository.java
@@ -65,6 +68,7 @@ C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\OperationTaskRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\ScooterRentalApplication.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\SecurityAuditService.java
+C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\LocationService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\VehicleDamageRecordRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\QRCodeService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\AuthController.java
