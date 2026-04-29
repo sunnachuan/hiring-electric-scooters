@@ -5,6 +5,7 @@
         <div class="header-content">
           <div class="header-left">
             <el-button 
+              v-if="!isMobile"
               @click="toggleSidebar" 
               class="sidebar-toggle" 
               :icon="isCollapsed ? 'Expand' : 'Fold'" 
@@ -42,6 +43,13 @@
           v-if="!isMobile"
           width="200px" 
           class="sidebar desktop-sidebar"
+          :class="{ collapsed: isCollapsed }"
+        >
+        <!-- 手机版导航栏 -->
+        <el-aside 
+          v-if="isMobile"
+          width="200px" 
+          class="sidebar mobile-sidebar"
           :class="{ collapsed: isCollapsed }"
         >
           <el-menu
@@ -111,8 +119,93 @@
             </el-menu-item>
           </el-menu>
         </el-aside>
+          <el-menu
+            :default-active="activeMenu"
+            router
+            class="sidebar-menu"
+            background-color="#304156"
+            text-color="#bfcbd9"
+            active-text-color="#409EFF"
+          >
+            <el-menu-item index="/map">
+              <el-icon><MapLocation /></el-icon>
+              <template #title>
+                <span>地图找车</span>
+              </template>
+            </el-menu-item>
+            <el-menu-item index="/scooters">
+              <el-icon><Location /></el-icon>
+              <template #title>
+                <span>滑板车列表</span>
+              </template>
+            </el-menu-item>
+            <el-menu-item index="/feedback">
+              <el-icon><ChatDotRound /></el-icon>
+              <template #title>
+                <span>意见反馈</span>
+              </template>
+            </el-menu-item>
+            <el-menu-item index="/profile">
+              <el-icon><User /></el-icon>
+              <template #title>
+                <span>个人中心</span>
+              </template>
+            </el-menu-item>
+            
+            <el-divider v-if="isAdmin" />
+            
+            <el-menu-item v-if="isAdmin" index="/admin/dashboard">
+              <el-icon><DataAnalysis /></el-icon>
+              <template #title>
+                <span>管理仪表盘</span>
+              </template>
+            </el-menu-item>
+            <el-menu-item v-if="isAdmin" index="/admin/scooters">
+              <el-icon><Setting /></el-icon>
+              <template #title>
+                <span>滑板车管理</span>
+              </template>
+            </el-menu-item>
+            <el-menu-item v-if="isAdmin" index="/admin/locations">
+              <el-icon><MapLocation /></el-icon>
+              <template #title>
+                <span>点位管理</span>
+              </template>
+            </el-menu-item>
+            <el-menu-item v-if="isAdmin" index="/admin/feedback">
+              <el-icon><ChatLineRound /></el-icon>
+              <template #title>
+                <span>反馈管理</span>
+              </template>
+            </el-menu-item>
+            <el-menu-item v-if="isAdmin" index="/admin/device-monitor">
+              <el-icon><Monitor /></el-icon>
+              <template #title>
+                <span>设备监控</span>
+              </template>
+            </el-menu-item>
+          </el-menu>
+        </el-aside>
         
-
+        <!-- 手机版底部导航栏 -->
+        <div v-if="isMobile" class="mobile-bottom-nav">
+          <div class="nav-item" :class="{ active: activeMenu === '/map' }" @click="navigateTo('/map')">
+            <el-icon><MapLocation /></el-icon>
+            <span>地图找车</span>
+          </div>
+          <div class="nav-item" :class="{ active: activeMenu === '/scooters' }" @click="navigateTo('/scooters')">
+            <el-icon><Location /></el-icon>
+            <span>滑板车列表</span>
+          </div>
+          <div class="nav-item" :class="{ active: activeMenu === '/feedback' }" @click="navigateTo('/feedback')">
+            <el-icon><ChatDotRound /></el-icon>
+            <span>意见反馈</span>
+          </div>
+          <div class="nav-item" :class="{ active: activeMenu === '/profile' }" @click="navigateTo('/profile')">
+            <el-icon><User /></el-icon>
+            <span>个人中心</span>
+          </div>
+        </div>
         
         <el-main class="main-content">
           <router-view />
@@ -120,7 +213,7 @@
       </el-container>
       
       <!-- Footer组件 -->
-      <Footer />
+      <Footer v-if="!isMobile" />
     </el-container>
     
     <router-view v-else />
@@ -223,6 +316,11 @@ const getAvatarInitial = (username) => {
   return username.charAt(0).toUpperCase()
 }
 
+// 导航到指定页面
+const navigateTo = (path) => {
+  router.push(path)
+}
+
 
 </script>
 
@@ -323,6 +421,35 @@ const getAvatarInitial = (username) => {
   overflow: hidden;
   max-width: 280px;
   min-width: 160px;
+}
+
+/* 手机版欢迎样式 */
+@media (max-width: 768px) {
+  .welcome-card {
+    gap: 8px;
+    padding: 6px 12px;
+    max-width: 200px;
+    min-width: 140px;
+  }
+  
+  /* 手机版隐藏欢迎文字 */
+  .welcome-text {
+    display: none;
+  }
+  
+  .username {
+    font-size: 13px;
+    max-width: 80px;
+  }
+  
+  .user-avatar .el-avatar {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  
+  .avatar-text {
+    font-size: 14px;
+  }
 }
 
 .welcome-card::before {
@@ -447,6 +574,96 @@ const getAvatarInitial = (username) => {
   }
 }
 
+/* 手机版底部导航栏 */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  height: 60px;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #bfcbd9;
+  font-size: 12px;
+  text-align: center;
+  position: relative;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active {
+  color: #409EFF;
+  background: rgba(64, 158, 255, 0.1);
+}
+
+.nav-item .el-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 24px;
+}
+
+.nav-item span {
+  font-size: 10px;
+  line-height: 1.2;
+  text-align: center;
+  width: 100%;
+  padding: 0 4px;
+}
+
+/* 修复手机版底部导航图标位置问题 */
+@media (max-width: 768px) {
+  .nav-item {
+    padding: 4px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .nav-item .el-icon {
+    font-size: 20px;
+    margin-bottom: 3px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .nav-item span {
+    font-size: 9px;
+    line-height: 1.1;
+    text-align: center;
+    width: 100%;
+  }
+}
+
+/* 为手机版调整主内容区域，避免被底部导航栏遮挡 */
+@media (max-width: 768px) {
+  .main-content {
+    padding-bottom: 60px !important;
+  }
+}
+
 .sidebar {
   background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
@@ -545,8 +762,14 @@ const getAvatarInitial = (username) => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  /* 手机版标题居中 */
+  .header-content {
+    justify-content: center;
+  }
+  
   .header-content h1 {
     font-size: 20px;
+    text-align: center;
   }
   
   .header-left {
@@ -566,8 +789,9 @@ const getAvatarInitial = (username) => {
     padding: 16px;
   }
   
-  .user-info span {
-    display: none;
+  /* 手机版完全隐藏整个欢迎区域 */
+  .user-info {
+    display: none !important;
   }
 }
 
@@ -588,6 +812,5 @@ const getAvatarInitial = (username) => {
 
 .el-icon {
   font-size: 18px;
-  margin-right: 8px;
 }
 </style>

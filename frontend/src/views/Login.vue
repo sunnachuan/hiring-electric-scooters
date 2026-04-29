@@ -59,7 +59,7 @@
           <el-form-item prop="termsAgreed">
             <el-checkbox v-model="loginForm.termsAgreed">
               我已阅读并同意
-              <el-link type="primary" :underline="false" @click="showTermsDialog = true">《滑板车租赁服务协议》</el-link>
+              <el-link type="primary" underline="never" @click="showTermsDialog = true">《滑板车租赁服务协议》</el-link>
             </el-checkbox>
           </el-form-item>
           

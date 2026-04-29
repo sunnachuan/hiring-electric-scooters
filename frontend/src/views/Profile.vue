@@ -4,19 +4,26 @@
     <div class="profile-header">
       <div class="header-bg"></div>
       <div class="header-content">
-        <!-- 用户头像 -->
-        <div class="avatar-section">
-          <div class="avatar-wrapper">
-            <el-avatar :size="80" :src="userInfo.avatar" class="user-avatar">
-              {{ userInfo.username?.charAt(0).toUpperCase() }}
-            </el-avatar>
-            <div class="avatar-badge">
-              <el-icon><Star /></el-icon>
+        <!-- 用户信息布局 -->
+        <div class="profile-layout">
+          <!-- 左边：头像和用户名 -->
+          <div class="left-section">
+            <div class="avatar-wrapper">
+              <el-avatar :size="80" :src="userInfo.avatar" class="user-avatar">
+                {{ userInfo.username?.charAt(0).toUpperCase() }}
+              </el-avatar>
+              <div class="avatar-badge">
+                <el-icon><Star /></el-icon>
+              </div>
+            </div>
+            <div class="user-name-section">
+              <h2 class="username">{{ userInfo.username }}</h2>
+              <p class="user-role">{{ userInfo.role === 'ADMIN' ? '管理员' : '普通用户' }}</p>
             </div>
           </div>
-          <div class="user-info">
-            <h2 class="username">{{ userInfo.username }}</h2>
-            <p class="user-role">{{ userInfo.role === 'ADMIN' ? '管理员' : '普通用户' }}</p>
+          
+          <!-- 右边：预订统计信息 -->
+          <div class="right-section">
             <div class="user-stats">
               <div class="stat-item">
                 <span class="stat-value">{{ bookingStats.total }}</span>
@@ -722,7 +729,16 @@ onMounted(() => {
   color: white;
 }
 
-.avatar-section {
+.profile-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px 30px 0 30px;
+}
+
+/* 左边部分：头像和用户名 */
+.left-section {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -752,19 +768,27 @@ onMounted(() => {
   font-size: 12px;
 }
 
-.user-info {
-  flex: 1;
+.user-name-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .username {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   margin: 0 0 8px 0;
 }
 
 .user-role {
   opacity: 0.9;
-  margin: 0 0 20px 0;
+  margin: 0;
+}
+
+/* 右边部分：预订统计信息 */
+.right-section {
+  display: flex;
+  align-items: center;
 }
 
 .user-stats {
@@ -814,7 +838,81 @@ onMounted(() => {
 .card-content {
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: 12px 16px;
+}
+
+/* 手机版功能卡片样式 */
+@media (max-width: 768px) {
+  /* 减小Element UI卡片body的内边距 */
+  .function-card :deep(.el-card__body) {
+    padding: 0 !important;
+  }
+  
+  /* 隐藏手机版箭头 */
+  .card-arrow {
+    display: none !important;
+  }
+  
+  /* 重新设计菜单列表模块 */
+  .function-cards {
+    margin: 5px 0px 0px 10px;
+    width: calc(100vw - 40px);
+    background: white;
+    border-radius: 0;
+    gap: 0;
+    margin-bottom: 0;
+  }
+  
+  .function-card {
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    border-bottom: 1px solid #e8e8e8;
+    transition: background-color 0.2s ease;
+  }
+  
+  .function-card:last-child {
+    border-bottom: none;
+  }
+  
+  .function-card:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .card-content {
+    padding: 12px 16px;
+    min-height: 64px;
+    line-height: 1.1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+  .card-icon {
+    font-size: 14px;
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+  }
+  
+  .card-text {
+    flex: 1;
+    text-align: left;
+  }
+  
+  .card-text h3 {
+    font-size: 12px;
+    margin-bottom: 0;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+  
+  .card-text p {
+    font-size: 9px;
+    line-height: 1.1;
+    opacity: 0.8;
+    margin-top: 1px;
+  }
 }
 
 .card-icon {
@@ -1033,7 +1131,7 @@ onMounted(() => {
   background: linear-gradient(135deg, #f0f8ff 0%, #e6f7ff 100%);
 }
 
-.card-content {
+.bank-card-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1179,7 +1277,7 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .card-content {
+  .bank-card-content {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
@@ -1283,7 +1381,28 @@ onMounted(() => {
   }
   
   .header-content {
-    padding: 24px 16px 16px;
+    padding: 40px 16px 16px;
+  }
+  
+  /* 手机版头像布局调整 */
+  .left-section {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .user-name-section {
+    align-items: center;
+    text-align: center;
+  }
+  
+  /* 手机版隐藏用户角色 */
+  .user-role {
+    display: none;
+  }
+  
+  /* 手机版用户名字体调整 */
+  .username {
+    font-size: 20px;
   }
   
   .avatar-section {
@@ -1298,8 +1417,8 @@ onMounted(() => {
   }
   
   .profile-content {
-    padding: 16px;
-    margin-top: -80px;
+    padding: 1px;
+    margin-top: 1px;
   }
   
   .function-cards {
