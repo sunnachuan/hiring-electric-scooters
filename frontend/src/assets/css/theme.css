@@ -1,0 +1,343 @@
+/* 全局主题变量系统 */
+
+/* 基础字体大小设置 */
+:root {
+  /* 字体大小模式 */
+  --font-size-base: 16px;
+  --font-size-scale: 1; /* 默认正常字体 */
+  
+  /* 浅色主题（默认） */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8f9fa;
+  --color-bg-tertiary: #e9ecef;
+  --color-text-primary: #212529;
+  --color-text-secondary: #6c757d;
+  --color-text-tertiary: #adb5bd;
+  --color-border: #dee2e6;
+  --color-primary: #2563eb;
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+  --color-info: #0ea5e9;
+}
+
+/* 深色主题 */
+[data-theme="dark"] {
+  --color-bg-primary: #0a0f14;
+  --color-bg-secondary: #141920;
+  --color-bg-tertiary: #1e242b;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #e2e8f0;
+  --color-text-tertiary: #a0aec0;
+  --color-border: #374151;
+  --color-primary: #3b82f6;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #06b6d4;
+}
+
+/* 高对比度主题 */
+[data-theme="high-contrast"] {
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #0a0a0a;
+  --color-bg-tertiary: #1a1a1a;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #f0f0f0;
+  --color-text-tertiary: #e0e0e0;
+  --color-border: #ffffff;
+  --color-primary: #ffff00;
+  --color-success: #00ff00;
+  --color-warning: #ffa500;
+  --color-error: #ff0000;
+  --color-info: #00ffff;
+}
+
+/* 字体大小模式 */
+[data-font-size="small"] {
+  --font-size-scale: 0.875; /* 14px */
+}
+
+[data-font-size="normal"] {
+  --font-size-scale: 1; /* 16px */
+}
+
+[data-font-size="large"] {
+  --font-size-scale: 1.125; /* 18px */
+}
+
+[data-font-size="x-large"] {
+  --font-size-scale: 1.25; /* 20px */
+}
+
+/* 应用字体缩放 */
+html {
+  font-size: calc(var(--font-size-base) * var(--font-size-scale));
+}
+
+/* 全局样式重置 */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: calc(var(--font-size-base) * var(--font-size-scale));
+}
+
+body {
+  background-color: var(--color-bg-primary) !important;
+  color: var(--color-text-primary) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* 组件样式适配 */
+.el-card {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.el-card .el-card__header {
+  background-color: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom-color: var(--color-border) !important;
+}
+
+.el-table {
+  background-color: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.el-table th {
+  background-color: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom-color: var(--color-border) !important;
+}
+
+.el-table tr {
+  background-color: var(--color-bg-secondary) !important;
+}
+
+.el-table tr:hover {
+  background-color: var(--color-bg-tertiary) !important;
+}
+
+.el-table td {
+  border-bottom-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* 按钮样式适配 */
+.el-button {
+  color: var(--color-text-primary) !important;
+}
+
+.el-button--primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* 输入框样式适配 */
+.el-input__wrapper {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.el-input__inner {
+  color: var(--color-text-primary) !important;
+}
+
+/* 菜单样式适配 */
+.el-menu {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.el-menu-item {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-bg-secondary) !important;
+}
+
+.el-menu-item:hover {
+  background-color: var(--color-bg-tertiary) !important;
+}
+
+.el-menu-item.is-active {
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+/* 标签页样式适配 */
+.el-tabs__header {
+  background-color: var(--color-bg-secondary) !important;
+}
+
+.el-tabs__item {
+  color: var(--color-text-primary) !important;
+}
+
+.el-tabs__item.is-active {
+  color: var(--color-primary) !important;
+}
+
+.el-tabs__nav-wrap::after {
+  background-color: var(--color-border) !important;
+}
+
+/* 对话框样式适配 */
+.el-dialog {
+  background-color: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.el-dialog__header {
+  background-color: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.el-dialog__body {
+  background-color: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.el-button {
+  transition: all 0.3s ease;
+}
+
+.el-input__wrapper {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+.el-input__inner {
+  color: var(--color-text-primary);
+}
+
+.el-menu {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+.el-menu-item {
+  color: var(--color-text-primary);
+}
+
+.el-menu-item:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+.el-menu-item.is-active {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+/* 高对比度主题的特殊样式 */
+[data-theme="high-contrast"] {
+  * {
+    border-width: 2px !important;
+  }
+  
+  .el-button {
+    border: 2px solid currentColor;
+  }
+  
+  .el-input__wrapper {
+    border: 2px solid var(--color-border);
+  }
+  
+  .focus-visible {
+    outline: 3px solid var(--color-primary) !important;
+    outline-offset: 2px;
+  }
+  
+  /* 滑板车列表高对比度适配 */
+  .scooter-card {
+    border: 3px solid var(--color-border) !important;
+    background: var(--color-bg-secondary) !important;
+  }
+  
+  .scooter-card::before {
+    background: var(--color-primary) !important;
+    height: 6px !important;
+  }
+  
+  .scooter-card:hover {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  .scooter-card .el-tag {
+    border-width: 2px !important;
+    font-weight: bold !important;
+  }
+  
+  .scooter-card .el-tag--success {
+    background-color: var(--color-success) !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+  }
+  
+  .scooter-card .el-tag--warning {
+    background-color: var(--color-warning) !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+  }
+  
+  .scooter-card .el-tag--info {
+    background-color: var(--color-info) !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+  }
+  
+  .scooter-card .el-tag--danger {
+    background-color: var(--color-error) !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+  }
+  
+  /* 电池指示器高对比度 */
+  .battery-fill.high {
+    background-color: var(--color-success) !important;
+  }
+  
+  .battery-fill.medium {
+    background-color: var(--color-warning) !important;
+  }
+  
+  .battery-fill.low {
+    background-color: var(--color-error) !important;
+  }
+  
+  /* 设备监控页面高对比度 */
+  .map-marker {
+    border: 3px solid currentColor !important;
+  }
+  
+  .stat-card {
+    border: 3px solid var(--color-border) !important;
+  }
+}
+
+/* 可访问性辅助类 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 主题切换动画 */
+.theme-transition * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

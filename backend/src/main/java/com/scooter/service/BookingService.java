@@ -78,6 +78,9 @@ public class BookingService {
         // 更新滑板车可用数量
         scooterService.decrementAvailableQuantity(scooter.getId());
         
+        // 更新滑板车锁定状态（预订创建时保持锁定状态，直到用户解锁）
+        updateScooterLockStatus(scooter.getId(), true);
+        
         // 异步发送预订确认邮件（避免阻塞主流程）
         try {
             log.debug("BookingService: 异步发送预订确认邮件 - 预订ID: {}, 用户: {}", savedBooking.getId(), user.getUsername());
@@ -210,6 +213,31 @@ public class BookingService {
         return bookingRepository.findAll();
     }
     
+    /**
+     * 更新滑板车锁定状态
+     */
+    private void updateScooterLockStatus(Long scooterId, boolean isLocked) {
+        try {
+            Scooter scooter = scooterRepository.findById(scooterId)
+                    .orElseThrow(() -> new RuntimeException("滑板车不存在"));
+            
+            scooter.setIsLocked(isLocked);
+            scooter.setLastUpdateTime(LocalDateTime.now());
+            scooterRepository.save(scooter);
+            
+            log.debug("滑板车 {} 锁定状态已更新为: {}", scooterId, isLocked ? "锁定" : "解锁");
+        } catch (Exception e) {
+            log.error("更新滑板车锁定状态失败: {}", e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取活跃预订数量（PENDING和ACTIVE状态的预订）
+     */
+    public int getActiveBookingsCount() {
+        return bookingRepository.countByStatusIn(List.of("PENDING", "ACTIVE"));
+    }
+    
     @Transactional
     public Booking cancelBooking(Long bookingId, User user) {
         Booking booking = bookingRepository.findById(bookingId)
@@ -227,6 +255,9 @@ public class BookingService {
         
         // 恢复滑板车可用数量
         scooterService.incrementAvailableQuantity(booking.getScooter().getId());
+        
+        // 更新滑板车锁定状态（取消预订时恢复锁定状态）
+        updateScooterLockStatus(booking.getScooter().getId(), true);
         
         Booking cancelledBooking = bookingRepository.save(booking);
         
@@ -263,6 +294,9 @@ public class BookingService {
         
         // 恢复滑板车可用数量
         scooterService.incrementAvailableQuantity(booking.getScooter().getId());
+        
+        // 更新滑板车锁定状态（还车时恢复锁定状态）
+        updateScooterLockStatus(booking.getScooter().getId(), true);
         
         Booking returnedBooking = bookingRepository.save(booking);
         

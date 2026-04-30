@@ -56,12 +56,12 @@
                 
                 <el-row :gutter="20" style="margin-top: 20px;">
                   <el-col :span="6">
-                    <el-statistic title="本周总收入" :value="stats.weeklyRevenue" precision="2">
+                    <el-statistic title="本周总收入" :value="stats.weeklyRevenue" :precision="2">
                       <template #prefix>¥</template>
                     </el-statistic>
                   </el-col>
                   <el-col :span="6">
-                    <el-statistic title="今日收入" :value="stats.todayRevenue" precision="2">
+                    <el-statistic title="今日收入" :value="stats.todayRevenue" :precision="2">
                       <template #prefix>¥</template>
                     </el-statistic>
                   </el-col>

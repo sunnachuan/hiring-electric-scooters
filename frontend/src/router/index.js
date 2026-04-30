@@ -113,6 +113,12 @@ const routes = [
     name: 'Unlock',
     component: () => import('@/views/Unlock.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/theme-settings',
+    name: 'ThemeSettings',
+    component: () => import('@/views/ThemeSettings.vue'),
+    meta: { requiresAuth: true }
   }
 ]
 

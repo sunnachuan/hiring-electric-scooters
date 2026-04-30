@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +105,37 @@ public class DeviceController {
         // 这里需要调用ScooterService的查询方法
         // 暂时返回空列表，后续实现
         return ResponseEntity.ok(List.of());
+    }
+    
+    /**
+     * 获取所有滑板车及其活跃预订状态
+     */
+    @GetMapping("/with-booking-status")
+    public ResponseEntity<List<Map<String, Object>>> getScootersWithBookingStatus() {
+        List<Scooter> scooters = deviceService.getAllScooters();
+        List<Map<String, Object>> result = new ArrayList<>();
+        
+        for (Scooter scooter : scooters) {
+            Map<String, Object> scooterData = new HashMap<>();
+            scooterData.put("id", scooter.getId());
+            scooterData.put("model", scooter.getModel());
+            scooterData.put("batteryLevel", scooter.getBatteryLevel());
+            scooterData.put("isOnline", scooter.getIsOnline());
+            scooterData.put("isLocked", scooter.getIsLocked());
+            scooterData.put("latitude", scooter.getLatitude());
+            scooterData.put("longitude", scooter.getLongitude());
+            scooterData.put("locationName", scooter.getLocationName());
+            scooterData.put("totalMileage", scooter.getTotalMileage());
+            scooterData.put("lastUpdateTime", scooter.getLastUpdateTime());
+            
+            // 检查是否有活跃预订
+            boolean hasActiveBooking = deviceService.hasActiveBooking(scooter.getId());
+            scooterData.put("hasActiveBooking", hasActiveBooking);
+            
+            result.add(scooterData);
+        }
+        
+        return ResponseEntity.ok(result);
     }
     
     /**

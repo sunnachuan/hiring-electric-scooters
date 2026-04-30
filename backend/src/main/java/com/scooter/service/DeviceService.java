@@ -2,6 +2,7 @@ package com.scooter.service;
 
 import com.scooter.entity.Scooter;
 import com.scooter.entity.ScooterLocation;
+import com.scooter.repository.BookingRepository;
 import com.scooter.repository.ScooterLocationRepository;
 import com.scooter.repository.ScooterRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class DeviceService {
     
     private final ScooterRepository scooterRepository;
     private final ScooterLocationRepository locationRepository;
+    private final BookingRepository bookingRepository;
     
     /**
      * 更新滑板车位置和状态
@@ -123,5 +125,21 @@ public class DeviceService {
     public void cleanupOldLocations() {
         LocalDateTime cutoffTime = LocalDateTime.now().minusDays(7);
         locationRepository.deleteByRecordedAtBefore(cutoffTime);
+    }
+    
+    /**
+     * 获取所有滑板车
+     */
+    public List<Scooter> getAllScooters() {
+        return scooterRepository.findAll();
+    }
+    
+    /**
+     * 检查滑板车是否有活跃预订
+     */
+    public boolean hasActiveBooking(Long scooterId) {
+        // 检查是否有PENDING或ACTIVE状态的预订
+        return bookingRepository.countByScooterIdAndStatusIn(scooterId, 
+                List.of("PENDING", "ACTIVE")) > 0;
     }
 }

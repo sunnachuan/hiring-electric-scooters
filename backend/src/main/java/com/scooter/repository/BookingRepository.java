@@ -49,6 +49,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Long countCompletedBookingsBetween(@Param("startTime") LocalDateTime startTime, 
                                        @Param("endTime") LocalDateTime endTime);
     
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.status IN :statuses")
+    int countByStatusIn(@Param("statuses") List<String> statuses);
+    
     @Query("SELECT b.durationType, SUM(b.totalPrice) FROM Booking b WHERE b.status = 'COMPLETED' AND b.endTime BETWEEN :startTime AND :endTime GROUP BY b.durationType")
     List<Object[]> getRevenueByDurationType(@Param("startTime") LocalDateTime startTime, 
                                            @Param("endTime") LocalDateTime endTime);
@@ -70,4 +73,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
      */
     @Query("SELECT b FROM Booking b WHERE b.user.id = :userId AND b.status = 'ACTIVE' AND b.endTime < :currentTime")
     List<Booking> findUserOvertimeBookings(@Param("userId") Long userId, @Param("currentTime") LocalDateTime currentTime);
+    
+    /**
+     * 统计滑板车的活跃预订数量
+     */
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.scooter.id = :scooterId AND b.status IN :statuses")
+    int countByScooterIdAndStatusIn(@Param("scooterId") Long scooterId, @Param("statuses") List<String> statuses);
 }

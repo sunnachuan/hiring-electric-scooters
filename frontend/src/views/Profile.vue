@@ -92,6 +92,17 @@
         </el-card>
 
         <el-card class="function-card" shadow="hover">
+          <div class="card-content" @click="$router.push('/theme-settings')">
+            <el-icon class="card-icon"><Brush /></el-icon>
+            <div class="card-text">
+              <h3>主题设置</h3>
+              <p>自定义界面主题和字体大小</p>
+            </div>
+            <el-icon class="card-arrow"><ArrowRight /></el-icon>
+          </div>
+        </el-card>
+
+        <el-card class="function-card" shadow="hover">
           <div class="card-content" @click="handleLogout">
             <el-icon class="card-icon logout-icon"><SwitchButton /></el-icon>
             <div class="card-text">
@@ -778,11 +789,15 @@ onMounted(() => {
   font-size: 20px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--color-text-primary) !important;
 }
 
 .user-role {
   opacity: 0.9;
   margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary) !important;
+  font-weight: 400;
 }
 
 /* 右边部分：预订统计信息 */
@@ -809,7 +824,8 @@ onMounted(() => {
 
 .stat-label {
   font-size: 12px;
-  opacity: 0.8;
+  color: var(--color-text-secondary) !important;
+  font-weight: 500;
 }
 
 /* 主要内容区域 */
@@ -932,13 +948,13 @@ onMounted(() => {
 .card-text h3 {
   margin: 0 0 4px 0;
   font-size: 16px;
-  color: #303133;
+  color: var(--color-text-primary) !important;
 }
 
 .card-text p {
   margin: 0;
   font-size: 12px;
-  color: #909399;
+  color: var(--color-text-tertiary) !important;
 }
 
 .card-arrow {
@@ -999,12 +1015,17 @@ onMounted(() => {
 .scooter-model {
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: var(--color-text-primary) !important;
+}
+
+.booking-item h4 {
+  font-weight: 600;
+  color: var(--color-text-primary) !important;
 }
 
 .booking-details p {
   margin: 8px 0;
-  color: #606266;
+  color: var(--color-text-secondary) !important;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1083,7 +1104,7 @@ onMounted(() => {
 }
 
 .status-item .label {
-  color: #606266;
+  color: var(--color-text-secondary) !important;
   font-weight: 500;
 }
 
@@ -1145,7 +1166,7 @@ onMounted(() => {
 .bank-name {
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: var(--color-text-primary) !important;
   margin-bottom: 8px;
 }
 
@@ -1163,7 +1184,7 @@ onMounted(() => {
   font-family: 'Courier New', monospace;
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: var(--color-text-primary) !important;
   letter-spacing: 1px;
   margin-bottom: 8px;
 }

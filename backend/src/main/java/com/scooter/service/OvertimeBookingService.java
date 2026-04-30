@@ -159,7 +159,7 @@ public class OvertimeBookingService {
         }
         
         // 计算超时费用（按小时计算）
-        BigDecimal overtimeHours = new BigDecimal(booking.getOvertimeMinutes()).divide(new BigDecimal(60), 2, BigDecimal.ROUND_UP);
+        BigDecimal overtimeHours = new BigDecimal(booking.getOvertimeMinutes()).divide(new BigDecimal(60), 2, java.math.RoundingMode.UP);
         BigDecimal fee = baseRate.multiply(new BigDecimal(rateMultiplier)).multiply(overtimeHours);
         
         booking.setOvertimeFee(fee);

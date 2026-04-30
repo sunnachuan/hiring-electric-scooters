@@ -89,4 +89,12 @@ public class BookingController {
         
         return ResponseEntity.ok(bookingService.extendBooking(id, hours, user));
     }
+    
+    /**
+     * 获取活跃预订数量（用于设备监控界面）
+     */
+    @GetMapping("/active/count")
+    public ResponseEntity<Integer> getActiveBookingsCount() {
+        return ResponseEntity.ok(bookingService.getActiveBookingsCount());
+    }
 }

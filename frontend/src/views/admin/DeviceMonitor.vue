@@ -366,6 +366,7 @@ const statusFilter = ref('')
 const autoRefresh = ref(false)
 const refreshInterval = ref(null)
 const batteryOrientation = ref('vertical') // 电池图标方向：vertical(纵向) / horizontal(横向)
+const activeBookingsCount = ref(0) // 活跃预订数量
 
 // 调试：检查过滤条件
 console.log('搜索关键词:', searchKeyword.value)
@@ -375,12 +376,11 @@ console.log('状态过滤器:', statusFilter.value)
 const stats = computed(() => {
   const onlineCount = scooters.value.filter(s => s.isOnline).length
   const lowBatteryCount = scooters.value.filter(s => s.batteryLevel < 30).length
-  const unlockedCount = scooters.value.filter(s => !s.isLocked).length
   
   return {
     onlineCount,
     lowBatteryCount,
-    unlockedCount,
+    unlockedCount: activeBookingsCount.value, // 使用真实的活跃预订数量
     totalCount: scooters.value.length
   }
 })
@@ -426,14 +426,16 @@ const scootersWithLocation = computed(() => {
 // 获取设备状态文本
 const getStatusText = (scooter) => {
   if (!scooter.isOnline) return '离线'
-  if (!scooter.isLocked) return '已解锁'
+  if (scooter.hasActiveBooking && !scooter.isLocked) return '已解锁'
+  if (scooter.hasActiveBooking && scooter.isLocked) return '预订中'
   return '在线'
 }
 
 // 获取状态标签类型
 const getStatusTagType = (scooter) => {
   if (!scooter.isOnline) return 'info'
-  if (!scooter.isLocked) return 'warning'
+  if (scooter.hasActiveBooking && !scooter.isLocked) return 'warning'
+  if (scooter.hasActiveBooking && scooter.isLocked) return 'primary'
   return 'success'
 }
 
@@ -534,17 +536,22 @@ const formatTime = (time) => {
   return new Date(time).toLocaleString('zh-CN')
 }
 
-// 加载设备数据
+// 加载设备数据和活跃预订数量
 const loadScooters = async () => {
   try {
     loading.value = true
-    // 使用配置了JWT令牌的axios实例
-    const response = await api.get('/scooters')
-    console.log('API调用成功，返回数据数量:', response.data.length)
-    console.log('API返回的数据结构:', response.data[0])
+    
+    // 使用新的API端点获取设备及其预订状态
+    const scootersResponse = await api.get('/device/with-booking-status')
+    
+    console.log('API调用成功，返回设备数据数量:', scootersResponse.data.length)
+    console.log('API返回的设备数据结构:', scootersResponse.data[0])
+    
+    // 计算活跃预订数量
+    activeBookingsCount.value = scootersResponse.data.filter(scooter => scooter.hasActiveBooking).length
     
     // 确保使用后端返回的真实数据
-    scooters.value = response.data.map(scooter => {
+    scooters.value = scootersResponse.data.map(scooter => {
       console.log('原始数据:', scooter)
       
       // 正确处理数据类型转换
@@ -564,12 +571,17 @@ const loadScooters = async () => {
         ? Number(scooter.totalMileage)
         : 0
         
+      const hasActiveBooking = scooter.hasActiveBooking !== null && scooter.hasActiveBooking !== undefined 
+        ? Boolean(scooter.hasActiveBooking)
+        : false
+        
       return {
         id: scooter.id,
         model: scooter.model,
         batteryLevel: batteryLevel,
         isOnline: isOnline,
         isLocked: isLocked,
+        hasActiveBooking: hasActiveBooking,
         latitude: scooter.latitude || null,
         longitude: scooter.longitude || null,
         locationName: scooter.locationName || '未知位置',
@@ -585,6 +597,7 @@ const loadScooters = async () => {
     console.log('使用模拟数据')
     // 如果API调用失败，使用模拟数据
     scooters.value = generateMockScooters()
+    // 模拟数据中不设置活跃预订数量，保持为0
     console.log('总设备数量:', scooters.value.length)
     console.log('过滤后设备数量:', filteredScooters.value.length)
   } finally {
@@ -594,7 +607,7 @@ const loadScooters = async () => {
 
 // 生成更真实的模拟数据（实际使用时删除）
 const generateMockScooters = () => {
-  const models = ['X-Turbo', 'Speed-2000', 'Eco-Ride', 'Power-Glide', 'City-Cruiser', 'Mountain-Pro', 'Urban-Express']
+  const models = ['城市通勤款', '校园轻便款', '商务精英款', '时尚潮流款', '休闲娱乐款']
   const locations = [
     { name: '市中心', lat: 39.91, lng: 116.41 },
     { name: '大学城', lat: 39.93, lng: 116.38 },
@@ -603,7 +616,7 @@ const generateMockScooters = () => {
     { name: '公园', lat: 39.87, lng: 116.46 }
   ]
   
-  return Array.from({ length: 50 }, (_, i) => {
+  return Array.from({ length: 200 }, (_, i) => {
     const location = locations[i % locations.length]
     const model = models[i % models.length]
     

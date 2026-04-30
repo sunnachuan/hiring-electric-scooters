@@ -224,6 +224,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 import Footer from '@/components/Footer.vue'
 import { 
   MapLocation, Location, User, ChatDotRound,
@@ -289,6 +290,10 @@ const checkScreenSize = () => {
 onMounted(() => {
   checkScreenSize()
   window.addEventListener('resize', checkScreenSize)
+  
+  // 初始化主题设置
+  const themeStore = useThemeStore()
+  themeStore.initialize()
 })
 
 onUnmounted(() => {
@@ -331,15 +336,18 @@ const navigateTo = (path) => {
 <style scoped>
 .app-container {
   height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-color: var(--color-bg-primary);
 }
 
 .app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  padding: 0 20px;
+  height: 64px;
   display: flex;
   align-items: center;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  color: white;
   position: relative;
   z-index: 1000;
 }
@@ -665,7 +673,8 @@ const navigateTo = (path) => {
 }
 
 .sidebar {
-  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  background-color: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border);
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   position: relative;
@@ -686,15 +695,17 @@ const navigateTo = (path) => {
   position: relative;
   display: flex;
   align-items: center;
+  color: var(--color-text-primary) !important;
 }
 
 .sidebar-menu .el-menu-item:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background-color: var(--color-bg-tertiary) !important;
 }
 
 .sidebar-menu .el-menu-item.is-active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #764ba2 100%) !important;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  color: white !important;
 }
 
 /* 图标样式 */
