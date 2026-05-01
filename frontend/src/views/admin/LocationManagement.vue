@@ -1,57 +1,71 @@
 <template>
   <div class="location-management">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">点位管理</h1>
-        <p class="page-subtitle">管理滑板车停放点位信息</p>
-      </div>
-      <el-button type="primary" size="large" @click="addLocation">
-        <el-icon><Plus /></el-icon>
-        添加点位
-      </el-button>
-    </div>
-    
-    <!-- 搜索和筛选 -->
-    <div class="search-section">
-      <el-input
-        v-model="searchKeyword"
-        placeholder="搜索点位名称或地址"
-        clearable
-        style="width: 300px"
-        @input="handleSearch"
-      >
-        <template #prefix>
-          <el-icon><Search /></el-icon>
-        </template>
-      </el-input>
+    <el-row :gutter="20">
+      <el-col :span="24">
+        <el-card>
+      <template #header>
+        <div class="card-header">
+          <div>
+            <h2>点位管理</h2>
+            <p class="page-subtitle">管理滑板车停放点位信息</p>
+          </div>
+          <el-button type="primary" @click="addLocation">
+            <el-icon><Plus /></el-icon>
+            添加点位
+          </el-button>
+        </div>
+      </template>
       
-      <el-select v-model="filterStatus" placeholder="状态筛选" clearable @change="handleFilter">
-        <el-option label="全部" value="" />
-        <el-option label="启用" value="ACTIVE" />
-        <el-option label="停用" value="INACTIVE" />
-      </el-select>
-    </div>
-    
-    <!-- 点位列表 -->
-    <div class="locations-list">
-      <el-table
-        :data="filteredLocations"
-        v-loading="loading"
-        style="width: 100%"
-        :default-sort="{ prop: 'id', order: 'ascending' }"
-      >
+      <!-- 搜索和筛选 -->
+      <div class="search-section">
+        <el-input
+          v-model="searchKeyword"
+          placeholder="搜索点位名称或地址"
+          clearable
+          style="width: 300px"
+          @input="handleSearch"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        
+        <el-select v-model="filterStatus" placeholder="状态筛选" clearable @change="handleFilter">
+          <el-option label="全部" value="" />
+          <el-option label="启用" value="ACTIVE" />
+          <el-option label="停用" value="INACTIVE" />
+        </el-select>
+      </div>
+      
+      <!-- 点位列表 -->
+      <div class="locations-list">
+        <el-table
+          :data="filteredLocations"
+          v-loading="loading"
+          style="width: 100%"
+          :default-sort="{ prop: 'id', order: 'ascending' }"
+        >
         <el-table-column prop="id" label="ID" width="80" sortable />
         <el-table-column prop="name" label="点位名称" min-width="120" />
         <el-table-column prop="address" label="地址（经纬度）" min-width="200" show-overflow-tooltip />
         <el-table-column prop="capacity" label="容量" width="100" />
         <el-table-column prop="availableCount" label="可用数量" width="100">
           <template #default="{ row }">
-            <span :class="{ 'text-success': row.availableCount > 0, 'text-danger': row.availableCount === 0 }">
+            <span :class="{ 
+              'text-success data-priority-high': row.availableCount > 0, 
+              'text-danger data-priority-medium': row.availableCount === 0 
+            }">
               {{ row.availableCount }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="bookedCount" label="已预订" width="100" />
+        <el-table-column prop="bookedCount" label="已预订" width="100">
+          <template #default="{ row }">
+            <span class="data-priority-medium">
+              {{ row.bookedCount }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="row.status === 'ACTIVE' ? 'success' : 'info'">
@@ -68,9 +82,10 @@
           </template>
         </el-table-column>
       </el-table>
-    </div>
-    
-
+      </div>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -329,6 +344,12 @@ export default {
   padding: 20px;
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .page-header {
   margin-bottom: 20px;
   display: flex;
@@ -338,16 +359,20 @@ export default {
   gap: 15px;
 }
 
+/* ===== 现代科技风深色主题优化 ===== */
+
 .page-title {
   font-size: 24px;
-  font-weight: 600;
-  color: #303133;
+  font-weight: 700;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
+  letter-spacing: 0.5px;
 }
 
 .page-subtitle {
   font-size: 14px;
-  color: #606266;
+  color: var(--color-text-secondary);
+  font-weight: 400;
 }
 
 .search-section {
@@ -358,10 +383,11 @@ export default {
 }
 
 .locations-list {
-  background: white;
-  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .action-buttons {
@@ -371,11 +397,13 @@ export default {
 }
 
 .text-success {
-  color: #67c23a;
+  color: var(--color-success);
+  font-weight: 600;
 }
 
 .text-danger {
-  color: #f56c6c;
+  color: var(--color-error);
+  font-weight: 600;
 }
 
 .coordinate-inputs {
@@ -383,14 +411,212 @@ export default {
   gap: 4%;
 }
 
-.text-success {
-  color: #67C23A;
+/* ===== Element Plus 表格深色主题优化 ===== */
+
+/* 表格整体样式 */
+.locations-list .el-table {
+  background: transparent;
+  color: var(--color-text-primary);
+}
+
+.locations-list .el-table th {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
   font-weight: 600;
 }
 
-.text-danger {
-  color: #F56C6C;
+.locations-list .el-table td {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+/* 斑马纹效果优化 */
+.locations-list .el-table .el-table__row--striped td {
+  background: rgba(99, 102, 241, 0.05) !important;
+}
+
+/* 悬浮效果优化 */
+.locations-list .el-table .el-table__row:hover td {
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* 表格边框优化 */
+.locations-list .el-table {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.locations-list .el-table::before {
+  background-color: var(--color-border) !important;
+}
+
+/* 标签样式优化 */
+.locations-list .el-tag {
+  border: none;
+  font-weight: 500;
+}
+
+.locations-list .el-tag--success {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: var(--color-success) !important;
+}
+
+.locations-list .el-tag--info {
+  background: rgba(14, 165, 233, 0.15) !important;
+  color: var(--color-info) !important;
+}
+
+/* 按钮样式优化 */
+.locations-list .el-button {
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+}
+
+.locations-list .el-button--primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.locations-list .el-button--primary:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-light);
+  transform: translateY(-1px);
+}
+
+.locations-list .el-button--info {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.locations-list .el-button--info:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+/* 下拉框样式优化 */
+.locations-list .el-select .el-input__wrapper {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.locations-list .el-select .el-input__inner {
+  color: var(--color-text-primary);
+}
+
+.locations-list .el-select-dropdown {
+  background: var(--color-bg-secondary) !important;
+}
+
+/* 深色主题下的搜索和筛选区域样式优化 */
+.location-management[data-theme="dark"] .search-section .el-input__wrapper {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.location-management[data-theme="dark"] .search-section .el-input__wrapper:hover {
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+.location-management[data-theme="dark"] .search-section .el-input__inner {
+  color: var(--color-text-primary) !important;
+}
+
+.location-management[data-theme="dark"] .search-section .el-select .el-input__wrapper {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.location-management[data-theme="dark"] .search-section .el-select .el-input__wrapper:hover {
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+.location-management[data-theme="dark"] .search-section .el-select .el-input__inner {
+  color: var(--color-text-primary) !important;
+}
+
+.location-management[data-theme="dark"] .search-section .el-select-dropdown {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.location-management[data-theme="dark"] .search-section .el-select-dropdown__item {
+  color: var(--color-text-primary) !important;
+  background: var(--color-bg-secondary) !important;
+}
+
+.location-management[data-theme="dark"] .search-section .el-select-dropdown__item:hover {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-primary) !important;
+}
+
+.location-management[data-theme="dark"] .search-section .el-select-dropdown__item.selected {
+  background: rgba(99, 102, 241, 0.1) !important;
+  color: var(--color-primary) !important;
+}
+
+.locations-list .el-select-dropdown {
+  border: 1px solid var(--color-border) !important;
+}
+
+.locations-list .el-select-dropdown .el-select-dropdown__item {
+  color: var(--color-text-primary) !important;
+}
+
+.locations-list .el-select-dropdown .el-select-dropdown__item:hover {
+  background: var(--color-bg-tertiary) !important;
+}
+
+.locations-list .el-select-dropdown .el-select-dropdown__item.selected {
+  color: var(--color-primary) !important;
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* 加载状态优化 */
+.locations-list .el-loading-mask {
+  background: rgba(15, 23, 42, 0.8) !important;
+}
+
+/* 信息层级优化 */
+.data-priority-high {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 16px;
+}
+
+.data-priority-medium {
   font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+.data-priority-low {
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+/* 主按钮样式优化 */
+.tech-button-primary {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.tech-button-primary:hover {
+  background: var(--color-primary-light) !important;
+  border-color: var(--color-primary-light) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 /* 响应式适配 */

@@ -21,20 +21,53 @@
   --color-info: #0ea5e9;
 }
 
-/* 深色主题 */
+/* 深色主题 - 现代科技风 */
 [data-theme="dark"] {
-  --color-bg-primary: #0a0f14;
-  --color-bg-secondary: #141920;
-  --color-bg-tertiary: #1e242b;
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #e2e8f0;
-  --color-text-tertiary: #a0aec0;
-  --color-border: #374151;
-  --color-primary: #3b82f6;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #06b6d4;
+  /* 背景色层级 */
+  --color-bg-primary: #0F172A; /* 深海军黑 - 页面主背景 */
+  --color-bg-secondary: #1E293B; /* 卡片背景 - 比背景浅2级灰度 */
+  --color-bg-tertiary: #334155; /* 组件容器背景 */
+  
+  /* 文字层级 */
+  --color-text-primary: #F8FAFC; /* 一级文字 - 大标题、价格数字 */
+  --color-text-secondary: #CBD5E1; /* 二级文字 - 正文信息 */
+  --color-text-tertiary: #94A3B8; /* 三级文字 - 标签文字 */
+  
+  /* 边框和分隔 */
+  --color-border: rgba(99, 102, 241, 0.3); /* 主色透明边框 */
+  
+  /* 主色系统 */
+  --color-primary: #6366F1; /* 靛蓝主色 - 按钮、价格数字 */
+  --color-primary-light: #8B5CF6; /* 紫色辅助色 */
+  --color-primary-lighter: #E0E7FF; /* 主色浅版 - 副标题引导语 */
+  
+  /* 状态色 */
+  --color-success: #22C55E; /* 低饱和绿 - 可租用标签 */
+  --color-warning: #F59E0B; /* 警告色 */
+  --color-error: #EF4444; /* 错误色 */
+  --color-info: #0EA5E9; /* 信息色 */
+  
+  /* 标签背景 */
+  --color-tag-bg: rgba(99, 102, 241, 0.15); /* 主色透明背景 */
+}
+
+/* 确保主题变量在全局作用域中可用 */
+:root {
+  /* 深色主题变量 - 默认值设置为浅色主题值，在深色主题下会被覆盖 */
+  --color-bg-primary-dark: #0F172A;
+  --color-bg-secondary-dark: #1E293B;
+  --color-bg-tertiary-dark: #334155;
+  --color-text-primary-dark: #F8FAFC;
+  --color-text-secondary-dark: #CBD5E1;
+  --color-text-tertiary-dark: #94A3B8;
+  --color-border-dark: rgba(99, 102, 241, 0.3);
+  --color-primary-dark: #6366F1;
+  --color-primary-light-dark: #8B5CF6;
+  --color-primary-lighter-dark: #E0E7FF;
+  --color-success-dark: #22C55E;
+  --color-warning-dark: #F59E0B;
+  --color-error-dark: #EF4444;
+  --color-info-dark: #0EA5E9;
 }
 
 /* 高对比度主题 */
@@ -108,49 +141,82 @@ body {
   border-bottom-color: var(--color-border) !important;
 }
 
-.el-table {
-  background-color: var(--color-bg-secondary) !important;
-  color: var(--color-text-primary) !important;
-}
-
-.el-table th {
-  background-color: var(--color-bg-tertiary) !important;
-  color: var(--color-text-primary) !important;
-  border-bottom-color: var(--color-border) !important;
-}
-
-.el-table tr {
-  background-color: var(--color-bg-secondary) !important;
-}
-
-.el-table tr:hover {
-  background-color: var(--color-bg-tertiary) !important;
-}
-
-.el-table td {
-  border-bottom-color: var(--color-border) !important;
-  color: var(--color-text-primary) !important;
-}
+/* 移除所有全局表格样式，让Element Plus使用默认样式 */
+/* 这样深色模式下的表格将保持与浅色模式一致的样式 */
 
 /* 按钮样式适配 */
-.el-button {
+[data-theme="dark"] .el-button {
   color: var(--color-text-primary) !important;
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+  transition: all 0.3s ease;
 }
 
-.el-button--primary {
+[data-theme="dark"] .el-button:hover {
+  background-color: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+}
+
+[data-theme="dark"] .el-button--primary {
   background-color: var(--color-primary) !important;
   border-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+[data-theme="dark"] .el-button--primary:hover {
+  background-color: var(--color-primary-light) !important;
+  border-color: var(--color-primary-light) !important;
 }
 
 /* 输入框样式适配 */
-.el-input__wrapper {
+[data-theme="dark"] .el-input__wrapper {
   background-color: var(--color-bg-secondary) !important;
   border-color: var(--color-border) !important;
   color: var(--color-text-primary) !important;
 }
 
-.el-input__inner {
+[data-theme="dark"] .el-input__wrapper:hover {
+  border-color: var(--color-primary) !important;
+}
+
+[data-theme="dark"] .el-input__inner {
   color: var(--color-text-primary) !important;
+}
+
+/* 下拉选择框样式适配 */
+[data-theme="dark"] .el-select .el-input__wrapper {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .el-select .el-input__wrapper:hover {
+  border-color: var(--color-primary) !important;
+}
+
+[data-theme="dark"] .el-select .el-input__inner {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .el-select-dropdown {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .el-select-dropdown__item {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-bg-secondary) !important;
+}
+
+[data-theme="dark"] .el-select-dropdown__item:hover {
+  background-color: var(--color-bg-tertiary) !important;
+  color: var(--color-primary) !important;
+}
+
+[data-theme="dark"] .el-select-dropdown__item.selected {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+  color: var(--color-primary) !important;
 }
 
 /* 菜单样式适配 */
@@ -340,4 +406,135 @@ body {
 /* 主题切换动画 */
 .theme-transition * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ===== 现代科技风深色主题样式 ===== */
+
+/* 顶部横幅渐变 - 优化蓝紫渐变 */
+.header-gradient {
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+}
+
+/* 卡片样式优化 */
+.tech-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tech-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.1);
+  transform: translateY(-2px);
+}
+
+/* 按钮样式优化 - 描边样式 */
+.tech-button-outline {
+  background: transparent;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  transition: all 0.3s ease;
+}
+
+.tech-button-outline:hover {
+  background: var(--color-primary);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* 标签样式优化 */
+.tech-tag {
+  background: var(--color-tag-bg);
+  color: var(--color-primary-lighter);
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+}
+
+.tech-tag-success {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22C55E;
+}
+
+/* 价格数字样式 */
+.tech-price {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--color-primary);
+}
+
+/* 字体层级优化 */
+.tech-title-primary {
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.tech-title-secondary {
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--color-primary-lighter);
+  text-align: center;
+}
+
+.tech-card-title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #F1F5F9;
+}
+
+.tech-card-text {
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.tech-label-text {
+  font-weight: 500;
+  font-size: 12px;
+  color: #E2E8F0;
+}
+
+/* Footer组件深色主题优化 */
+[data-theme="dark"] .page-footer {
+  background: var(--color-bg-tertiary);
+  border-top: 1px solid var(--color-border);
+}
+
+[data-theme="dark"] .footer-top-border {
+  background: linear-gradient(90deg, #4F46E5 0%, #7C3AED 50%, #4F46E5 100%);
+}
+
+[data-theme="dark"] .footer-section h4 {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .footer-section p {
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+[data-theme="dark"] .footer-section p:hover {
+  color: var(--color-primary-lighter);
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .tech-title-primary {
+    font-size: 24px;
+  }
+  
+  .tech-title-secondary {
+    font-size: 14px;
+  }
+  
+  .tech-card-title {
+    font-size: 16px;
+  }
 }

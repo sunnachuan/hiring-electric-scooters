@@ -4,6 +4,21 @@
       <h1 class="page-title">滑板车租赁</h1>
       <p class="page-subtitle">选择您喜欢的滑板车开始租赁之旅</p>
       <div class="header-actions">
+        <el-select
+          v-model="addressFilter"
+          placeholder="地址筛选"
+          size="large"
+          style="width: 180px; margin-right: 15px;"
+          clearable
+        >
+          <el-option label="全部地址" value="" />
+          <el-option
+            v-for="location in allLocations"
+            :key="location"
+            :label="location"
+            :value="location"
+          />
+        </el-select>
         <el-button 
           type="primary" 
           size="large" 
@@ -65,13 +80,7 @@
           </el-tag>
         </div>
         
-        <!-- 点位信息 -->
-        <div class="location-info" v-if="scooter.locations && scooter.locations.length > 0">
-          <el-tag size="small" type="info">
-            <el-icon><Location /></el-icon>
-            {{ scooter.locations.join('、') }}
-          </el-tag>
-        </div>
+
         
         <!-- 可用数量 -->
         <div class="quantity-info" v-if="scooter.status === 'AVAILABLE'">
@@ -465,7 +474,7 @@
                   type="text" 
                   size="small" 
                   @click="deleteBankCard(card.id)"
-                  style="color: #f56c6c;"
+                  style="color: var(--color-error);"
                 >
                   删除
                 </el-button>
@@ -503,6 +512,7 @@ const bankCardLoading = ref(false)
 const bookingFormRef = ref()
 const bankCardFormRef = ref()
 const bankCards = ref([])
+const addressFilter = ref('')
 
 const bookingForm = ref({
   scooterModel: '',
@@ -558,6 +568,12 @@ const availableModels = computed(() => {
   return [...new Set(models)]
 })
 
+// 获取所有唯一的地址列表
+const allLocations = computed(() => {
+  const locations = scooters.value.map(s => s.locationName).filter(Boolean)
+  return [...new Set(locations)].sort()
+})
+
 // 根据选择的型号筛选滑板车，并按位置分组
 const filteredScooters = computed(() => {
   if (!bookingForm.value.scooterModel || !availableScooters.value) {
@@ -589,7 +605,12 @@ const groupedScooters = computed(() => {
   const grouped = {}
   
   // 使用所有滑板车数据，而不仅仅是可用的，以正确计算总数量
-  const allScooters = scooters.value || []
+  let allScooters = scooters.value || []
+  
+  // 应用地址筛选
+  if (addressFilter.value) {
+    allScooters = allScooters.filter(scooter => scooter.locationName === addressFilter.value)
+  }
   
   allScooters.forEach(scooter => {
     if (!grouped[scooter.model]) {
@@ -597,7 +618,7 @@ const groupedScooters = computed(() => {
         model: scooter.model,
         imageUrl: getScooterImage(scooter.model),
         hourlyRate: scooter.hourlyRate,
-        dailyRate: scooter.dailyRate,
+        dailyRate: calculateDailyRate(scooter.hourlyRate),
         status: scooter.status,
         totalQuantity: 0,
         totalAvailableQuantity: 0,
@@ -723,6 +744,12 @@ const getScooterFeatures = (model) => {
   }
   
   return featuresMap[model] || ['便携', '环保']
+}
+
+// 计算日价（24小时租赁价格）
+const calculateDailyRate = (hourlyRate) => {
+  // 根据阶梯定价方案：9-24小时享受60%折扣，最高收12小时费用
+  return hourlyRate * 12 * 0.6
 }
 
 // 新的分层定价计算逻辑
@@ -1137,6 +1164,27 @@ const handleKeydown = (event) => {
   font-size: 18px !important;
 }
 
+/* 深色主题适配 - 弹窗头部 */
+[data-theme="dark"] .el-dialog__header {
+  background: linear-gradient(135deg, #4c63b6 0%, #5c3a82 100%) !important;
+}
+
+[data-theme="dark"] .el-dialog__title {
+  color: white !important;
+}
+
+/* 高对比度主题适配 - 弹窗头部 */
+[data-theme="high-contrast"] .el-dialog__header {
+  background: linear-gradient(135deg, #000000 0%, #333333 100%) !important;
+  border-bottom: 3px solid var(--color-primary) !important;
+}
+
+[data-theme="high-contrast"] .el-dialog__title {
+  color: white !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
 .el-dialog__body {
   padding: 24px 20px !important;
 }
@@ -1457,6 +1505,56 @@ const handleKeydown = (event) => {
   border-color: #dcdfe6;
 }
 
+/* 深色主题适配 - 滑板车卡片 */
+[data-theme="dark"] .scooter-card {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .scooter-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  border-color: var(--color-primary);
+}
+
+[data-theme="dark"] .scooter-card.unavailable {
+  border-color: var(--color-text-tertiary);
+}
+
+[data-theme="dark"] .scooter-icon {
+  color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 高对比度主题适配 - 滑板车卡片 */
+[data-theme="high-contrast"] .scooter-card {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+  border-width: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="high-contrast"] .scooter-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  border-color: var(--color-primary);
+  border-width: 3px;
+}
+
+[data-theme="high-contrast"] .scooter-card.unavailable {
+  border-color: var(--color-text-tertiary);
+}
+
+[data-theme="high-contrast"] .scooter-icon {
+  color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 /* 滑板车图片样式 */
 .scooter-image {
   margin-bottom: 16px;
@@ -1540,6 +1638,17 @@ const handleKeydown = (event) => {
   color: #2c3e50;
 }
 
+/* 深色主题适配 */
+[data-theme="dark"] .scooter-model h3 {
+  color: var(--color-text-primary);
+}
+
+/* 高对比度主题适配 */
+[data-theme="high-contrast"] .scooter-model h3 {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
 .status-tag {
   font-weight: 600;
   border-radius: 12px;
@@ -1581,10 +1690,91 @@ const handleKeydown = (event) => {
   color: #667eea;
 }
 
+/* 深色主题适配 - 价格信息块 */
+[data-theme="dark"] .price-item {
+  background: var(--color-bg-secondary);
+  border-left-color: var(--color-primary);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .price-label {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .price-value {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .quantity-info .el-tag {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+  border-width: 1px;
+}
+
+/* 高对比度主题适配 - 价格信息块 */
+[data-theme="high-contrast"] .price-item {
+  background: var(--color-bg-secondary);
+  border-left-color: var(--color-primary);
+  border-left-width: 4px;
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="high-contrast"] .price-label {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .price-value {
+  color: var(--color-primary);
+  font-weight: 900;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="high-contrast"] .quantity-info .el-tag {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border-color: var(--color-primary);
+  border-width: 2px;
+  font-weight: 700;
+}
+
 .scooter-features {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+/* 深色主题适配 - 特色标签 */
+[data-theme="dark"] .scooter-features .el-tag {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .scooter-features .el-tag--info {
+  background: var(--color-tag-bg) !important;
+  color: var(--color-primary-lighter) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* 高对比度主题适配 - 特色标签 */
+[data-theme="high-contrast"] .scooter-features .el-tag {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-primary) !important;
+  border-width: 2px !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="high-contrast"] .scooter-features .el-tag--info {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-primary) !important;
 }
 
 .scooter-actions {
@@ -1731,6 +1921,72 @@ const handleKeydown = (event) => {
   color: #333;
 }
 
+/* 深色主题适配 - 阶梯定价方案 */
+[data-theme="dark"] .el-dialog__title {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .pricing-tips li {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .pricing-tips strong {
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .detail-section h4 {
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .detail-section p {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .total-section {
+  background-color: rgba(99, 102, 241, 0.1);
+  border: 1px solid var(--color-border);
+}
+
+[data-theme="dark"] .total-price {
+  color: var(--color-primary);
+}
+
+/* 高对比度主题适配 - 阶梯定价方案 */
+[data-theme="high-contrast"] .el-dialog__title {
+  color: var(--color-text-primary) !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="high-contrast"] .pricing-tips li {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+[data-theme="high-contrast"] .pricing-tips strong {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .detail-section h4 {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .detail-section p {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+[data-theme="high-contrast"] .total-section {
+  background-color: var(--color-bg-secondary);
+  border: 2px solid var(--color-primary);
+}
+
+[data-theme="high-contrast"] .total-price {
+  color: var(--color-primary);
+  font-weight: 900;
+}
+
 /* 定价标签浅色系样式 */
 .pricing-tag-gray {
   background-color: #f8f9fa !important;
@@ -1760,6 +2016,73 @@ const handleKeydown = (event) => {
   background-color: #e1bee7 !important;
   border-color: #ce93d8 !important;
   color: #6a1b9a !important;
+}
+
+/* 深色主题适配 - 定价标签 */
+[data-theme="dark"] .pricing-tag-gray {
+  background-color: rgba(148, 163, 184, 0.2) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-secondary) !important;
+}
+
+[data-theme="dark"] .pricing-tag-yellow {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  color: var(--color-warning) !important;
+}
+
+[data-theme="dark"] .pricing-tag-green {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+  border-color: rgba(34, 197, 94, 0.5) !important;
+  color: var(--color-success) !important;
+}
+
+[data-theme="dark"] .pricing-tag-blue {
+  background-color: rgba(14, 165, 233, 0.2) !important;
+  border-color: rgba(14, 165, 233, 0.5) !important;
+  color: var(--color-info) !important;
+}
+
+[data-theme="dark"] .pricing-tag-purple {
+  background-color: rgba(139, 92, 246, 0.2) !important;
+  border-color: rgba(139, 92, 246, 0.5) !important;
+  color: var(--color-primary-light) !important;
+}
+
+/* 高对比度主题适配 - 定价标签 */
+[data-theme="high-contrast"] .pricing-tag-gray {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+  border-width: 2px !important;
+}
+
+[data-theme="high-contrast"] .pricing-tag-yellow {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-warning) !important;
+  color: var(--color-warning) !important;
+  border-width: 2px !important;
+}
+
+[data-theme="high-contrast"] .pricing-tag-green {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-success) !important;
+  color: var(--color-success) !important;
+  border-width: 2px !important;
+}
+
+[data-theme="high-contrast"] .pricing-tag-blue {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-info) !important;
+  color: var(--color-info) !important;
+  border-width: 2px !important;
+}
+
+[data-theme="high-contrast"] .pricing-tag-purple {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  border-width: 2px !important;
 }
 
 /* 更亮的info标签样式 */

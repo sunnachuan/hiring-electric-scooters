@@ -766,7 +766,7 @@ const navigateTo = (path) => {
 }
 
 .main-content {
-  background: #f8f9fa;
+  background: var(--color-bg-primary);
   padding: 24px;
   overflow-y: auto;
 }

@@ -19,31 +19,33 @@
       </div>
       
       <div class="footer-section">
-        <h4>关于我们</h4>
-        <p>电动滑板车租赁服务</p>
-        <p>专业、安全、便捷</p>
-        <p>让出行更轻松</p>
+        <h4>服务条款</h4>
+        <p>隐私政策</p>
+        <p>用户协议</p>
+        <p>租赁规则</p>
       </div>
     </div>
   </footer>
 </template>
 
 <script setup>
-// 不再需要图标导入
+// Footer组件 - 页面底部信息展示
+// 支持主题切换，自动适配深色/浅色主题
 </script>
 
 <style scoped>
 .page-footer {
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  background: var(--color-bg-tertiary);
   margin-top: 0;
   padding: 0;
-  color: #fff;
+  color: var(--color-text-primary);
   position: relative;
+  border-top: 1px solid var(--color-border);
 }
 
 .footer-top-border {
   height: 3px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-primary) 100%);
   margin: 0;
 }
 
@@ -65,7 +67,7 @@
 }
 
 .footer-section h4 {
-  color: #ecf0f1;
+  color: var(--color-text-primary);
   margin-bottom: 16px;
   font-size: 15px;
   font-weight: 600;
@@ -73,7 +75,7 @@
 }
 
 .footer-section p {
-  color: #bdc3c7;
+  color: var(--color-text-secondary);
   margin: 8px 0;
   font-size: 13px;
   line-height: 1.6;
@@ -81,7 +83,7 @@
 }
 
 .footer-section p:hover {
-  color: #ecf0f1;
+  color: var(--color-primary-lighter);
 }
 
 /* 响应式设计 */

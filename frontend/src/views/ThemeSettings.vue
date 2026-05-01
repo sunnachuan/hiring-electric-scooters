@@ -1,10 +1,12 @@
 <template>
   <div class="theme-settings">
     <div class="settings-header">
-      <el-button @click="$router.back()" type="primary" link class="back-btn">
-        <el-icon><ArrowLeft /></el-icon>
-        返回个人中心
-      </el-button>
+      <div class="back-btn-container">
+        <el-button @click="$router.back()" type="primary" size="large" class="back-btn">
+          <el-icon><ArrowLeft /></el-icon>
+          返回个人中心
+        </el-button>
+      </div>
       <h1>主题与显示设置</h1>
       <p class="subtitle">自定义界面外观，提升使用体验</p>
     </div>
@@ -195,11 +197,64 @@ onMounted(() => {
   position: relative;
 }
 
-.back-btn {
+.back-btn-container {
   position: absolute;
   left: 0;
   top: 0;
 }
+
+.back-btn {
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+}
+
+/* 浅色模式按钮样式（默认） */
+ .back-btn {
+   background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+   border-color: #3b82f6;
+   color: white;
+ }
+ 
+ .back-btn:hover {
+   background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+   border-color: #2563eb;
+   transform: translateY(-2px);
+   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+ }
+ 
+ /* 深色模式按钮样式 */
+ html[data-theme="dark"] .back-btn {
+   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+   border-color: #6366f1;
+   color: white;
+ }
+ 
+ html[data-theme="dark"] .back-btn:hover {
+   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+   border-color: #4f46e5;
+   transform: translateY(-2px);
+   box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+ }
+ 
+ /* 高对比度模式按钮样式 */
+ html[data-theme="high-contrast"] .back-btn {
+   background: linear-gradient(135deg, #ffff00 0%, #ffd700 100%);
+   border-color: #ffff00;
+   color: #000000;
+   font-weight: 700;
+ }
+ 
+ html[data-theme="high-contrast"] .back-btn:hover {
+   background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+   border-color: #ffd700;
+   transform: translateY(-2px);
+   box-shadow: 0 6px 20px rgba(255, 255, 0, 0.5);
+ }
 
 .settings-header h1 {
   margin: 0 0 8px 0;
@@ -270,7 +325,7 @@ onMounted(() => {
 }
 
 .theme-preview.light {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
 }
 
 .theme-preview.dark {

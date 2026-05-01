@@ -157,4 +157,124 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
 }
+
+/* 深色主题下的反馈管理页面样式优化 - 提高优先级 */
+.feedback-admin-container[data-theme="dark"] .el-card {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .el-card__header {
+  background: var(--color-bg-tertiary) !important;
+  border-bottom-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .card-header h2 {
+  color: var(--color-text-primary) !important;
+}
+
+/* 深色主题下的筛选器样式 */
+.feedback-admin-container[data-theme="dark"] .card-header .el-select .el-input__wrapper {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .card-header .el-select .el-input__wrapper:hover {
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .card-header .el-select .el-input__inner {
+  color: var(--color-text-primary) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .card-header .el-select-dropdown {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .card-header .el-select-dropdown__item {
+  color: var(--color-text-primary) !important;
+  background: var(--color-bg-secondary) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .card-header .el-select-dropdown__item:hover {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-primary) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .card-header .el-select-dropdown__item.selected {
+  background: rgba(99, 102, 241, 0.1) !important;
+  color: var(--color-primary) !important;
+}
+
+/* 深色主题下的表格样式 */
+.feedback-admin-container[data-theme="dark"] .el-table {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .el-table th {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom-color: var(--color-border) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .el-table td {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom-color: var(--color-border) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .el-table tr:hover td {
+  background: var(--color-bg-tertiary) !important;
+}
+
+/* 深色主题下的按钮样式 */
+.feedback-admin-container[data-theme="dark"] .el-button {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .el-button:hover {
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .el-button--primary {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .el-button--primary:hover {
+  background: var(--color-primary-light) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .el-button--success {
+  background: var(--color-success) !important;
+  border-color: var(--color-success) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .el-button--success:hover {
+  background: rgba(34, 197, 94, 0.8) !important;
+  border-color: rgba(34, 197, 94, 0.8) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .el-button--warning {
+  background: var(--color-warning) !important;
+  border-color: var(--color-warning) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.feedback-admin-container[data-theme="dark"] .el-button--warning:hover {
+  background: rgba(245, 158, 11, 0.8) !important;
+  border-color: rgba(245, 158, 11, 0.8) !important;
+}
 </style>

@@ -347,6 +347,10 @@ onMounted(() => {
   padding: 12px 8px; /* 增加垂直内边距 */
   font-size: 13px;
   border-radius: 8px;
+  background: var(--color-bg-secondary) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+  transition: all 0.3s ease;
   transition: all 0.3s ease;
   display: flex;
   align-items: center; /* 垂直居中 */
@@ -358,6 +362,9 @@ onMounted(() => {
 .quick-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
 }
 
 /* 平板端：保持单列布局 */
@@ -415,8 +422,16 @@ onMounted(() => {
   border-radius: 8px;
 }
 
-:deep(.el-textarea) {
+[data-theme="dark"] :deep(.el-textarea .el-textarea__inner) {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
   border-radius: 8px;
+}
+
+[data-theme="dark"] :deep(.el-textarea .el-textarea__inner:focus) {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
 }
 
 /* 响应式表单 */

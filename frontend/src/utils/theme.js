@@ -64,9 +64,7 @@ function applyTheme(theme) {
   const html = document.documentElement
   
   // 移除所有主题属性
-  Object.values(THEMES).forEach(t => {
-    html.removeAttribute(`data-theme`)
-  })
+  html.removeAttribute('data-theme')
   
   // 设置新主题
   if (theme !== 'light') {

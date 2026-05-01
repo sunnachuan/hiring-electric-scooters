@@ -257,9 +257,9 @@ export default {
         // 如果所有瓦片图层都失败，使用离线模式
         if (!tileLayerAdded) {
           console.warn('所有在线瓦片图层加载失败，使用离线模式')
-          mapContainer.style.background = '#f0f0f0'
+          mapContainer.style.background = 'var(--color-bg-secondary)'
           const offlineMsg = document.createElement('div')
-          offlineMsg.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#666;'
+          offlineMsg.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:var(--color-text-secondary);'
           offlineMsg.innerHTML = '<h3>地图加载失败</h3><p>网络连接问题，显示离线模式</p>'
           mapContainer.appendChild(offlineMsg)
         }
@@ -267,10 +267,10 @@ export default {
         // 创建标记点
         markers.value = []
         locations.forEach(location => {
-          // 根据可用数量设置标记颜色
-          const color = location.availableCount > 0 ? '#67C23A' : '#F56C6C'
+          // 根据可用数量设置标记颜色 - 使用CSS变量
+          const colorClass = location.availableCount > 0 ? 'marker-available' : 'marker-unavailable'
           const iconHtml = `
-            <div class="custom-marker" style="background-color: ${color};">
+            <div class="custom-marker ${colorClass}">
               <div class="marker-content">
                 <span class="marker-text">${location.availableCount}</span>
               </div>
@@ -426,13 +426,13 @@ export default {
 .page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .page-subtitle {
   font-size: 13px;
-  color: #909399;
+  color: var(--color-text-secondary);
   margin: 6px 0 0 0;
 }
 
@@ -440,7 +440,7 @@ export default {
   flex: 1;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #e4e7ed;
+  border: 1px solid var(--color-border);
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   min-height: 400px;
 }
@@ -499,12 +499,12 @@ export default {
   align-items: center;
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .info-label {
   font-weight: 500;
-  color: #606266;
+  color: var(--color-text-secondary);
 }
 
 .info-value {
@@ -512,11 +512,11 @@ export default {
 }
 
 .info-value.available {
-  color: #67C23A;
+  color: var(--color-success);
 }
 
 .info-value.booked {
-  color: #E6A23C;
+  color: var(--color-warning);
 }
 
 .dialog-footer {
@@ -526,17 +526,26 @@ export default {
 }
 
 /* 自定义标记点样式 */
+/* 地图标记点样式 - 深色主题适配 */
 :deep(.custom-marker) {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  border: 3px solid white;
+  border: 3px solid var(--color-bg-primary);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+:deep(.marker-available) {
+  background: var(--color-success) !important;
+}
+
+:deep(.marker-unavailable) {
+  background: var(--color-error) !important;
 }
 
 :deep(.custom-marker:hover) {

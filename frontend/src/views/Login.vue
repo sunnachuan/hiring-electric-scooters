@@ -382,7 +382,7 @@ onUnmounted(() => {
 
 .terms-item {
   margin-bottom: 25px;
-  background: white;
+  background: var(--color-bg-primary);
   padding: 20px;
   border-radius: 8px;
   border: 1px solid #e9ecef;

@@ -61,7 +61,7 @@
             <el-tag v-if="row.locationName" type="info" size="small">
               {{ row.locationName }}
             </el-tag>
-            <span v-else style="color: #999;">未设置</span>
+            <span v-else style="color: var(--color-text-tertiary);">未设置</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200">
@@ -390,24 +390,25 @@ onUnmounted(() => {
 /* 返回顶部悬浮块样式 */
 .back-to-top {
   position: fixed;
-  bottom: 60px;
+  bottom: 80px;
   right: 40px;
   width: 50px;
   height: 50px;
-  background: #409eff;
+  background: var(--color-primary);
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  border: none;
   box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
   transition: all 0.3s ease;
   z-index: 1000;
 }
 
 .back-to-top:hover {
-  background: #337ecc;
+  background: var(--color-primary-dark);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4);
 }

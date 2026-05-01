@@ -714,14 +714,14 @@ onUnmounted(() => {
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  color: white;
+  color: var(--color-text-primary);
 }
 
 .stat-icon.online { background: #67c23a; }
@@ -732,12 +732,34 @@ onUnmounted(() => {
 .stat-value {
   font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  /* 移除硬编码颜色，让主题模式能够正确应用 */
 }
 
 .stat-label {
   font-size: 14px;
-  color: #909399;
+  /* 移除硬编码颜色，让主题模式能够正确应用 */
+}
+
+/* 深色模式统计卡片数字颜色优化 - 提高对比度 */
+.device-monitor[data-theme="dark"] .stat-card .stat-value {
+  color: #ffffff !important; /* 白色，提高深色背景下的对比度 */
+  font-weight: 700 !important; /* 加粗增强可读性 */
+}
+
+.device-monitor[data-theme="dark"] .stat-card .stat-label {
+  color: #e2e8f0 !important; /* 浅灰色，保持良好对比度 */
+}
+
+/* 高对比度模式统计卡片数字颜色优化 - 强烈对比 */
+.device-monitor[data-theme="high-contrast"] .stat-card .stat-value {
+  color: #ffff00 !important; /* 亮黄色，高对比度 */
+  font-weight: 800 !important; /* 更粗的字体 */
+  text-shadow: 0 0 2px #000000 !important; /* 添加黑色阴影增强可读性 */
+}
+
+.device-monitor[data-theme="high-contrast"] .stat-card .stat-label {
+  color: #ffffff !important; /* 白色，高对比度 */
+  font-weight: 600 !important; /* 加粗 */
 }
 
 .monitor-content {
@@ -777,7 +799,7 @@ onUnmounted(() => {
 
 .map-container {
   height: 400px;
-  background: #f5f7fa;
+  background: var(--color-bg-secondary);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -908,7 +930,7 @@ onUnmounted(() => {
   height: 16px;
   border-radius: 50%;
   margin: 0 auto 2px;
-  border: 2px solid white;
+  border: 2px solid var(--color-border);
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
@@ -919,7 +941,7 @@ onUnmounted(() => {
 .marker-id {
   font-size: 10px;
   text-align: center;
-  color: white;
+  color: var(--color-text-primary);
   text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
   font-weight: bold;
 }
@@ -946,7 +968,7 @@ onUnmounted(() => {
   left: 50%;
   transform: translateX(-50%);
   margin-bottom: 8px;
-  background: white;
+  background: var(--color-bg-secondary);
   border-radius: 6px;
   padding: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -971,7 +993,7 @@ onUnmounted(() => {
   position: absolute;
   bottom: 16px;
   right: 16px;
-  background: white;
+  background: var(--color-bg-secondary);
   padding: 12px;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -1284,6 +1306,36 @@ onUnmounted(() => {
   justify-content: flex-end;
 }
 
+/* 设备监控页面按钮深色主题适配 - 提高优先级 */
+.device-monitor[data-theme="dark"] .map-controls .el-button,
+.device-monitor[data-theme="dark"] .list-controls .el-button {
+  background: var(--color-bg-secondary-dark) !important;
+  border-color: var(--color-border-dark) !important;
+  color: var(--color-text-primary-dark) !important;
+  transition: all 0.3s ease;
+}
+
+.device-monitor[data-theme="dark"] .map-controls .el-button:hover,
+.device-monitor[data-theme="dark"] .list-controls .el-button:hover {
+  background: var(--color-bg-tertiary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+  color: var(--color-primary-dark) !important;
+  transform: translateY(-1px);
+}
+
+.device-monitor[data-theme="dark"] .map-controls .el-button--primary,
+.device-monitor[data-theme="dark"] .list-controls .el-button--primary {
+  background: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+  color: var(--color-text-primary-dark) !important;
+}
+
+.device-monitor[data-theme="dark"] .map-controls .el-button--primary:hover,
+.device-monitor[data-theme="dark"] .list-controls .el-button--primary:hover {
+  background: var(--color-primary-light-dark) !important;
+  border-color: var(--color-primary-light-dark) !important;
+}
+
 .control-row {
     display: flex;
     gap: 12px;
@@ -1312,6 +1364,54 @@ onUnmounted(() => {
   height: 40px
 }
 
+/* 修复表格固定列层级问题 - 通用修复 */
+.list-section .el-table {
+  /* 确保表格容器有正确的层级上下文 */
+  position: relative;
+  z-index: 1;
+}
+
+.list-section .el-table__fixed-right {
+  /* 提高固定列的层级，确保始终在最上层 */
+  z-index: 3 !important;
+}
+
+.list-section .el-table__fixed-body-wrapper {
+  /* 确保固定列内容层级正确 */
+  z-index: 4 !important;
+}
+
+.list-section .el-table__body-wrapper {
+  /* 降低非固定列内容的层级 */
+  z-index: 1 !important;
+}
+
+.list-section .el-table__body {
+  /* 确保表格主体内容不会溢出到固定列 */
+  overflow: hidden;
+}
+
+.list-section .el-table td {
+  /* 防止单元格内容溢出 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-section .el-table .el-table__fixed-right-patch {
+  /* 修复固定列补丁的层级 */
+  z-index: 2 !important;
+}
+
+/* 深色模式特定修复 - 移除所有影响表格颜色的样式，使用Element Plus默认样式 */
+/* 让Element Plus自动处理深色模式下的表格样式 */
+
+/* 所有主题模式使用Element Plus默认表格样式 */
+/* 移除所有自定义表格颜色设置，让Element Plus自动处理 */
+
+/* 移除所有自定义斑马纹样式，使用Element Plus默认样式 */
+/* 让Element Plus自动处理所有主题模式的表格样式 */
+
 /* 搜索框和筛选器样式优化 - 更明显的颜色 */
 .list-controls {
   display: flex;
@@ -1320,26 +1420,78 @@ onUnmounted(() => {
 }
 
 .list-controls .el-input {
-  --el-input-bg-color: #ffffff;
-  --el-input-border-color: #409eff;
-  --el-input-hover-border-color: #409eff;
-  --el-input-focus-border-color: #409eff;
+  --el-input-bg-color: var(--color-bg-secondary);
+  --el-input-border-color: var(--color-primary);
+  --el-input-hover-border-color: var(--color-primary-light);
+  --el-input-focus-border-color: var(--color-primary);
 }
 
 .list-controls .el-input__wrapper {
-  background-color: #ffffff !important;
-  border: 1px solid #409eff !important;
-  box-shadow: 0 0 0 1px #409eff inset, 0 0 0 1px rgba(64, 158, 255, 0.2) !important;
+  background-color: var(--color-bg-secondary) !important;
+  border: 1px solid var(--color-primary) !important;
+  box-shadow: 0 0 0 1px var(--color-primary) inset, 0 0 0 1px rgba(99, 102, 241, 0.2) !important;
 }
 
 .list-controls .el-input__wrapper:hover {
-  border-color: #66b1ff !important;
-  box-shadow: 0 0 0 1px #66b1ff inset, 0 0 0 1px rgba(102, 177, 255, 0.3) !important;
+  border-color: var(--color-primary-light) !important;
+  box-shadow: 0 0 0 1px var(--color-primary-light) inset, 0 0 0 1px rgba(139, 92, 246, 0.3) !important;
 }
 
 .list-controls .el-input__wrapper.is-focus {
-  border-color: #409eff !important;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* 深色主题下的搜索框样式优化 */
+[data-theme="dark"] .list-controls .el-input__wrapper {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .list-controls .el-input__wrapper:hover {
+  background-color: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+[data-theme="dark"] .list-controls .el-input__inner {
+  color: var(--color-text-primary) !important;
+}
+
+/* 深色主题下的筛选器样式优化 */
+[data-theme="dark"] .list-controls .el-select .el-input__wrapper {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .list-controls .el-select .el-input__wrapper:hover {
+  background-color: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+[data-theme="dark"] .list-controls .el-select .el-input__inner {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .list-controls .el-select-dropdown {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .list-controls .el-select-dropdown__item {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-bg-secondary) !important;
+}
+
+[data-theme="dark"] .list-controls .el-select-dropdown__item:hover {
+  background-color: var(--color-bg-tertiary) !important;
+  color: var(--color-primary) !important;
+}
+
+[data-theme="dark"] .list-controls .el-select-dropdown__item.selected {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+  color: var(--color-primary) !important;
 }
 
 .list-controls .el-select {
