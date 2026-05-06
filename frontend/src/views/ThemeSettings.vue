@@ -1,14 +1,16 @@
 <template>
   <div class="theme-settings">
-    <div class="settings-header">
-      <div class="back-btn-container">
-        <el-button @click="$router.back()" type="primary" size="large" class="back-btn">
-          <el-icon><ArrowLeft /></el-icon>
-          返回个人中心
-        </el-button>
-      </div>
+    <!-- 返回按钮 -->
+    <div class="back-button">
+      <el-button @click="$router.back()" type="primary" size="large">
+        <el-icon><ArrowLeft /></el-icon>
+        返回个人中心
+      </el-button>
+    </div>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
       <h1>主题与显示设置</h1>
-      <p class="subtitle">自定义界面外观，提升使用体验</p>
     </div>
 
     <div class="settings-content">
@@ -46,15 +48,7 @@
           </div>
         </div>
 
-        <div class="system-theme-option">
-          <el-switch
-            v-model="followSystem"
-            @change="toggleFollowSystem"
-            active-text="跟随系统主题"
-            inactive-text="自定义主题"
-          />
-          <span class="help-text">开启后，界面将自动跟随系统深色/浅色模式</span>
-        </div>
+
       </el-card>
 
       <!-- 字体大小设置 -->
@@ -148,7 +142,6 @@ const themeStore = useThemeStore()
 // 计算属性
 const currentTheme = computed(() => themeStore.currentTheme)
 const currentFontSize = computed(() => themeStore.currentFontSize)
-const followSystem = computed(() => themeStore.followSystem)
 const availableThemes = computed(() => themeStore.availableThemes)
 const availableFontSizes = computed(() => themeStore.availableFontSizes)
 const fontSizeConfig = computed(() => themeStore.fontSizeConfig)
@@ -160,10 +153,6 @@ const setTheme = (theme) => {
 
 const setFontSize = (fontSize) => {
   themeStore.setFontSize(fontSize)
-}
-
-const toggleFollowSystem = () => {
-  themeStore.toggleFollowSystem()
 }
 
 const resetSettings = () => {
@@ -191,73 +180,19 @@ onMounted(() => {
   padding: 20px;
 }
 
-.settings-header {
-  text-align: center;
-  margin-bottom: 40px;
-  position: relative;
+.back-button {
+  margin-bottom: 24px;
 }
 
-.back-btn-container {
-  position: absolute;
-  left: 0;
-  top: 0;
+.page-header {
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e4e7ed;
 }
 
-.back-btn {
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-weight: 600;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 2px solid transparent;
-}
-
-/* 浅色模式按钮样式（默认） */
- .back-btn {
-   background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-   border-color: #3b82f6;
-   color: white;
- }
- 
- .back-btn:hover {
-   background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-   border-color: #2563eb;
-   transform: translateY(-2px);
-   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
- }
- 
- /* 深色模式按钮样式 */
- html[data-theme="dark"] .back-btn {
-   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-   border-color: #6366f1;
-   color: white;
- }
- 
- html[data-theme="dark"] .back-btn:hover {
-   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-   border-color: #4f46e5;
-   transform: translateY(-2px);
-   box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
- }
- 
- /* 高对比度模式按钮样式 */
- html[data-theme="high-contrast"] .back-btn {
-   background: linear-gradient(135deg, #ffff00 0%, #ffd700 100%);
-   border-color: #ffff00;
-   color: #000000;
-   font-weight: 700;
- }
- 
- html[data-theme="high-contrast"] .back-btn:hover {
-   background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
-   border-color: #ffd700;
-   transform: translateY(-2px);
-   box-shadow: 0 6px 20px rgba(255, 255, 0, 0.5);
- }
-
-.settings-header h1 {
+.page-header h1 {
   margin: 0 0 8px 0;
+  color: #303133;
   font-size: 28px;
   font-weight: 600;
 }

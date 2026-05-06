@@ -113,23 +113,6 @@ function initializeTheme() {
   applyFontSize(fontSize)
 }
 
-// 检测系统主题偏好
-function detectSystemTheme() {
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'dark'
-  }
-  return 'light'
-}
-
-// 监听系统主题变化
-function watchSystemTheme(callback) {
-  if (window.matchMedia) {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      callback(e.matches ? 'dark' : 'light')
-    })
-  }
-}
-
 // 获取主题配置
 function getThemeConfig() {
   return {
@@ -154,8 +137,6 @@ export {
   applyTheme,
   applyFontSize,
   initializeTheme,
-  detectSystemTheme,
-  watchSystemTheme,
   getThemeConfig,
   resetToDefaults
 }

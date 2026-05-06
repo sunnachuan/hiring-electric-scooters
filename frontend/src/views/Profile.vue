@@ -1531,10 +1531,15 @@ html[data-theme="high-contrast"] .user-role {
     padding: 40px 16px 16px;
   }
   
-  /* 手机版头像布局调整 */
+  /* 手机版头像布局调整 - 删除多余的浅蓝色边框 */
   .left-section {
     flex-direction: column;
     gap: 15px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
   }
   
   .user-name-section {

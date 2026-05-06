@@ -6,16 +6,13 @@ import {
   getCurrentTheme,
   getCurrentFontSize,
   applyTheme,
-  applyFontSize,
-  detectSystemTheme,
-  watchSystemTheme
+  applyFontSize
 } from '@/utils/theme'
 
 export const useThemeStore = defineStore('theme', () => {
   // 状态
   const currentTheme = ref(getCurrentTheme())
   const currentFontSize = ref(getCurrentFontSize())
-  const followSystem = ref(false)
   
   // 计算属性
   const themeConfig = computed(() => THEMES[currentTheme.value])
@@ -30,7 +27,6 @@ export const useThemeStore = defineStore('theme', () => {
     if (themeExists) {
       currentTheme.value = theme
       applyTheme(theme)
-      followSystem.value = false
     }
   }
   
@@ -41,26 +37,9 @@ export const useThemeStore = defineStore('theme', () => {
     }
   }
   
-  const toggleFollowSystem = () => {
-    followSystem.value = !followSystem.value
-    
-    if (followSystem.value) {
-      const systemTheme = detectSystemTheme()
-      setTheme(systemTheme)
-      
-      // 监听系统主题变化
-      watchSystemTheme((theme) => {
-        if (followSystem.value) {
-          setTheme(theme)
-        }
-      })
-    }
-  }
-  
   const resetSettings = () => {
     setTheme('light')
     setFontSize('normal')
-    followSystem.value = false
   }
   
   // 初始化
@@ -68,22 +47,12 @@ export const useThemeStore = defineStore('theme', () => {
     // 应用初始设置
     applyTheme(currentTheme.value)
     applyFontSize(currentFontSize.value)
-    
-    // 监听系统主题变化（如果启用）
-    if (followSystem.value) {
-      watchSystemTheme((theme) => {
-        if (followSystem.value) {
-          setTheme(theme)
-        }
-      })
-    }
   }
   
   return {
     // 状态
     currentTheme,
     currentFontSize,
-    followSystem,
     
     // 计算属性
     themeConfig,
@@ -94,7 +63,6 @@ export const useThemeStore = defineStore('theme', () => {
     // 动作
     setTheme,
     setFontSize,
-    toggleFollowSystem,
     resetSettings,
     initialize
   }

@@ -248,7 +248,8 @@ const activeMenu = computed(() => {
       path.startsWith('/my-bookings') || 
       path.startsWith('/account-settings') || 
       path.startsWith('/change-password') || 
-      path.startsWith('/insurance-terms')) {
+      path.startsWith('/insurance-terms') ||
+      path.startsWith('/theme-settings')) {
     return '/profile'
   }
   
