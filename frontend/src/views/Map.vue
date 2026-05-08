@@ -650,7 +650,8 @@ export default {
 @media (max-width: 768px) {
   .map-container {
     padding: 10px;
-    height: calc(100vh - 80px);
+    height: 60vh;
+    max-height: 400px;
   }
   
   .page-title {
@@ -659,6 +660,8 @@ export default {
   
   .amap-container {
     border-radius: 4px;
+    min-height: 280px;
+    max-height: 350px;
   }
   
   :deep(.custom-marker) {
@@ -683,6 +686,8 @@ export default {
 @media (max-width: 480px) {
   .map-container {
     padding: 5px;
+    height: 55vh;
+    max-height: 350px;
   }
   
   .page-header {
@@ -700,6 +705,11 @@ export default {
   .map-title {
     font-size: 16px;
     margin-bottom: 15px;
+  }
+  
+  .amap-container {
+    min-height: 250px;
+    max-height: 300px;
   }
 }
 </style>

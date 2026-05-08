@@ -14,23 +14,34 @@
             />
             <h1>电动滑板车租赁系统</h1>
           </div>
-          <div class="user-info">
-            <div class="welcome-card">
-              <div class="user-avatar">
-                <el-avatar 
-                  :size="36" 
-                  :src="userInfo?.avatar" 
-                  :style="{ background: getAvatarColor(userInfo?.username) }"
-                >
-                  <span class="avatar-text">{{ getAvatarInitial(userInfo?.username) }}</span>
-                </el-avatar>
-              </div>
-              <div class="welcome-content">
-                <span class="welcome-text">欢迎回来，</span>
-                <span class="username">{{ userInfo?.username }}</span>
-              </div>
-              <div class="status-indicator">
-                <div class="status-dot"></div>
+          <div class="header-right">
+            <!-- 手机端扫描按钮 -->
+            <button 
+              v-if="isMobile" 
+              class="scan-btn-mobile" 
+              @click="showScanner = true"
+              title="扫描二维码"
+            >
+              <img src="/src/assets/icon/scan.png" alt="扫描二维码" class="scan-icon" />
+            </button>
+            <div class="user-info">
+              <div class="welcome-card">
+                <div class="user-avatar">
+                  <el-avatar 
+                    :size="36" 
+                    :src="userInfo?.avatar" 
+                    :style="{ background: getAvatarColor(userInfo?.username) }"
+                  >
+                    <span class="avatar-text">{{ getAvatarInitial(userInfo?.username) }}</span>
+                  </el-avatar>
+                </div>
+                <div class="welcome-content">
+                  <span class="welcome-text">欢迎回来，</span>
+                  <span class="username">{{ userInfo?.username }}</span>
+                </div>
+                <div class="status-indicator">
+                  <div class="status-dot"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -45,80 +56,6 @@
           class="sidebar desktop-sidebar"
           :class="{ collapsed: isCollapsed }"
         >
-        <!-- 手机版导航栏 -->
-        <el-aside 
-          v-if="isMobile"
-          width="200px" 
-          class="sidebar mobile-sidebar"
-          :class="{ collapsed: isCollapsed }"
-        >
-          <el-menu
-            :default-active="activeMenu"
-            router
-            class="sidebar-menu"
-            background-color="#304156"
-            text-color="#bfcbd9"
-            active-text-color="#409EFF"
-          >
-            <el-menu-item index="/map">
-              <el-icon><MapLocation /></el-icon>
-              <template #title>
-                <span>地图找车</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item index="/scooters">
-              <el-icon><Location /></el-icon>
-              <template #title>
-                <span>滑板车列表</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item index="/feedback">
-              <el-icon><ChatDotRound /></el-icon>
-              <template #title>
-                <span>意见反馈</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item index="/profile">
-              <el-icon><User /></el-icon>
-              <template #title>
-                <span>个人中心</span>
-              </template>
-            </el-menu-item>
-            
-            <el-divider v-if="isAdmin" />
-            
-            <el-menu-item v-if="isAdmin" index="/admin/dashboard">
-              <el-icon><DataAnalysis /></el-icon>
-              <template #title>
-                <span>管理仪表盘</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item v-if="isAdmin" index="/admin/scooters">
-              <el-icon><Setting /></el-icon>
-              <template #title>
-                <span>滑板车管理</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item v-if="isAdmin" index="/admin/locations">
-              <el-icon><MapLocation /></el-icon>
-              <template #title>
-                <span>点位管理</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item v-if="isAdmin" index="/admin/feedback">
-              <el-icon><ChatLineRound /></el-icon>
-              <template #title>
-                <span>反馈管理</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item v-if="isAdmin" index="/admin/device-monitor">
-              <el-icon><Monitor /></el-icon>
-              <template #title>
-                <span>设备监控</span>
-              </template>
-            </el-menu-item>
-          </el-menu>
-        </el-aside>
           <el-menu
             :default-active="activeMenu"
             router
@@ -217,6 +154,12 @@
     </el-container>
     
     <router-view v-else />
+    
+    <!-- 二维码扫描器 -->
+    <QrCodeScanner 
+      :visible="showScanner" 
+      @close="showScanner = false" 
+    />
   </div>
 </template>
 
@@ -226,6 +169,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import Footer from '@/components/Footer.vue'
+import QrCodeScanner from '@/components/QrCodeScanner.vue'
 import { 
   MapLocation, Location, User, ChatDotRound,
   DataAnalysis, Setting, ChatLineRound, Monitor
@@ -272,6 +216,16 @@ const isCollapsed = ref(false)
 
 // 判断是否为手机端
 const isMobile = ref(false)
+
+// 扫码器显示状态
+const showScanner = ref(false)
+
+// 处理扫码成功
+const handleScanSuccess = (result) => {
+  showScanner.value = false
+  // 这里可以处理扫码结果，比如跳转到解锁页面
+  console.log('扫码结果:', result)
+}
 
 // 切换侧边栏状态
 const toggleSidebar = () => {
@@ -341,7 +295,7 @@ const navigateTo = (path) => {
 }
 
 .app-header {
-  background: linear-gradient(135deg, var(--color-primary) 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light, #764ba2) 100%);
   border: none;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   padding: 0 20px;
@@ -351,6 +305,7 @@ const navigateTo = (path) => {
   color: white;
   position: relative;
   z-index: 1000;
+  transition: background 0.3s ease;
 }
 
 .app-header::before {
@@ -377,6 +332,65 @@ const navigateTo = (path) => {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.scan-btn-mobile {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  order: 2;
+}
+
+.scan-icon {
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)) brightness(1.1);
+}
+
+.scan-btn-mobile:hover .scan-icon {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.user-info {
+  order: 1;
+}
+
+.scan-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.scan-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.scan-btn .el-icon {
+  font-size: 18px;
 }
 
 .sidebar-toggle {
@@ -774,18 +788,31 @@ const navigateTo = (path) => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  /* 手机版标题居中 */
+  /* 手机版标题居中，右侧显示扫描按钮 */
   .header-content {
-    justify-content: center;
+    justify-content: space-between;
   }
   
   .header-content h1 {
     font-size: 20px;
     text-align: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
   
   .header-left {
     gap: 12px;
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .header-right {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: auto;
   }
   
   .sidebar-toggle {
