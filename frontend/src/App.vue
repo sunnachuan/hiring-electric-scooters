@@ -12,7 +12,7 @@
               size="small"
               circle
             />
-            <h1>电动滑板车租赁系统</h1>
+            <h1>极客出行</h1>
           </div>
           <div class="header-right">
             <!-- 手机端扫描按钮 -->
@@ -159,6 +159,8 @@
     <QrCodeScanner 
       :visible="showScanner" 
       @close="showScanner = false" 
+      @scan-success="handleScanSuccess"
+      @error="handleScanError"
     />
   </div>
 </template>
@@ -174,6 +176,7 @@ import {
   MapLocation, Location, User, ChatDotRound,
   DataAnalysis, Setting, ChatLineRound, Monitor
 } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const route = useRoute()
@@ -223,8 +226,20 @@ const showScanner = ref(false)
 // 处理扫码成功
 const handleScanSuccess = (result) => {
   showScanner.value = false
-  // 这里可以处理扫码结果，比如跳转到解锁页面
-  console.log('扫码结果:', result)
+  ElMessage.success('扫码成功！')
+  // 跳转到解锁页面并传递二维码内容
+  router.push({ name: 'Unlock', params: { qrCode: result } })
+}
+
+// 处理扫码错误
+const handleScanError = (error) => {
+  console.error('扫码错误:', error)
+  // 提示用户，然后直接跳转到解锁页面使用手动输入
+  setTimeout(() => {
+    showScanner.value = false
+    ElMessage.warning('摄像头无法使用，请使用手动输入')
+    router.push({ name: 'Unlock' })
+  }, 1500)
 }
 
 // 切换侧边栏状态

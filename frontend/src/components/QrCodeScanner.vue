@@ -8,12 +8,24 @@
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
-      <span class="scanner-title">扫码</span>
+      <span class="scanner-title">扫一扫</span>
       <div class="placeholder"></div>
     </div>
     
     <!-- 扫描区域 -->
     <div class="scanner-container">
+      <!-- 视频元素 -->
+      <video 
+        ref="videoRef" 
+        class="scanner-video" 
+        playsinline
+        autoplay
+        muted
+      ></video>
+      
+      <!-- 隐藏的 canvas 用于二维码识别 -->
+      <canvas ref="canvasRef" style="display: none;"></canvas>
+      
       <!-- 扫描框 -->
       <div class="scan-frame">
         <!-- 四角装饰 -->
@@ -30,7 +42,7 @@
       </div>
       
       <!-- 提示文字 -->
-      <p class="scan-hint">将二维码对准取景框</p>
+      <p class="scan-hint">{{ hintText }}</p>
     </div>
     
     <!-- 底部提示 -->
@@ -41,7 +53,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import jsQR from 'jsqr'
 
 const props = defineProps({
   visible: {
@@ -50,45 +63,144 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'scan-success'])
+const emit = defineEmits(['close', 'scan-success', 'error'])
 
+const videoRef = ref(null)
+const canvasRef = ref(null)
 const isScanning = ref(false)
+const streamRef = ref(null)
+const animationFrameRef = ref(null)
+const hintText = ref('正在打开摄像头...')
 
-// 自动开始扫描
-const startScan = () => {
+// 调试信息
+console.log('=== QrCodeScanner 组件加载 ===')
+console.log('协议:', window.location.protocol)
+console.log('主机:', window.location.hostname)
+console.log('mediaDevices:', !!navigator.mediaDevices)
+
+const startCamera = async () => {
+  console.log('--- startCamera 开始 ---')
+  hintText.value = '正在打开摄像头...'
+  
+  if (!navigator.mediaDevices) {
+    console.error('navigator.mediaDevices 不存在')
+    hintText.value = '浏览器不支持摄像头'
+    emit('error', '浏览器不支持')
+    return
+  }
+  
+  if (!navigator.mediaDevices.getUserMedia) {
+    console.error('getUserMedia 不存在')
+    hintText.value = '浏览器不支持摄像头'
+    emit('error', '浏览器不支持')
+    return
+  }
+  
+  try {
+    console.log('请求摄像头权限...')
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+    console.log('权限获取成功')
+    streamRef.value = stream
+    
+    await nextTick()
+    
+    if (videoRef.value) {
+      videoRef.value.srcObject = stream
+      console.log('视频流已绑定')
+      hintText.value = '将二维码对准取景框'
+      startScanning()
+    }
+  } catch (error) {
+    console.error('摄像头失败:', error)
+    hintText.value = '摄像头无法使用，请使用手动输入'
+    emit('error', error)
+  }
+}
+
+const stopCamera = () => {
+  if (streamRef.value) {
+    streamRef.value.getTracks().forEach(track => track.stop())
+    streamRef.value = null
+  }
+}
+
+const startScanning = () => {
   isScanning.value = true
+  scanQRCode()
 }
 
-// 停止扫描
-const stopScan = () => {
+const stopScanning = () => {
   isScanning.value = false
+  if (animationFrameRef.value) {
+    cancelAnimationFrame(animationFrameRef.value)
+    animationFrameRef.value = null
+  }
 }
 
-// 关闭扫描器
+const scanQRCode = () => {
+  if (!isScanning.value) return
+  if (!videoRef.value || !canvasRef.value) {
+    animationFrameRef.value = requestAnimationFrame(scanQRCode)
+    return
+  }
+  
+  const video = videoRef.value
+  const canvas = canvasRef.value
+  const ctx = canvas.getContext('2d')
+  
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const code = jsQR(imageData.data, imageData.width, imageData.height)
+    
+    if (code && code.data && code.data.trim().length >= 3) {
+      handleScanSuccess(code.data)
+      return
+    }
+  }
+  
+  animationFrameRef.value = requestAnimationFrame(scanQRCode)
+}
+
+const handleScanSuccess = (data) => {
+  stopScanning()
+  emit('scan-success', data)
+  
+  if (navigator.vibrate) {
+    navigator.vibrate(100)
+  }
+  
+  setTimeout(() => {
+    handleClose()
+  }, 300)
+}
+
 const handleClose = () => {
-  stopScan()
+  stopScanning()
+  stopCamera()
   emit('close')
 }
 
-// 监听 visible 变化，自动开始/停止扫描
-watch(() => props.visible, (newVal) => {
+watch(() => props.visible, async (newVal) => {
   if (newVal) {
-    // 延迟一点开始扫描，让界面渲染完成
-    setTimeout(startScan, 300)
+    await nextTick()
+    await startCamera()
   } else {
-    stopScan()
+    handleClose()
   }
 })
 
-// 生命周期
 onMounted(() => {
   if (props.visible) {
-    setTimeout(startScan, 300)
+    startCamera()
   }
 })
 
 onUnmounted(() => {
-  stopScan()
+  handleClose()
 })
 </script>
 
@@ -111,6 +223,8 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 16px 20px;
   background: rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 10;
 }
 
 .close-btn {
@@ -119,17 +233,16 @@ onUnmounted(() => {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   border: none;
-  color: white;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s;
+  color: white;
+  transition: background 0.2s;
 }
 
 .close-btn:hover {
   background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.05);
 }
 
 .icon {
@@ -140,7 +253,7 @@ onUnmounted(() => {
 .scanner-title {
   color: white;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .placeholder {
@@ -150,83 +263,84 @@ onUnmounted(() => {
 .scanner-container {
   flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.scanner-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .scan-frame {
+  width: 250px;
+  height: 250px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
   position: relative;
-  width: 280px;
-  height: 280px;
-  border-radius: 20px;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.6);
-  box-shadow: 0 0 40px rgba(16, 185, 129, 0.2);
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .corner {
   position: absolute;
-  width: 28px;
-  height: 28px;
-  border-color: #10B981;
-  border-style: solid;
-  border-width: 4px;
-  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #00d4aa;
 }
 
 .corner.top-left {
-  top: 8px;
-  left: 8px;
-  border-right-width: 0;
-  border-bottom-width: 0;
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
 }
 
 .corner.top-right {
-  top: 8px;
-  right: 8px;
-  border-left-width: 0;
-  border-bottom-width: 0;
+  top: -3px;
+  right: -3px;
+  border-left: none;
+  border-bottom: none;
 }
 
 .corner.bottom-left {
-  bottom: 8px;
-  left: 8px;
-  border-right-width: 0;
-  border-top-width: 0;
+  bottom: -3px;
+  left: -3px;
+  border-right: none;
+  border-top: none;
 }
 
 .corner.bottom-right {
-  bottom: 8px;
-  right: 8px;
-  border-left-width: 0;
-  border-top-width: 0;
+  bottom: -3px;
+  right: -3px;
+  border-left: none;
+  border-top: none;
 }
 
 .scan-line {
   position: absolute;
-  left: 10px;
-  right: 10px;
+  left: 0;
+  right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #10B981, transparent);
-  box-shadow: 0 0 15px #10B981, 0 0 30px rgba(16, 185, 129, 0.5);
-  top: -2px;
+  background: linear-gradient(90deg, transparent, #00d4aa, transparent);
+  top: 50%;
   opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .scan-line.active {
-  animation: scanMove 2s linear infinite;
   opacity: 1;
+  animation: scan 2s linear infinite;
 }
 
-@keyframes scanMove {
-  0% {
-    top: 10px;
-  }
-  100% {
-    top: calc(100% - 10px);
-  }
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
 }
 
 .scan-grid {
@@ -236,26 +350,32 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   background-image: 
-    linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(0, 212, 170, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 170, 0.1) 1px, transparent 1px);
   background-size: 20px 20px;
+  pointer-events: none;
 }
 
 .scan-hint {
-  color: rgba(255, 255, 255, 0.7);
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: white;
   font-size: 14px;
-  margin: 24px 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .scanner-footer {
-  padding: 16px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
   text-align: center;
-  background: rgba(0, 0, 0, 0.3);
 }
 
 .scanner-footer p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
   margin: 0;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 12px;
 }
 </style>

@@ -229,10 +229,13 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { 
   Camera, Search, Bicycle, Unlock, Lock, Monitor, Refresh 
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+
+const route = useRoute()
 
 // 响应式数据
 const isCameraActive = ref(false)
@@ -382,7 +385,12 @@ const fetchScooterByQRCode = async (qrCode) => {
 
 // 生命周期
 onMounted(() => {
-  ElMessage.info('请扫描滑板车上的二维码开始使用')
+  // 检查是否有路由传来的二维码参数
+  if (route.params.qrCode) {
+    handleQRCodeScan(route.params.qrCode)
+  } else {
+    ElMessage.info('请扫描滑板车上的二维码开始使用')
+  }
   
   // 添加键盘事件监听
   document.addEventListener('keydown', handleKeydown)

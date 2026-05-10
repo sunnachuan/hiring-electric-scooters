@@ -1,8 +1,19 @@
 import axios from 'axios'
 
+// 获取正确的API地址，让手机和电脑都能访问
+const getBaseURL = () => {
+  const hostname = window.location.hostname
+  // 如果是localhost或127.0.0.1，还是用localhost
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:8082/api'
+  }
+  // 否则用当前访问的IP地址（但后端仍然用http）
+  return `http://${hostname}:8082/api`
+}
+
 const api = axios.create({
-  baseURL: 'http://localhost:8082/api',
-  timeout: 10000
+  baseURL: getBaseURL(),
+  timeout: 15000
 })
 
 // 检查token是否即将过期（在过期前5分钟）
