@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -50,11 +51,10 @@ public class AdminController {
         LocalDateTime weekAgo = LocalDateTime.now().minusWeeks(1);
         
         // 获取一周内的总收入
-        Double totalRevenue = bookingService.calculateTotalRevenueSince(weekAgo);
-        if (totalRevenue == null) totalRevenue = 0.0;
+        BigDecimal totalRevenue = bookingService.calculateTotalRevenueSince(weekAgo);
         
         // 获取按租用时长分类的收入
-        Map<String, Double> revenueByDuration = bookingService.getRevenueByDurationTypeSince(weekAgo);
+        Map<String, BigDecimal> revenueByDuration = bookingService.getRevenueByDurationTypeSince(weekAgo);
         
         Map<String, Object> response = new HashMap<>();
         response.put("totalRevenue", totalRevenue);
@@ -68,7 +68,7 @@ public class AdminController {
         LocalDateTime weekAgo = LocalDateTime.now().minusWeeks(1);
         
         // 获取一周内的每日收入
-        Map<String, Double> revenueByDay = bookingService.getDailyRevenueSince(weekAgo);
+        Map<String, BigDecimal> revenueByDay = bookingService.getDailyRevenueSince(weekAgo);
         
         Map<String, Object> response = new HashMap<>();
         response.put("dailyRevenue", revenueByDay);

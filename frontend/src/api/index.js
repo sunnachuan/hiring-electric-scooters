@@ -1,18 +1,8 @@
 import axios from 'axios'
 
-// 获取正确的API地址，让手机和电脑都能访问
-const getBaseURL = () => {
-  const hostname = window.location.hostname
-  // 如果是localhost或127.0.0.1，还是用localhost
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:8082/api'
-  }
-  // 否则用当前访问的IP地址（但后端仍然用http）
-  return `http://${hostname}:8082/api`
-}
-
+// 使用相对路径，通过 Vite 代理转发，避免 CORS 问题
 const api = axios.create({
-  baseURL: getBaseURL(),
+  baseURL: '/api',
   timeout: 15000
 })
 

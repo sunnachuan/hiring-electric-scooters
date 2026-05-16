@@ -1,7 +1,6 @@
 package com.scooter.service;
 
 import com.scooter.entity.Booking;
-import com.scooter.entity.Scooter;
 import com.scooter.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -59,8 +58,10 @@ public class BillingService {
         Duration duration = Duration.between(booking.getStartTime(), booking.getEndTime());
         long minutes = duration.toMinutes();
         
-        // 转换为小时（向上取整）
-        BigDecimal hours = BigDecimal.valueOf(Math.ceil(minutes / 60.0));
+        // 转换为小时（向上取整），使用 BigDecimal 避免浮点精度丢失
+        BigDecimal minutesBd = BigDecimal.valueOf(minutes);
+        BigDecimal sixty = new BigDecimal("60");
+        BigDecimal hours = minutesBd.divide(sixty, 10, RoundingMode.CEILING);
         
         // 获取时间费率
         BigDecimal timeRate = booking.getTimeRate() != null ? 
@@ -73,15 +74,16 @@ public class BillingService {
      * 计算距离费用
      */
     private BigDecimal calculateDistanceFee(Booking booking) {
-        if (booking.getDistanceTraveled() == null || booking.getDistanceTraveled() <= 0) {
+        if (booking.getDistanceTraveled() == null || 
+            booking.getDistanceTraveled().compareTo(BigDecimal.ZERO) <= 0) {
             return BigDecimal.ZERO;
         }
         
         // 获取距离费率
         BigDecimal distanceRate = booking.getDistanceRate() != null ? 
-                booking.getDistanceRate() : BigDecimal.valueOf(0.5); // 默认0.5元/公里
+                booking.getDistanceRate() : new BigDecimal("0.50"); // 默认0.5元/公里
         
-        return distanceRate.multiply(BigDecimal.valueOf(booking.getDistanceTraveled()));
+        return distanceRate.multiply(booking.getDistanceTraveled());
     }
     
     /**
@@ -115,14 +117,17 @@ public class BillingService {
     /**
      * 计算当前行驶距离
      */
-    private Double calculateCurrentDistance(Booking booking) {
+    private BigDecimal calculateCurrentDistance(Booking booking) {
         // 这里应该调用设备服务获取当前位置
         // 暂时返回一个估算值
         Duration duration = Duration.between(booking.getStartTime(), LocalDateTime.now());
         long minutes = duration.toMinutes();
         
         // 假设平均速度10km/h
-        return minutes * 10.0 / 60.0;
+        BigDecimal minutesBd = BigDecimal.valueOf(minutes);
+        BigDecimal speed = new BigDecimal("10.00");
+        BigDecimal sixty = new BigDecimal("60");
+        return speed.multiply(minutesBd).divide(sixty, 2, RoundingMode.HALF_UP);
     }
     
     /**
@@ -148,7 +153,7 @@ public class BillingService {
                 booking.getStartLatitude(), booking.getStartLongitude(),
                 booking.getEndLatitude(), booking.getEndLongitude()
             );
-            booking.setDistanceTraveled(distance);
+            booking.setDistanceTraveled(BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_UP));
         }
         
         return bookingRepository.save(booking);

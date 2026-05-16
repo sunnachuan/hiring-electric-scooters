@@ -72,38 +72,47 @@ const streamRef = ref(null)
 const animationFrameRef = ref(null)
 const hintText = ref('正在打开摄像头...')
 
-// 调试信息
 console.log('=== QrCodeScanner 组件加载 ===')
 console.log('协议:', window.location.protocol)
 console.log('主机:', window.location.hostname)
+console.log('isSecureContext:', window.isSecureContext)
 console.log('mediaDevices:', !!navigator.mediaDevices)
 
 const startCamera = async () => {
   console.log('--- startCamera 开始 ---')
   hintText.value = '正在打开摄像头...'
-  
+
+  if (!window.isSecureContext) {
+    console.error('当前不是安全上下文，摄像头不可用')
+    hintText.value = '摄像头需要 HTTPS 连接，请使用 https:// 地址访问'
+    emit('error', '非安全上下文：摄像头需要 HTTPS')
+    return
+  }
+
   if (!navigator.mediaDevices) {
     console.error('navigator.mediaDevices 不存在')
-    hintText.value = '浏览器不支持摄像头'
-    emit('error', '浏览器不支持')
+    hintText.value = '当前浏览器不支持摄像头 API'
+    emit('error', '浏览器不支持 mediaDevices')
     return
   }
-  
+
   if (!navigator.mediaDevices.getUserMedia) {
     console.error('getUserMedia 不存在')
-    hintText.value = '浏览器不支持摄像头'
-    emit('error', '浏览器不支持')
+    hintText.value = '当前浏览器不支持摄像头调用'
+    emit('error', '浏览器不支持 getUserMedia')
     return
   }
-  
+
   try {
     console.log('请求摄像头权限...')
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' }
+    })
     console.log('权限获取成功')
     streamRef.value = stream
-    
+
     await nextTick()
-    
+
     if (videoRef.value) {
       videoRef.value.srcObject = stream
       console.log('视频流已绑定')
@@ -111,8 +120,18 @@ const startCamera = async () => {
       startScanning()
     }
   } catch (error) {
-    console.error('摄像头失败:', error)
-    hintText.value = '摄像头无法使用，请使用手动输入'
+    console.error('摄像头失败:', error.name, error.message)
+    if (error.name === 'NotAllowedError') {
+      hintText.value = '摄像头权限被拒绝，请在浏览器设置中允许'
+    } else if (error.name === 'NotFoundError') {
+      hintText.value = '未检测到摄像头设备'
+    } else if (error.name === 'NotReadableError') {
+      hintText.value = '摄像头被其他应用占用'
+    } else if (error.name === 'OverconstrainedError') {
+      hintText.value = '摄像头不支持所需分辨率'
+    } else {
+      hintText.value = '摄像头无法使用，请检查连接是否为 HTTPS'
+    }
     emit('error', error)
   }
 }

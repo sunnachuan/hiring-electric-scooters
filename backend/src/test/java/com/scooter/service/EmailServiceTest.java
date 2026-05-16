@@ -36,8 +36,8 @@ public class EmailServiceTest {
         Scooter testScooter = new Scooter();
         testScooter.setId(1L);
         testScooter.setModel("测试滑板车");
-        testScooter.setHourlyRate(BigDecimal.valueOf(20.0));
-        testScooter.setDailyRate(BigDecimal.valueOf(100.0));
+        testScooter.setHourlyRate(new BigDecimal("20.00"));
+        testScooter.setDailyRate(new BigDecimal("100.00"));
         testScooter.setStatus("AVAILABLE");
 
         Booking testBooking = new Booking();
@@ -47,8 +47,8 @@ public class EmailServiceTest {
         testBooking.setStartTime(LocalDateTime.now());
         testBooking.setEndTime(LocalDateTime.now().plusHours(1));
         testBooking.setDurationType("1h");
-        testBooking.setTotalPrice(BigDecimal.valueOf(20.0));
-        testBooking.setDiscountApplied(BigDecimal.valueOf(0.9));
+        testBooking.setTotalPrice(new BigDecimal("20.00"));
+        testBooking.setDiscountApplied(new BigDecimal("0.90"));
         testBooking.setStatus("ACTIVE");
         testBooking.setCreatedAt(LocalDateTime.now());
         testBooking.setUpdatedAt(LocalDateTime.now());

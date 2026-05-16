@@ -233,7 +233,9 @@ const handleLogin = async () => {
   loading.value = true
   
   try {
+    console.log('开始登录，请求数据:', loginForm.value)
     const result = await authStore.login(loginForm.value)
+    console.log('登录响应:', result)
     
     if (result.success) {
       ElMessage.success('登录成功')
@@ -242,7 +244,8 @@ const handleLogin = async () => {
       ElMessage.error(result.message)
     }
   } catch (error) {
-    ElMessage.error('登录失败，请重试')
+    console.error('登录异常:', error)
+    ElMessage.error(`登录失败: ${error?.message || error || '未知错误'}`)
   } finally {
     loading.value = false
   }

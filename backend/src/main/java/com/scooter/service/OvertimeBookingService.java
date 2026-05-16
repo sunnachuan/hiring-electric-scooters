@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -116,7 +117,7 @@ public class OvertimeBookingService {
         }
         
         // 更新超时费用（2倍费率）
-        updateOvertimeFee(booking, 2.0);
+        updateOvertimeFee(booking, new BigDecimal("2.00"));
     }
     
     /**
@@ -133,7 +134,7 @@ public class OvertimeBookingService {
         }
         
         // 更新超时费用（3倍费率）
-        updateOvertimeFee(booking, 3.0);
+        updateOvertimeFee(booking, new BigDecimal("3.00"));
         
         // 超过4小时启动紧急处理
         if (ChronoUnit.HOURS.between(booking.getEndTime(), now) >= 4) {
@@ -152,15 +153,17 @@ public class OvertimeBookingService {
     /**
      * 更新超时费用
      */
-    private void updateOvertimeFee(Booking booking, double rateMultiplier) {
+    private void updateOvertimeFee(Booking booking, BigDecimal rateMultiplier) {
         BigDecimal baseRate = booking.getTimeRate();
         if (baseRate == null) {
-            baseRate = new BigDecimal("5.0"); // 默认费率
+            baseRate = new BigDecimal("5.00"); // 默认费率
         }
         
-        // 计算超时费用（按小时计算）
-        BigDecimal overtimeHours = new BigDecimal(booking.getOvertimeMinutes()).divide(new BigDecimal(60), 2, java.math.RoundingMode.UP);
-        BigDecimal fee = baseRate.multiply(new BigDecimal(rateMultiplier)).multiply(overtimeHours);
+        // 按分钟精确计费，避免向上取整到小时导致多收费
+        BigDecimal overtimeMinutes = BigDecimal.valueOf(booking.getOvertimeMinutes());
+        BigDecimal sixty = new BigDecimal("60");
+        BigDecimal fee = baseRate.multiply(rateMultiplier).multiply(overtimeMinutes)
+                .divide(sixty, 2, RoundingMode.HALF_UP);
         
         booking.setOvertimeFee(fee);
         log.info("预订 {} 超时费用更新为: {} 元", booking.getId(), fee);

@@ -62,7 +62,7 @@ public class Booking {
     private LocalDateTime updatedAt;
     
     @Column(name = "distance_traveled", precision = 10, scale = 2)
-    private Double distanceTraveled = 0.0; // 行驶距离（公里）
+    private BigDecimal distanceTraveled = BigDecimal.ZERO; // 行驶距离（公里）
     
     @Column(name = "start_latitude", precision = 10, scale = 8)
     private Double startLatitude; // 起始位置纬度

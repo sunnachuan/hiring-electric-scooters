@@ -115,19 +115,19 @@ public class BookingService {
             return basePrice.multiply(BigDecimal.valueOf(hours));
         } else if (hours <= 8) {
             // 4-8小时：85% 折扣
-            return basePrice.multiply(BigDecimal.valueOf(hours)).multiply(BigDecimal.valueOf(0.85));
+            return basePrice.multiply(BigDecimal.valueOf(hours)).multiply(new BigDecimal("0.85"));
         } else if (hours <= 24) {
             // 9-24小时：60% 折扣，但最高收12小时费用
             int effectiveHours = Math.min(hours, 12);
-            return basePrice.multiply(BigDecimal.valueOf(effectiveHours)).multiply(BigDecimal.valueOf(0.6));
+            return basePrice.multiply(BigDecimal.valueOf(effectiveHours)).multiply(new BigDecimal("0.60"));
         } else if (hours <= 72) {
             // 1-3天：50% 折扣，每天按12小时计费
             int days = (int) Math.ceil(hours / 24.0);
-            return basePrice.multiply(BigDecimal.valueOf(12 * days)).multiply(BigDecimal.valueOf(0.5));
+            return basePrice.multiply(BigDecimal.valueOf(12 * days)).multiply(new BigDecimal("0.50"));
         } else {
             // 3天以上：30% 折扣，每天按12小时计费
             int days = (int) Math.ceil(hours / 24.0);
-            return basePrice.multiply(BigDecimal.valueOf(12 * days)).multiply(BigDecimal.valueOf(0.3));
+            return basePrice.multiply(BigDecimal.valueOf(12 * days)).multiply(new BigDecimal("0.30"));
         }
     }
     
@@ -144,12 +144,12 @@ public class BookingService {
                 .sum();
         
         if (totalHours >= 8) {
-            discount = BigDecimal.valueOf(0.9); // 9折
+            discount = new BigDecimal("0.90"); // 9折
         }
         
         // 检查学生/老年人折扣
         if (user.getIsStudent() || user.getIsSenior()) {
-            BigDecimal specialDiscount = BigDecimal.valueOf(0.95); // 9.5折
+            BigDecimal specialDiscount = new BigDecimal("0.95"); // 9.5折
             if (specialDiscount.compareTo(discount) < 0) {
                 discount = specialDiscount;
             }
@@ -353,30 +353,30 @@ public class BookingService {
     /**
      * 计算从指定时间开始的总收入
      */
-    public Double calculateTotalRevenueSince(LocalDateTime startDate) {
+    public BigDecimal calculateTotalRevenueSince(LocalDateTime startDate) {
         BigDecimal result = bookingRepository.calculateTotalRevenueSince(startDate);
-        return result != null ? result.doubleValue() : 0.0;
+        return result != null ? result : BigDecimal.ZERO;
     }
     
     /**
      * 获取按租用时长分类的收入统计
      */
-    public Map<String, Double> getRevenueByDurationTypeSince(LocalDateTime startDate) {
+    public Map<String, BigDecimal> getRevenueByDurationTypeSince(LocalDateTime startDate) {
         List<Object[]> results = bookingRepository.findRevenueByDurationTypeSince(startDate);
-        Map<String, Double> revenueByDuration = new HashMap<>();
+        Map<String, BigDecimal> revenueByDuration = new HashMap<>();
         
         // 初始化所有可能的租用时长类型
-        revenueByDuration.put("1h", 0.0);
-        revenueByDuration.put("4h", 0.0);
-        revenueByDuration.put("1d", 0.0);
-        revenueByDuration.put("1w", 0.0);
+        revenueByDuration.put("1h", BigDecimal.ZERO);
+        revenueByDuration.put("4h", BigDecimal.ZERO);
+        revenueByDuration.put("1d", BigDecimal.ZERO);
+        revenueByDuration.put("1w", BigDecimal.ZERO);
         
         // 填充实际数据
         for (Object[] result : results) {
             String durationType = (String) result[0];
             BigDecimal revenue = (BigDecimal) result[1];
             if (revenue != null) {
-                revenueByDuration.put(durationType, revenue.doubleValue());
+                revenueByDuration.put(durationType, revenue);
             }
         }
         
@@ -386,15 +386,15 @@ public class BookingService {
     /**
      * 获取每日收入统计
      */
-    public Map<String, Double> getDailyRevenueSince(LocalDateTime startDate) {
+    public Map<String, BigDecimal> getDailyRevenueSince(LocalDateTime startDate) {
         List<Object[]> results = bookingRepository.findDailyRevenueSince(startDate);
-        Map<String, Double> dailyRevenue = new HashMap<>();
+        Map<String, BigDecimal> dailyRevenue = new HashMap<>();
         
         // 生成过去7天的日期
         for (int i = 6; i >= 0; i--) {
             LocalDateTime date = LocalDateTime.now().minusDays(i);
             String dateKey = date.toLocalDate().toString();
-            dailyRevenue.put(dateKey, 0.0);
+            dailyRevenue.put(dateKey, BigDecimal.ZERO);
         }
         
         // 填充实际数据
@@ -404,10 +404,9 @@ public class BookingService {
                 BigDecimal revenue = (BigDecimal) result[1];
                 if (revenue != null && startTime != null) {
                     String dateKey = startTime.toLocalDate().toString();
-                    dailyRevenue.put(dateKey, dailyRevenue.getOrDefault(dateKey, 0.0) + revenue.doubleValue());
+                    dailyRevenue.merge(dateKey, revenue, BigDecimal::add);
                 }
             } catch (Exception e) {
-                // 如果类型转换失败，使用默认值
                 System.err.println("Error processing daily revenue data: " + e.getMessage());
             }
         }

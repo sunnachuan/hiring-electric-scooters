@@ -19,20 +19,26 @@ const hostname = ref(window.location.hostname)
 
 const startTest = async () => {
   console.log('=== 简单测试 ===')
+  console.log('isSecureContext:', window.isSecureContext)
   console.log('navigator.mediaDevices:', !!navigator.mediaDevices)
   console.log('getUserMedia:', !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia))
   status.value = '正在启动...'
-  
+
+  if (!window.isSecureContext) {
+    status.value = '错误：需要 HTTPS 连接'
+    return
+  }
+
   try {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       status.value = '不支持 API'
       return
     }
-    
+
     const stream = await navigator.mediaDevices.getUserMedia({ video: true })
     console.log('成功获取 stream')
     status.value = '成功！'
-    
+
     if (videoRef.value) {
       videoRef.value.srcObject = stream
       videoRef.value.onloadedmetadata = () => {

@@ -9,7 +9,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   const login = async (credentials) => {
     try {
+      console.log('发送登录请求，URL:', '/auth/login', '数据:', credentials)
       const response = await api.post('/auth/login', credentials)
+      console.log('登录响应数据:', response)
       const { token: newToken, ...userData } = response.data
       
       token.value = newToken
@@ -23,11 +25,32 @@ export const useAuthStore = defineStore('auth', () => {
       
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
       
+      console.log('登录成功，用户信息:', userData)
       return { success: true }
     } catch (error) {
+      console.error('登录请求失败:', error)
+      console.error('错误详情:', {
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status
+      })
+      
+      let errorMessage = '登录失败'
+      if (error.response?.data) {
+        if (typeof error.response.data === 'string') {
+          errorMessage = error.response.data
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message
+        } else if (error.response.data.error) {
+          errorMessage = error.response.data.error
+        }
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
       return { 
         success: false, 
-        message: error.response?.data?.message || '登录失败' 
+        message: errorMessage
       }
     }
   }

@@ -241,12 +241,12 @@ const handleScanSuccess = (result) => {
 // 处理扫码错误
 const handleScanError = (error) => {
   console.error('扫码错误:', error)
-  // 提示用户，然后直接跳转到解锁页面使用手动输入
+  const errMsg = typeof error === 'string' ? error : (error?.message || '摄像头无法使用')
   setTimeout(() => {
     showScanner.value = false
-    ElMessage.warning('摄像头无法使用，请使用手动输入')
+    ElMessage.warning(errMsg + '，请使用手动输入')
     router.push({ name: 'Unlock' })
-  }, 1500)
+  }, 2000)
 }
 
 // 切换侧边栏状态
@@ -271,6 +271,37 @@ onMounted(() => {
   // 初始化主题设置
   const themeStore = useThemeStore()
   themeStore.initialize()
+  
+  // 全局错误监听 - 防止页面自动刷新并保存错误信息
+  window.onerror = (message, source, lineno, colno, error) => {
+    const errorInfo = `[全局错误] ${message} at ${source}:${lineno}:${colno}`
+    console.error(errorInfo, error)
+    localStorage.setItem('lastError', JSON.stringify({
+      message, source, lineno, colno,
+      stack: error?.stack,
+      time: new Date().toISOString()
+    }))
+    return false // 让浏览器继续显示默认错误
+  }
+  
+  window.addEventListener('unhandledrejection', (event) => {
+    const errorInfo = `[未处理的Promise错误] ${event.reason}`
+    console.error(errorInfo, event.reason)
+    localStorage.setItem('lastError', JSON.stringify({
+      message: String(event.reason),
+      stack: event.reason?.stack,
+      time: new Date().toISOString()
+    }))
+  })
+  
+  // 检查是否有保存的错误信息
+  const lastError = localStorage.getItem('lastError')
+  if (lastError) {
+    try {
+      const errorData = JSON.parse(lastError)
+      console.warn('上次运行的错误:', errorData)
+    } catch (e) {}
+  }
 })
 
 onUnmounted(() => {
