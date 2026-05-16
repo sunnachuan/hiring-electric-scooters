@@ -91,14 +91,28 @@ function applyTheme(theme) {
 // 应用字体大小
 function applyFontSize(fontSize) {
   const html = document.documentElement
+  const body = document.body
   
-  // 移除所有字体大小属性
-  Object.values(FONT_SIZES).forEach(fs => {
-    html.removeAttribute(`data-font-size-${fs.value}`)
-  })
-  
-  // 设置新字体大小
+  // 设置新字体大小属性
   html.setAttribute('data-font-size', fontSize)
+  
+  // 直接通过 zoom 属性来缩放整个页面，这会影响所有元素
+  const zoomMap = {
+    'small': 0.9,
+    'normal': 1,
+    'large': 1.15
+  }
+  
+  // 应用 zoom
+  body.style.zoom = zoomMap[fontSize] || 1
+  
+  // 同时也设置 html 的 font-size 作为备用方案
+  const scaleMap = {
+    'small': 0.875,
+    'normal': 1,
+    'large': 1.125
+  }
+  html.style.fontSize = `${16 * (scaleMap[fontSize] || 1)}px`
   
   // 保存到本地存储
   localStorage.setItem(STORAGE_KEYS.FONT_SIZE, fontSize)

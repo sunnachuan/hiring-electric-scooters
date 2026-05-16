@@ -103,10 +103,16 @@
                 <span>滑板车管理</span>
               </template>
             </el-menu-item>
-            <el-menu-item v-if="isAdmin" index="/admin/locations">
-              <el-icon><MapLocation /></el-icon>
+            <el-menu-item v-if="isAdmin" index="/admin/operations">
+              <el-icon><Operation /></el-icon>
               <template #title>
-                <span>点位管理</span>
+                <span>运维管理</span>
+              </template>
+            </el-menu-item>
+            <el-menu-item v-if="isAdmin" index="/admin/device-monitor">
+              <el-icon><Monitor /></el-icon>
+              <template #title>
+                <span>设备监控</span>
               </template>
             </el-menu-item>
             <el-menu-item v-if="isAdmin" index="/admin/feedback">
@@ -115,10 +121,10 @@
                 <span>反馈管理</span>
               </template>
             </el-menu-item>
-            <el-menu-item v-if="isAdmin" index="/admin/device-monitor">
-              <el-icon><Monitor /></el-icon>
+            <el-menu-item v-if="isAdmin" index="/admin/locations">
+              <el-icon><MapLocation /></el-icon>
               <template #title>
-                <span>设备监控</span>
+                <span>点位管理</span>
               </template>
             </el-menu-item>
           </el-menu>
@@ -174,7 +180,7 @@ import Footer from '@/components/Footer.vue'
 import QrCodeScanner from '@/components/QrCodeScanner.vue'
 import { 
   MapLocation, Location, User, ChatDotRound,
-  DataAnalysis, Setting, ChatLineRound, Monitor
+  DataAnalysis, Goods, ChatLineRound, Monitor, Operation
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
@@ -207,6 +213,7 @@ const activeMenu = computed(() => {
     if (path.startsWith('/admin/locations')) return '/admin/locations'
     if (path.startsWith('/admin/feedback')) return '/admin/feedback'
     if (path.startsWith('/admin/device-monitor')) return '/admin/device-monitor'
+    if (path.startsWith('/admin/operations')) return '/admin/operations'
     return '/admin/dashboard'
   }
   
@@ -859,8 +866,8 @@ const navigateTo = (path) => {
   }
 }
 
-.el-divider {
-  border-color: rgba(255, 255, 255, 0.2) !important;
+.sidebar-menu .el-divider {
+  border-color: var(--color-border) !important;
   margin: 16px 8px !important;
 }
 

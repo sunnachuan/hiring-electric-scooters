@@ -554,7 +554,7 @@ const handleKeydown = (event) => {
 
 .qr-text {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary);
   font-family: monospace;
 }
 
@@ -570,7 +570,7 @@ const handleKeydown = (event) => {
 }
 
 .input-tip {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 14px;
 }
 
@@ -610,7 +610,7 @@ const handleKeydown = (event) => {
 
 .scooter-details p {
   margin: 0;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .status-indicators {
@@ -626,7 +626,7 @@ const handleKeydown = (event) => {
 
 .status-label {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-bottom: 8px;
 }
 
@@ -677,18 +677,18 @@ const handleKeydown = (event) => {
 
 .empty-icon {
   font-size: 64px;
-  color: #c0c4cc;
+  color: var(--color-text-tertiary);
   margin-bottom: 16px;
 }
 
 .empty-state h4 {
   margin: 0 0 8px 0;
-  color: #606266;
+  color: var(--color-text-secondary);
 }
 
 .empty-state p {
   margin: 0;
-  color: #909399;
+  color: var(--color-text-tertiary);
 }
 
 .instructions-content {
@@ -698,19 +698,19 @@ const handleKeydown = (event) => {
 .safety-tips {
   margin-top: 30px;
   padding: 20px;
-  background: #f5f7fa;
+  background: var(--color-bg-tertiary);
   border-radius: 8px;
 }
 
 .safety-tips h4 {
   margin: 0 0 12px 0;
-  color: #303133;
+  color: var(--color-text-primary);
 }
 
 .safety-tips ul {
   margin: 0;
   padding-left: 20px;
-  color: #606266;
+  color: var(--color-text-secondary);
 }
 
 .safety-tips li {
@@ -730,12 +730,12 @@ const handleKeydown = (event) => {
 
 .confirm-content h4 {
   margin: 0 0 8px 0;
-  color: #303133;
+  color: var(--color-text-primary);
 }
 
 .confirm-content p {
   margin: 0 0 4px 0;
-  color: #606266;
+  color: var(--color-text-secondary);
 }
 
 /* 动画效果 */

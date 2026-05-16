@@ -7,6 +7,10 @@ import './assets/css/responsive.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
+import { initializeTheme } from './utils/theme'
+
+// 初始化主题设置
+initializeTheme()
 
 const app = createApp(App)
 

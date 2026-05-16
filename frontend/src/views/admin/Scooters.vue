@@ -387,7 +387,6 @@ onUnmounted(() => {
   align-items: center;
 }
 
-/* 返回顶部悬浮块样式 */
 .back-to-top {
   position: fixed;
   bottom: 80px;
@@ -415,5 +414,126 @@ onUnmounted(() => {
 
 .back-to-top .el-icon {
   font-size: 20px;
+}
+</style>
+
+<style>
+/* ===== 滑板车管理 - Element Plus 组件主题适配 ===== */
+
+.scooters-admin-container .el-table {
+  background: transparent;
+  color: var(--color-text-primary);
+}
+
+.scooters-admin-container .el-table th.el-table__cell {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  font-weight: 600;
+}
+
+.scooters-admin-container .el-table td.el-table__cell {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.scooters-admin-container .el-table .el-table__cell .cell {
+  color: var(--color-text-primary) !important;
+}
+
+.scooters-admin-container .el-table tr {
+  background: transparent !important;
+}
+
+.scooters-admin-container .el-table__body tr:hover > td.el-table__cell {
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+.scooters-admin-container .el-table__empty-block {
+  background: var(--color-bg-secondary) !important;
+}
+
+.scooters-admin-container .el-table__empty-text {
+  color: var(--color-text-tertiary) !important;
+}
+
+.scooters-admin-container .el-tag--success {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: var(--color-success) !important;
+}
+
+.scooters-admin-container .el-tag--danger {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: var(--color-error) !important;
+}
+
+.scooters-admin-container .el-tag--info {
+  background: rgba(14, 165, 233, 0.15) !important;
+  color: var(--color-info) !important;
+}
+
+/* ===== 深色模式 ===== */
+[data-theme="dark"] .scooters-admin-container .el-table th.el-table__cell {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 2px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .scooters-admin-container .el-table td.el-table__cell {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .scooters-admin-container .el-table__body tr:hover > td.el-table__cell {
+  background: rgba(99, 102, 241, 0.15) !important;
+}
+
+[data-theme="dark"] .scooters-admin-container .el-table .el-table__cell .cell {
+  color: var(--color-text-primary) !important;
+}
+
+/* ===== 高对比度模式 ===== */
+[data-theme="high-contrast"] .scooters-admin-container .el-table th.el-table__cell {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 3px solid var(--color-border) !important;
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .scooters-admin-container .el-table td.el-table__cell {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 2px solid var(--color-border) !important;
+}
+
+[data-theme="high-contrast"] .scooters-admin-container .el-table__body tr:hover > td.el-table__cell {
+  background: rgba(255, 255, 0, 0.2) !important;
+}
+
+[data-theme="high-contrast"] .scooters-admin-container .el-table .el-table__cell .cell {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="high-contrast"] .scooters-admin-container .el-tag--success {
+  background: var(--color-success) !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .scooters-admin-container .el-tag--danger {
+  background: var(--color-error) !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .scooters-admin-container .el-tag--info {
+  background: var(--color-info) !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700;
 }
 </style>

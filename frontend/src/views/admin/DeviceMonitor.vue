@@ -79,85 +79,22 @@
         </template>
         
         <div class="map-container">
-                  <!-- 模拟地图区域 -->
-                  <div class="mock-map">
-                    <!-- 地图背景 - 使用真实地图样式 -->
-                    <div class="map-background">
-                      <div class="map-grid">
-                        <!-- 模拟地图网格 -->
-                        <div class="grid-lines">
-                          <div class="grid-line horizontal" v-for="i in 10" :key="'h' + i" :style="{ top: (i * 10) + '%' }"></div>
-                          <div class="grid-line vertical" v-for="i in 10" :key="'v' + i" :style="{ left: (i * 10) + '%' }"></div>
-                        </div>
-                        
-                        <!-- 模拟道路 -->
-                        <div class="map-roads">
-                          <div class="road main-road" style="top: 30%;"></div>
-                          <div class="road main-road" style="top: 70%;"></div>
-                          <div class="road side-road" style="left: 25%;"></div>
-                          <div class="road side-road" style="left: 75%;"></div>
-                        </div>
-                        
-                        <!-- 模拟建筑物 -->
-                        <div class="map-buildings">
-                          <div class="building large" style="top: 15%; left: 15%;"></div>
-                          <div class="building medium" style="top: 15%; left: 60%;"></div>
-                          <div class="building small" style="top: 50%; left: 20%;"></div>
-                          <div class="building large" style="top: 50%; left: 70%;"></div>
-                          <div class="building medium" style="top: 80%; left: 10%;"></div>
-                          <div class="building small" style="top: 80%; left: 85%;"></div>
-                        </div>
-                        
-                        <!-- 模拟公园 -->
-                        <div class="map-parks">
-                          <div class="park" style="top: 40%; left: 45%;"></div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <!-- 设备标记 -->
-                    <div class="map-markers">
-                      <div 
-                        v-for="scooter in scootersWithLocation" 
-                        :key="scooter.id"
-                        class="map-marker"
-                        :class="getMarkerClass(scooter)"
-                        :style="getMarkerStyle(scooter)"
-                        @click="selectScooter(scooter)"
-                      >
-                        <div class="marker-content">
-                          <div class="battery-indicator" :class="getBatteryClass(scooter.batteryLevel)"></div>
-                          <div class="marker-id">{{ scooter.id }}</div>
-                        </div>
-                        <div class="marker-tooltip" v-if="selectedScooter?.id === scooter.id">
-                          <div class="tooltip-content">
-                            <div class="tooltip-title">滑板车 #{{ scooter.id }}</div>
-                            <div class="tooltip-info">
-                              <span>电量: {{ scooter.batteryLevel }}%</span>
-                              <span>状态: {{ getStatusText(scooter) }}</span>
-                              <span>位置: {{ scooter.latitude?.toFixed(4) }}, {{ scooter.longitude?.toFixed(4) }}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div class="map-legend">
-                      <div class="legend-item">
-                        <div class="legend-color online"></div>
-                        <span>在线</span>
-                      </div>
-                      <div class="legend-item">
-                        <div class="legend-color offline"></div>
-                        <span>离线</span>
-                      </div>
-                      <div class="legend-item">
-                        <div class="legend-color low-battery"></div>
-                        <span>低电量</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          <div id="device-monitor-map" class="leaflet-map"></div>
+          <div class="map-legend">
+            <div class="legend-item">
+              <div class="legend-color online"></div>
+              <span>在线</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color offline"></div>
+              <span>离线</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color low-battery"></div>
+              <span>低电量</span>
+            </div>
+          </div>
+        </div>
       </el-card>
 
       <!-- 设备列表 -->
@@ -352,11 +289,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
 
-// 响应式数据
 const loading = ref(false)
 const scooters = ref([])
 const selectedScooter = ref(null)
@@ -365,8 +301,10 @@ const searchKeyword = ref('')
 const statusFilter = ref('')
 const autoRefresh = ref(false)
 const refreshInterval = ref(null)
-const batteryOrientation = ref('vertical') // 电池图标方向：vertical(纵向) / horizontal(横向)
-const activeBookingsCount = ref(0) // 活跃预订数量
+const batteryOrientation = ref('vertical')
+const activeBookingsCount = ref(0)
+const deviceMap = ref(null)
+const mapMarkers = ref([])
 
 // 调试：检查过滤条件
 console.log('搜索关键词:', searchKeyword.value)
@@ -459,25 +397,6 @@ const getPremiumBatteryClass = (level) => {
   return 'premium-low'
 }
 
-// 地图标记样式
-const getMarkerClass = (scooter) => {
-  const classes = []
-  if (!scooter.isOnline) classes.push('offline')
-  if (scooter.batteryLevel < 20) classes.push('low-battery')
-  if (!scooter.isLocked) classes.push('unlocked')
-  return classes.join(' ')
-}
-
-const getMarkerStyle = (scooter) => {
-  // 模拟地图位置（实际应该使用真实坐标计算）
-  const x = (scooter.latitude % 90 + 90) / 180 * 100
-  const y = (scooter.longitude % 180 + 180) / 360 * 100
-  return {
-    left: `${x}%`,
-    top: `${y}%`
-  }
-}
-
 // 选择设备
 const selectScooter = (scooter) => {
   selectedScooter.value = scooter
@@ -493,8 +412,127 @@ const viewDetails = (scooter) => {
 const resetFilters = () => {
   searchKeyword.value = ''
   statusFilter.value = ''
-  console.log('过滤器已重置，总设备数量:', scooters.value.length)
-  console.log('过滤后设备数量:', filteredScooters.value.length)
+}
+
+// 初始化 Leaflet 地图
+const initDeviceMap = async () => {
+  await nextTick()
+  const mapContainer = document.getElementById('device-monitor-map')
+  if (!mapContainer) return
+
+  if (deviceMap.value) {
+    deviceMap.value.remove()
+    deviceMap.value = null
+  }
+
+  if (!window.L) {
+    const script = document.createElement('script')
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+
+    await new Promise((resolve) => {
+      script.onload = () => {
+        document.head.appendChild(link)
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  }
+
+  deviceMap.value = L.map('device-monitor-map').setView([39.9042, 116.4074], 13)
+
+  const tileLayers = [
+    {
+      url: 'https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      subdomains: ['a', 'b', 'c']
+    },
+    {
+      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    },
+    {
+      url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      subdomains: ['a', 'b', 'c']
+    }
+  ]
+
+  let tileLayerAdded = false
+  for (const layerConfig of tileLayers) {
+    try {
+      const layer = L.tileLayer(layerConfig.url, {
+        attribution: layerConfig.attribution,
+        subdomains: layerConfig.subdomains || ['a', 'b', 'c'],
+        maxZoom: 19,
+        errorTileUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiBmaWxsPSIjRjBGMEYwIi8+Cjx0ZXh0IHg9IjEyOCIgeT0iMTI4IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NjYiPk1hcCBUaWxlPC90ZXh0Pgo8L3N2Zz4K'
+      })
+      layer.on('tileerror', function(error) {
+        console.warn('设备监控地图瓦片加载错误:', error)
+      })
+      layer.addTo(deviceMap.value)
+      tileLayerAdded = true
+      break
+    } catch (error) {
+      console.warn(`设备监控地图瓦片 ${layerConfig.url} 加载失败:`, error)
+      continue
+    }
+  }
+
+  if (!tileLayerAdded) {
+    console.warn('设备监控地图所有在线瓦片加载失败，使用离线模式')
+    const mapEl = document.getElementById('device-monitor-map')
+    if (mapEl) {
+      mapEl.style.background = 'var(--color-bg-secondary)'
+      const offlineMsg = document.createElement('div')
+      offlineMsg.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:var(--color-text-secondary);z-index:1000;'
+      offlineMsg.innerHTML = '<p>地图加载失败，请检查网络连接</p>'
+      mapEl.appendChild(offlineMsg)
+    }
+  }
+
+  updateMapMarkers()
+}
+
+const updateMapMarkers = () => {
+  if (!deviceMap.value) return
+
+  mapMarkers.value.forEach(m => deviceMap.value.removeLayer(m))
+  mapMarkers.value = []
+
+  const scootersWithLoc = scooters.value.filter(s => s.latitude && s.longitude)
+
+  scootersWithLoc.forEach(scooter => {
+    let markerColor = '#67c23a'
+    if (!scooter.isOnline) markerColor = '#909399'
+    else if (scooter.batteryLevel < 20) markerColor = '#f56c6c'
+    else if (!scooter.isLocked) markerColor = '#e6a23c'
+
+    const markerIcon = L.divIcon({
+      className: 'device-map-marker',
+      html: `<div style="background:${markerColor};width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    })
+
+    const marker = L.marker([scooter.latitude, scooter.longitude], { icon: markerIcon })
+      .addTo(deviceMap.value)
+      .bindPopup(`
+        <b>滑板车 #${scooter.id}</b><br/>
+        型号: ${scooter.model}<br/>
+        电量: ${scooter.batteryLevel}%<br/>
+        状态: ${getStatusText(scooter)}<br/>
+        位置: ${scooter.latitude?.toFixed(4)}, ${scooter.longitude?.toFixed(4)}
+      `)
+
+    marker.on('click', () => {
+      selectScooter(scooter)
+    })
+
+    mapMarkers.value.push(marker)
+  })
 }
 
 // 切换电池图标方向
@@ -506,6 +544,7 @@ const toggleBatteryOrientation = () => {
 // 刷新地图
 const refreshMap = async () => {
   await loadScooters()
+  updateMapMarkers()
   ElMessage.success('设备位置已刷新')
 }
 
@@ -657,13 +696,18 @@ const generateMockScooters = () => {
 }
 
 // 生命周期
-onMounted(() => {
-  loadScooters()
+onMounted(async () => {
+  await loadScooters()
+  await initDeviceMap()
 })
 
 onUnmounted(() => {
   if (refreshInterval.value) {
     clearInterval(refreshInterval.value)
+  }
+  if (deviceMap.value) {
+    deviceMap.value.remove()
+    deviceMap.value = null
   }
 })
 </script>
@@ -692,7 +736,7 @@ onUnmounted(() => {
 }
 
 .subtitle {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 14px;
 }
 
@@ -741,25 +785,25 @@ onUnmounted(() => {
 }
 
 /* 深色模式统计卡片数字颜色优化 - 提高对比度 */
-.device-monitor[data-theme="dark"] .stat-card .stat-value {
-  color: #ffffff !important; /* 白色，提高深色背景下的对比度 */
-  font-weight: 700 !important; /* 加粗增强可读性 */
+[data-theme="dark"] .device-monitor .stat-card .stat-value {
+  color: #ffffff !important;
+  font-weight: 700 !important;
 }
 
-.device-monitor[data-theme="dark"] .stat-card .stat-label {
-  color: #e2e8f0 !important; /* 浅灰色，保持良好对比度 */
+[data-theme="dark"] .device-monitor .stat-card .stat-label {
+  color: #e2e8f0 !important;
 }
 
 /* 高对比度模式统计卡片数字颜色优化 - 强烈对比 */
-.device-monitor[data-theme="high-contrast"] .stat-card .stat-value {
-  color: #ffff00 !important; /* 亮黄色，高对比度 */
-  font-weight: 800 !important; /* 更粗的字体 */
-  text-shadow: 0 0 2px #000000 !important; /* 添加黑色阴影增强可读性 */
+[data-theme="high-contrast"] .device-monitor .stat-card .stat-value {
+  color: #ffff00 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 2px #000000 !important;
 }
 
-.device-monitor[data-theme="high-contrast"] .stat-card .stat-label {
-  color: #ffffff !important; /* 白色，高对比度 */
-  font-weight: 600 !important; /* 加粗 */
+[data-theme="high-contrast"] .device-monitor .stat-card .stat-label {
+  color: #ffffff !important;
+  font-weight: 600 !important;
 }
 
 .monitor-content {
@@ -802,191 +846,12 @@ onUnmounted(() => {
   background: var(--color-bg-secondary);
   border-radius: 8px;
   overflow: hidden;
-}
-
-.mock-map {
   position: relative;
+}
+
+.leaflet-map {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
-}
-
-/* 地图背景 */
-.map-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-/* 道路样式 */
-.map-roads {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.road {
-  position: absolute;
-  background: #666;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.road.main-road {
-  width: 100%;
-  height: 6px;
-  background: #555;
-}
-
-.road.side-road {
-  width: 4px;
-  height: 100%;
-  background: #777;
-}
-
-/* 建筑物样式 */
-.map-buildings {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.building {
-  position: absolute;
-  border-radius: 2px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.building.large {
-  width: 50px;
-  height: 70px;
-  background: #8B4513;
-}
-
-.building.medium {
-  width: 35px;
-  height: 50px;
-  background: #A0522D;
-}
-
-.building.small {
-  width: 25px;
-  height: 35px;
-  background: #CD853F;
-}
-
-/* 公园样式 */
-.map-parks {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.park {
-  position: absolute;
-  width: 100px;
-  height: 100px;
-  background: #32CD32;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* 设备标记容器 */
-.map-markers {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.map-grid {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.map-marker {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.map-marker:hover {
-  transform: translate(-50%, -50%) scale(1.2);
-  z-index: 10;
-}
-
-.marker-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.battery-indicator {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  margin: 0 auto 2px;
-  border: 2px solid var(--color-border);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.battery-indicator.high { background: #67c23a; }
-.battery-indicator.medium { background: #e6a23c; }
-.battery-indicator.low { background: #f56c6c; }
-
-.marker-id {
-  font-size: 10px;
-  text-align: center;
-  color: var(--color-text-primary);
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-  font-weight: bold;
-}
-
-.map-marker.online .battery-indicator {
-  animation: pulse 2s infinite;
-}
-
-.map-marker.offline .battery-indicator {
-  background: #909399 !important;
-}
-
-.map-marker.low-battery .battery-indicator {
-  animation: blink 1s infinite;
-}
-
-.map-marker.unlocked .marker-content {
-  animation: bounce 0.5s ease-in-out infinite alternate;
-}
-
-.marker-tooltip {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-bottom: 8px;
-  background: var(--color-bg-secondary);
-  border-radius: 6px;
-  padding: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  min-width: 200px;
-  z-index: 100;
-}
-
-.tooltip-title {
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.tooltip-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 12px;
-  color: #666;
 }
 
 .map-legend {
@@ -999,6 +864,7 @@ onUnmounted(() => {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   display: flex;
   gap: 12px;
+  z-index: 1000;
 }
 
 .legend-item {
@@ -1006,6 +872,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 6px;
   font-size: 12px;
+  color: var(--color-text-primary);
 }
 
 .legend-color {
@@ -1218,7 +1085,7 @@ onUnmounted(() => {
 }
 
 .no-location {
-  color: #c0c4cc;
+  color: var(--color-text-tertiary);
   font-style: italic;
 }
 
@@ -1233,7 +1100,7 @@ onUnmounted(() => {
 
 .detail-section h4 {
   margin: 0 0 12px 0;
-  color: #303133;
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
@@ -1243,33 +1110,16 @@ onUnmounted(() => {
   align-items: center;
   margin-bottom: 8px;
   padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .detail-item label {
   font-weight: 500;
-  color: #606266;
+  color: var(--color-text-secondary);
 }
 
 .detail-item span {
-  color: #303133;
-}
-
-/* 动画效果 */
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0.3; }
-}
-
-@keyframes bounce {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-4px); }
+  color: var(--color-text-primary);
 }
 
 /* 响应式设计 */
@@ -1307,31 +1157,31 @@ onUnmounted(() => {
 }
 
 /* 设备监控页面按钮深色主题适配 - 提高优先级 */
-.device-monitor[data-theme="dark"] .map-controls .el-button,
-.device-monitor[data-theme="dark"] .list-controls .el-button {
+[data-theme="dark"] .device-monitor .map-controls .el-button,
+[data-theme="dark"] .device-monitor .list-controls .el-button {
   background: var(--color-bg-secondary-dark) !important;
   border-color: var(--color-border-dark) !important;
   color: var(--color-text-primary-dark) !important;
   transition: all 0.3s ease;
 }
 
-.device-monitor[data-theme="dark"] .map-controls .el-button:hover,
-.device-monitor[data-theme="dark"] .list-controls .el-button:hover {
+[data-theme="dark"] .device-monitor .map-controls .el-button:hover,
+[data-theme="dark"] .device-monitor .list-controls .el-button:hover {
   background: var(--color-bg-tertiary-dark) !important;
   border-color: var(--color-primary-dark) !important;
   color: var(--color-primary-dark) !important;
   transform: translateY(-1px);
 }
 
-.device-monitor[data-theme="dark"] .map-controls .el-button--primary,
-.device-monitor[data-theme="dark"] .list-controls .el-button--primary {
+[data-theme="dark"] .device-monitor .map-controls .el-button--primary,
+[data-theme="dark"] .device-monitor .list-controls .el-button--primary {
   background: var(--color-primary-dark) !important;
   border-color: var(--color-primary-dark) !important;
   color: var(--color-text-primary-dark) !important;
 }
 
-.device-monitor[data-theme="dark"] .map-controls .el-button--primary:hover,
-.device-monitor[data-theme="dark"] .list-controls .el-button--primary:hover {
+[data-theme="dark"] .device-monitor .map-controls .el-button--primary:hover,
+[data-theme="dark"] .device-monitor .list-controls .el-button--primary:hover {
   background: var(--color-primary-light-dark) !important;
   border-color: var(--color-primary-light-dark) !important;
 }
@@ -1343,209 +1193,300 @@ onUnmounted(() => {
     flex-wrap: nowrap;
   }
 }
+</style>
+
+<style>
+/* ===== 设备管理 - Element Plus 组件主题适配 ===== */
 
 /* 列表区域样式 */
-.list-section {
+.device-monitor .list-section {
   min-height: 400px;
 }
 
-.list-section .el-table {
+.device-monitor .list-section .el-table {
   margin-top: 16px;
-}
-
-/* 表格滚动条优化 */
-.list-section .el-table__body-wrapper {
-  max-height: 340px;
-  overflow-y: auto;
-}
-
-/* 表格行高优化 */
-.list-section .el-table .el-table__row {
-  height: 40px
-}
-
-/* 修复表格固定列层级问题 - 通用修复 */
-.list-section .el-table {
-  /* 确保表格容器有正确的层级上下文 */
+  background: transparent;
+  color: var(--color-text-primary);
   position: relative;
   z-index: 1;
 }
 
-.list-section .el-table__fixed-right {
-  /* 提高固定列的层级，确保始终在最上层 */
-  z-index: 3 !important;
+.device-monitor .list-section .el-table th.el-table__cell {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  font-weight: 600;
 }
 
-.list-section .el-table__fixed-body-wrapper {
-  /* 确保固定列内容层级正确 */
-  z-index: 4 !important;
+.device-monitor .list-section .el-table td.el-table__cell {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
 }
 
-.list-section .el-table__body-wrapper {
-  /* 降低非固定列内容的层级 */
+.device-monitor .list-section .el-table .el-table__cell .cell {
+  color: var(--color-text-primary) !important;
+}
+
+.device-monitor .list-section .el-table tr {
+  background: transparent !important;
+}
+
+.device-monitor .list-section .el-table__body tr:hover > td.el-table__cell {
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+.device-monitor .list-section .el-table__empty-block {
+  background: var(--color-bg-secondary) !important;
+}
+
+.device-monitor .list-section .el-table__empty-text {
+  color: var(--color-text-tertiary) !important;
+}
+
+.device-monitor .list-section .el-table__body-wrapper {
+  max-height: 340px;
+  overflow-y: auto;
   z-index: 1 !important;
 }
 
-.list-section .el-table__body {
-  /* 确保表格主体内容不会溢出到固定列 */
+.device-monitor .list-section .el-table .el-table__row {
+  height: 40px;
+}
+
+.device-monitor .list-section .el-table__fixed-right {
+  z-index: 3 !important;
+}
+
+.device-monitor .list-section .el-table__fixed-body-wrapper {
+  z-index: 4 !important;
+}
+
+.device-monitor .list-section .el-table__body {
   overflow: hidden;
 }
 
-.list-section .el-table td {
-  /* 防止单元格内容溢出 */
+.device-monitor .list-section .el-table td {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.list-section .el-table .el-table__fixed-right-patch {
-  /* 修复固定列补丁的层级 */
+.device-monitor .list-section .el-table .el-table__fixed-right-patch {
   z-index: 2 !important;
 }
 
-/* 深色模式特定修复 - 移除所有影响表格颜色的样式，使用Element Plus默认样式 */
-/* 让Element Plus自动处理深色模式下的表格样式 */
+.device-monitor .list-section .el-table .el-table__cell {
+  padding: 8px 0;
+}
 
-/* 所有主题模式使用Element Plus默认表格样式 */
-/* 移除所有自定义表格颜色设置，让Element Plus自动处理 */
+/* 标签 */
+.device-monitor .el-tag--success {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: var(--color-success) !important;
+}
 
-/* 移除所有自定义斑马纹样式，使用Element Plus默认样式 */
-/* 让Element Plus自动处理所有主题模式的表格样式 */
+.device-monitor .el-tag--warning {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: var(--color-warning) !important;
+}
 
-/* 搜索框和筛选器样式优化 - 更明显的颜色 */
-.list-controls {
+.device-monitor .el-tag--info {
+  background: rgba(14, 165, 233, 0.15) !important;
+  color: var(--color-info) !important;
+}
+
+.device-monitor .el-tag--primary {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: var(--color-primary) !important;
+}
+
+/* 搜索框和筛选器 */
+.device-monitor .list-controls {
   display: flex;
   gap: 12px;
   align-items: center;
 }
 
-.list-controls .el-input {
-  --el-input-bg-color: var(--color-bg-secondary);
-  --el-input-border-color: var(--color-primary);
-  --el-input-hover-border-color: var(--color-primary-light);
-  --el-input-focus-border-color: var(--color-primary);
-}
-
-.list-controls .el-input__wrapper {
+.device-monitor .list-controls .el-input__wrapper {
   background-color: var(--color-bg-secondary) !important;
   border: 1px solid var(--color-primary) !important;
   box-shadow: 0 0 0 1px var(--color-primary) inset, 0 0 0 1px rgba(99, 102, 241, 0.2) !important;
 }
 
-.list-controls .el-input__wrapper:hover {
+.device-monitor .list-controls .el-input__wrapper:hover {
   border-color: var(--color-primary-light) !important;
   box-shadow: 0 0 0 1px var(--color-primary-light) inset, 0 0 0 1px rgba(139, 92, 246, 0.3) !important;
 }
 
-.list-controls .el-input__wrapper.is-focus {
+.device-monitor .list-controls .el-input__wrapper.is-focus {
   border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
 }
 
-/* 深色主题下的搜索框样式优化 */
-[data-theme="dark"] .list-controls .el-input__wrapper {
-  background-color: var(--color-bg-secondary) !important;
-  border-color: var(--color-primary) !important;
-  color: var(--color-text-primary) !important;
-}
-
-[data-theme="dark"] .list-controls .el-input__wrapper:hover {
-  background-color: var(--color-bg-tertiary) !important;
-  border-color: var(--color-primary-light) !important;
-}
-
-[data-theme="dark"] .list-controls .el-input__inner {
-  color: var(--color-text-primary) !important;
-}
-
-/* 深色主题下的筛选器样式优化 */
-[data-theme="dark"] .list-controls .el-select .el-input__wrapper {
-  background-color: var(--color-bg-secondary) !important;
-  border-color: var(--color-primary) !important;
-  color: var(--color-text-primary) !important;
-}
-
-[data-theme="dark"] .list-controls .el-select .el-input__wrapper:hover {
-  background-color: var(--color-bg-tertiary) !important;
-  border-color: var(--color-primary-light) !important;
-}
-
-[data-theme="dark"] .list-controls .el-select .el-input__inner {
-  color: var(--color-text-primary) !important;
-}
-
-[data-theme="dark"] .list-controls .el-select-dropdown {
-  background-color: var(--color-bg-secondary) !important;
-  border-color: var(--color-border) !important;
-}
-
-[data-theme="dark"] .list-controls .el-select-dropdown__item {
-  color: var(--color-text-primary) !important;
-  background-color: var(--color-bg-secondary) !important;
-}
-
-[data-theme="dark"] .list-controls .el-select-dropdown__item:hover {
-  background-color: var(--color-bg-tertiary) !important;
-  color: var(--color-primary) !important;
-}
-
-[data-theme="dark"] .list-controls .el-select-dropdown__item.selected {
-  background-color: rgba(99, 102, 241, 0.1) !important;
-  color: var(--color-primary) !important;
-}
-
-.list-controls .el-select {
-  --el-select-border-color-hover: #409eff;
-  --el-select-input-focus-border-color: #409eff;
-}
-
-.list-controls .el-select .el-input__wrapper {
+.device-monitor .list-controls .el-select .el-input__wrapper {
   background-color: #ffffff !important;
   border: 1px solid #409eff !important;
   box-shadow: 0 0 0 1px #409eff inset, 0 0 0 1px rgba(64, 158, 255, 0.2) !important;
 }
 
-.list-controls .el-select .el-input__wrapper:hover {
+.device-monitor .list-controls .el-select .el-input__wrapper:hover {
   border-color: #66b1ff !important;
   box-shadow: 0 0 0 1px #66b1ff inset, 0 0 0 1px rgba(102, 177, 255, 0.3) !important;
 }
 
-.list-controls .el-select .el-input__wrapper.is-focus {
+.device-monitor .list-controls .el-select .el-input__wrapper.is-focus {
   border-color: #409eff !important;
   box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2) !important;
 }
 
-/* 重置按钮样式优化 */
-.list-controls .el-button--primary.is-link {
+.device-monitor .list-controls .el-button--primary.is-link {
   color: #409eff !important;
   font-weight: 500;
 }
 
-.list-controls .el-button--primary.is-link:hover {
+.device-monitor .list-controls .el-button--primary.is-link:hover {
   color: #66b1ff !important;
   text-decoration: underline;
 }
 
-.list-section .el-table .el-table__cell {
-  padding: 8px 0;
-}
-
 /* 滚动条样式 */
-.list-section .el-table__body-wrapper::-webkit-scrollbar {
+.device-monitor .list-section .el-table__body-wrapper::-webkit-scrollbar {
   width: 6px;
 }
 
-.list-section .el-table__body-wrapper::-webkit-scrollbar-track {
+.device-monitor .list-section .el-table__body-wrapper::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 3px;
 }
 
-.list-section .el-table__body-wrapper::-webkit-scrollbar-thumb {
+.device-monitor .list-section .el-table__body-wrapper::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 3px;
 }
 
-.list-section .el-table__body-wrapper::-webkit-scrollbar-thumb:hover {
+.device-monitor .list-section .el-table__body-wrapper::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* ===== 深色模式 ===== */
+[data-theme="dark"] .device-monitor .list-section .el-table th.el-table__cell {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 2px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-section .el-table td.el-table__cell {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-section .el-table__body tr:hover > td.el-table__cell {
+  background: rgba(99, 102, 241, 0.15) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-section .el-table .el-table__cell .cell {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-controls .el-input__wrapper {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-controls .el-input__wrapper:hover {
+  background-color: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-controls .el-input__inner {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-controls .el-select .el-input__wrapper {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-controls .el-select .el-input__wrapper:hover {
+  background-color: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-controls .el-select .el-input__inner {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-controls .el-select-dropdown {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-controls .el-select-dropdown__item {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-bg-secondary) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-controls .el-select-dropdown__item:hover {
+  background-color: var(--color-bg-tertiary) !important;
+  color: var(--color-primary) !important;
+}
+
+[data-theme="dark"] .device-monitor .list-controls .el-select-dropdown__item.selected {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+  color: var(--color-primary) !important;
+}
+
+/* ===== 高对比度模式 ===== */
+[data-theme="high-contrast"] .device-monitor .list-section .el-table th.el-table__cell {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 3px solid var(--color-border) !important;
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .device-monitor .list-section .el-table td.el-table__cell {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 2px solid var(--color-border) !important;
+}
+
+[data-theme="high-contrast"] .device-monitor .list-section .el-table__body tr:hover > td.el-table__cell {
+  background: rgba(255, 255, 0, 0.2) !important;
+}
+
+[data-theme="high-contrast"] .device-monitor .list-section .el-table .el-table__cell .cell {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="high-contrast"] .device-monitor .el-tag--success {
+  background: var(--color-success) !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .device-monitor .el-tag--warning {
+  background: var(--color-warning) !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .device-monitor .el-tag--info {
+  background: var(--color-info) !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .device-monitor .el-tag--primary {
+  background: var(--color-primary) !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700;
 }
 </style>

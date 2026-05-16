@@ -359,8 +359,6 @@ export default {
   gap: 15px;
 }
 
-/* ===== 现代科技风深色主题优化 ===== */
-
 .page-title {
   font-size: 24px;
   font-weight: 700;
@@ -411,180 +409,6 @@ export default {
   gap: 4%;
 }
 
-/* ===== Element Plus 表格深色主题优化 ===== */
-
-/* 表格整体样式 */
-.locations-list .el-table {
-  background: transparent;
-  color: var(--color-text-primary);
-}
-
-.locations-list .el-table th {
-  background: var(--color-bg-tertiary) !important;
-  color: var(--color-text-primary) !important;
-  border-bottom: 1px solid var(--color-border) !important;
-  font-weight: 600;
-}
-
-.locations-list .el-table td {
-  background: var(--color-bg-secondary) !important;
-  color: var(--color-text-primary) !important;
-  border-bottom: 1px solid var(--color-border) !important;
-}
-
-/* 斑马纹效果优化 */
-.locations-list .el-table .el-table__row--striped td {
-  background: rgba(99, 102, 241, 0.05) !important;
-}
-
-/* 悬浮效果优化 */
-.locations-list .el-table .el-table__row:hover td {
-  background: rgba(99, 102, 241, 0.1) !important;
-}
-
-/* 表格边框优化 */
-.locations-list .el-table {
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-}
-
-.locations-list .el-table::before {
-  background-color: var(--color-border) !important;
-}
-
-/* 标签样式优化 */
-.locations-list .el-tag {
-  border: none;
-  font-weight: 500;
-}
-
-.locations-list .el-tag--success {
-  background: rgba(34, 197, 94, 0.15) !important;
-  color: var(--color-success) !important;
-}
-
-.locations-list .el-tag--info {
-  background: rgba(14, 165, 233, 0.15) !important;
-  color: var(--color-info) !important;
-}
-
-/* 按钮样式优化 */
-.locations-list .el-button {
-  border: 1px solid var(--color-border);
-  transition: all 0.3s ease;
-}
-
-.locations-list .el-button--primary {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-}
-
-.locations-list .el-button--primary:hover {
-  background: var(--color-primary-light);
-  border-color: var(--color-primary-light);
-  transform: translateY(-1px);
-}
-
-.locations-list .el-button--info {
-  background: transparent;
-  color: var(--color-text-secondary);
-  border-color: var(--color-border);
-}
-
-.locations-list .el-button--info:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-}
-
-/* 下拉框样式优化 */
-.locations-list .el-select .el-input__wrapper {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border);
-  color: var(--color-text-primary);
-}
-
-.locations-list .el-select .el-input__inner {
-  color: var(--color-text-primary);
-}
-
-.locations-list .el-select-dropdown {
-  background: var(--color-bg-secondary) !important;
-}
-
-/* 深色主题下的搜索和筛选区域样式优化 */
-.location-management[data-theme="dark"] .search-section .el-input__wrapper {
-  background: var(--color-bg-secondary) !important;
-  border-color: var(--color-primary) !important;
-  color: var(--color-text-primary) !important;
-}
-
-.location-management[data-theme="dark"] .search-section .el-input__wrapper:hover {
-  background: var(--color-bg-tertiary) !important;
-  border-color: var(--color-primary-light) !important;
-}
-
-.location-management[data-theme="dark"] .search-section .el-input__inner {
-  color: var(--color-text-primary) !important;
-}
-
-.location-management[data-theme="dark"] .search-section .el-select .el-input__wrapper {
-  background: var(--color-bg-secondary) !important;
-  border-color: var(--color-primary) !important;
-  color: var(--color-text-primary) !important;
-}
-
-.location-management[data-theme="dark"] .search-section .el-select .el-input__wrapper:hover {
-  background: var(--color-bg-tertiary) !important;
-  border-color: var(--color-primary-light) !important;
-}
-
-.location-management[data-theme="dark"] .search-section .el-select .el-input__inner {
-  color: var(--color-text-primary) !important;
-}
-
-.location-management[data-theme="dark"] .search-section .el-select-dropdown {
-  background: var(--color-bg-secondary) !important;
-  border-color: var(--color-border) !important;
-}
-
-.location-management[data-theme="dark"] .search-section .el-select-dropdown__item {
-  color: var(--color-text-primary) !important;
-  background: var(--color-bg-secondary) !important;
-}
-
-.location-management[data-theme="dark"] .search-section .el-select-dropdown__item:hover {
-  background: var(--color-bg-tertiary) !important;
-  color: var(--color-primary) !important;
-}
-
-.location-management[data-theme="dark"] .search-section .el-select-dropdown__item.selected {
-  background: rgba(99, 102, 241, 0.1) !important;
-  color: var(--color-primary) !important;
-}
-
-.locations-list .el-select-dropdown {
-  border: 1px solid var(--color-border) !important;
-}
-
-.locations-list .el-select-dropdown .el-select-dropdown__item {
-  color: var(--color-text-primary) !important;
-}
-
-.locations-list .el-select-dropdown .el-select-dropdown__item:hover {
-  background: var(--color-bg-tertiary) !important;
-}
-
-.locations-list .el-select-dropdown .el-select-dropdown__item.selected {
-  color: var(--color-primary) !important;
-  background: rgba(99, 102, 241, 0.1) !important;
-}
-
-/* 加载状态优化 */
-.locations-list .el-loading-mask {
-  background: rgba(15, 23, 42, 0.8) !important;
-}
-
-/* 信息层级优化 */
 .data-priority-high {
   font-weight: 700;
   color: var(--color-primary);
@@ -603,7 +427,6 @@ export default {
   font-size: 13px;
 }
 
-/* 主按钮样式优化 */
 .tech-button-primary {
   background: var(--color-primary) !important;
   border-color: var(--color-primary) !important;
@@ -619,24 +442,384 @@ export default {
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-/* 响应式适配 */
 @media (max-width: 768px) {
   .location-management {
     padding: 10px;
   }
-  
+
   .page-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .search-section {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .search-section .el-input {
     width: 100% !important;
   }
+}
+</style>
+
+<!-- 非 scoped 样式块：用于穿透 Element Plus 组件内部元素 -->
+<style>
+/* ===== 点位管理 - Element Plus 组件主题适配 ===== */
+
+/* --- 表格基础样式（所有主题） --- */
+.location-management .locations-list .el-table {
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.location-management .locations-list .el-table::before {
+  background-color: var(--color-border) !important;
+}
+
+.location-management .locations-list .el-table th.el-table__cell {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  font-weight: 600;
+}
+
+.location-management .locations-list .el-table td.el-table__cell {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.location-management .locations-list .el-table .el-table__cell .cell {
+  color: var(--color-text-primary) !important;
+}
+
+.location-management .locations-list .el-table tr {
+  background: transparent !important;
+}
+
+.location-management .locations-list .el-table--striped .el-table__row--striped td.el-table__cell {
+  background: rgba(99, 102, 241, 0.05) !important;
+}
+
+.location-management .locations-list .el-table__body tr:hover > td.el-table__cell {
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+.location-management .locations-list .el-table__fixed-right,
+.location-management .locations-list .el-table__fixed {
+  background: var(--color-bg-secondary) !important;
+}
+
+.location-management .locations-list .el-table__fixed-right::before,
+.location-management .locations-list .el-table__fixed::before {
+  background: transparent !important;
+}
+
+.location-management .locations-list .el-table__empty-block {
+  background: var(--color-bg-secondary) !important;
+}
+
+.location-management .locations-list .el-table__empty-text {
+  color: var(--color-text-tertiary) !important;
+}
+
+/* --- 标签样式 --- */
+.location-management .locations-list .el-tag {
+  border: none;
+  font-weight: 500;
+}
+
+.location-management .locations-list .el-tag--success {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: var(--color-success) !important;
+}
+
+.location-management .locations-list .el-tag--info {
+  background: rgba(14, 165, 233, 0.15) !important;
+  color: var(--color-info) !important;
+}
+
+/* --- 按钮样式 --- */
+.location-management .locations-list .el-button {
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+}
+
+.location-management .locations-list .el-button--primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.location-management .locations-list .el-button--primary:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-light);
+  transform: translateY(-1px);
+}
+
+.location-management .locations-list .el-button--info {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.location-management .locations-list .el-button--info:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+/* --- 下拉框样式 --- */
+.location-management .locations-list .el-select .el-input__wrapper {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.location-management .locations-list .el-select .el-input__inner {
+  color: var(--color-text-primary);
+}
+
+.location-management .locations-list .el-select-dropdown {
+  background: var(--color-bg-secondary) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+.location-management .locations-list .el-select-dropdown .el-select-dropdown__item {
+  color: var(--color-text-primary) !important;
+}
+
+.location-management .locations-list .el-select-dropdown .el-select-dropdown__item:hover {
+  background: var(--color-bg-tertiary) !important;
+}
+
+.location-management .locations-list .el-select-dropdown .el-select-dropdown__item.selected {
+  color: var(--color-primary) !important;
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* --- 加载遮罩 --- */
+.location-management .locations-list .el-loading-mask {
+  background: rgba(15, 23, 42, 0.8) !important;
+}
+
+/* ================================================================ */
+/* ===== 深色模式 (data-theme="dark") ===== */
+/* ================================================================ */
+
+[data-theme="dark"] .location-management .locations-list .el-table,
+[data-theme="dark"] .location-management .locations-list .el-table__header-wrapper,
+[data-theme="dark"] .location-management .locations-list .el-table__body-wrapper,
+[data-theme="dark"] .location-management .locations-list .el-table__footer-wrapper {
+  background: transparent !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table th.el-table__cell {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 2px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table td.el-table__cell {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table tr {
+  background: transparent !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table--striped .el-table__row--striped td.el-table__cell {
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table__body tr:hover > td.el-table__cell {
+  background: rgba(99, 102, 241, 0.15) !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table__fixed-right,
+[data-theme="dark"] .location-management .locations-list .el-table__fixed {
+  background: var(--color-bg-secondary) !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table__fixed-right::before,
+[data-theme="dark"] .location-management .locations-list .el-table__fixed::before {
+  background: transparent !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table .el-table__cell .cell {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table--border::after,
+[data-theme="dark"] .location-management .locations-list .el-table--border::before,
+[data-theme="dark"] .location-management .locations-list .el-table__inner-wrapper::before {
+  background: var(--color-border) !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table--border .el-table__cell {
+  border-right: 1px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table__empty-block {
+  background: var(--color-bg-secondary) !important;
+}
+
+[data-theme="dark"] .location-management .locations-list .el-table__empty-text {
+  color: var(--color-text-tertiary) !important;
+}
+
+/* 深色模式 - 搜索区域 */
+[data-theme="dark"] .location-management .search-section .el-input__wrapper {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .location-management .search-section .el-input__wrapper:hover {
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+[data-theme="dark"] .location-management .search-section .el-input__inner {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .location-management .search-section .el-select .el-input__wrapper {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .location-management .search-section .el-select .el-input__wrapper:hover {
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+[data-theme="dark"] .location-management .search-section .el-select .el-input__inner {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .location-management .search-section .el-select-dropdown {
+  background: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .location-management .search-section .el-select-dropdown__item {
+  color: var(--color-text-primary) !important;
+  background: var(--color-bg-secondary) !important;
+}
+
+[data-theme="dark"] .location-management .search-section .el-select-dropdown__item:hover {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-primary) !important;
+}
+
+[data-theme="dark"] .location-management .search-section .el-select-dropdown__item.selected {
+  background: rgba(99, 102, 241, 0.1) !important;
+  color: var(--color-primary) !important;
+}
+
+/* ================================================================ */
+/* ===== 高对比度模式 (data-theme="high-contrast") ===== */
+/* ================================================================ */
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table,
+[data-theme="high-contrast"] .location-management .locations-list .el-table__header-wrapper,
+[data-theme="high-contrast"] .location-management .locations-list .el-table__body-wrapper,
+[data-theme="high-contrast"] .location-management .locations-list .el-table__footer-wrapper {
+  background: transparent !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table th.el-table__cell {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 3px solid var(--color-border) !important;
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table tr {
+  background: transparent !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table td.el-table__cell {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 2px solid var(--color-border) !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table--striped .el-table__row--striped td.el-table__cell {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table__body tr:hover > td.el-table__cell {
+  background: rgba(255, 255, 0, 0.2) !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table__fixed-right,
+[data-theme="high-contrast"] .location-management .locations-list .el-table__fixed {
+  background: var(--color-bg-secondary) !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table__fixed-right::before,
+[data-theme="high-contrast"] .location-management .locations-list .el-table__fixed::before {
+  background: transparent !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table .el-table__cell .cell {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table--border::after,
+[data-theme="high-contrast"] .location-management .locations-list .el-table--border::before,
+[data-theme="high-contrast"] .location-management .locations-list .el-table__inner-wrapper::before {
+  background: var(--color-border) !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table--border .el-table__cell {
+  border-right: 2px solid var(--color-border) !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table__empty-block {
+  background: var(--color-bg-secondary) !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table__empty-text {
+  color: var(--color-text-primary) !important;
+}
+
+/* 高对比度 - 标签 */
+[data-theme="high-contrast"] .location-management .locations-list .el-table .el-tag--success {
+  background: var(--color-success) !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table .el-tag--info {
+  background: var(--color-info) !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700;
+}
+
+/* 高对比度 - 按钮 */
+[data-theme="high-contrast"] .location-management .locations-list .el-table .el-button {
+  border: 2px solid var(--color-border) !important;
+  font-weight: 700;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table .el-button--primary {
+  background: var(--color-primary) !important;
+  color: #000000 !important;
+  border-color: var(--color-primary) !important;
+}
+
+[data-theme="high-contrast"] .location-management .locations-list .el-table .el-button--info {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
 }
 </style>

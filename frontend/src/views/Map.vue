@@ -594,7 +594,7 @@ export default {
 .map-title {
   font-size: 18px;
   font-weight: 600;
-  color: #303133;
+  color: var(--color-text-primary);
   margin-bottom: 20px;
   text-align: center;
 }
@@ -629,7 +629,7 @@ export default {
 .marker-label {
   font-size: 12px;
   font-weight: 600;
-  color: #303133;
+  color: var(--color-text-primary);
   background: rgba(255, 255, 255, 0.9);
   padding: 2px 6px;
   border-radius: 4px;
