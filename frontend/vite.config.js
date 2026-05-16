@@ -11,13 +11,14 @@ export default defineConfig({
     }
   },
   server: {
-    port: process.env.VITE_PORT || 5174,
+    port: parseInt(process.env.VITE_PORT) || 5173,
+    strictPort: false,
     host: '0.0.0.0',
     https: true,
     allowedHosts: true,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_URL || 'http://127.0.0.1:8082',
+        target: process.env.VITE_API_URL || 'http://127.0.0.1:8080',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '/api'),
         secure: false,

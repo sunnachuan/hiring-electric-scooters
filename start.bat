@@ -18,40 +18,27 @@ if /i "%choice%" neq "y" (
 )
 
 echo.
-echo 步骤1: 启动后端服务...
-cd backend
-call mvnw spring-boot:run
-if %errorlevel% neq 0 (
-    echo 后端启动失败，请检查Java和Maven环境
-    pause
-    exit /b
-)
-
-echo.
-echo 步骤2: 启动前端服务...
-cd ..\frontend
-call npm install
-if %errorlevel% neq 0 (
-    echo 前端依赖安装失败
-    pause
-    exit /b
-)
-
-call npm run dev
-if %errorlevel% neq 0 (
-    echo 前端启动失败
-    pause
-    exit /b
-)
-
-echo.
 echo ========================================
-echo   系统启动完成！
+echo   请在新窗口中手动启动以下服务：
 echo ========================================
 echo.
-echo 访问地址:
-echo 前端: http://localhost:5173
-echo 后端: http://localhost:8080
+echo 步骤1: 启动后端服务
+echo    cd backend
+echo    mvnw spring-boot:run
+echo    后端默认端口: 8080（可通过 SERVER_PORT 环境变量修改，被占用自动顺延）
+echo.
+echo 步骤2: 启动前端服务
+echo    cd frontend
+echo    npm install
+echo    npm run dev
+echo    前端默认端口: 5173（可通过 VITE_PORT 环境变量修改，被占用自动顺延）
+echo.
+echo ========================================
+echo   启动后访问地址
+echo ========================================
+echo.
+echo 前端界面: http://localhost:5173
+echo 后端API: http://localhost:8080
 echo.
 echo 管理员账号:
 echo 用户名: admin

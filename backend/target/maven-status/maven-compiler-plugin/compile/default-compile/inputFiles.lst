@@ -57,6 +57,7 @@ C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\util\EncryptionUtils.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\VehicleDamageRecord.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\TemporaryUser.java
+C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\config\WebServerConfig.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\config\JwtAuthTokenFilter.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\DamageLevel.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\DamageStatus.java
