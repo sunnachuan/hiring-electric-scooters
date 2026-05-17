@@ -145,8 +145,8 @@
           :data="filteredScooters" 
           v-loading="loading" 
           stripe
-          :max-height="Math.max(500, Math.min(filteredScooters.length * 50, 500))"
-          style="height: auto; min-height: 500px;"
+          max-height="450"
+          style="width: 100%;"
         >
           <el-table-column label="设备ID" prop="id" width="80" fixed />
           <el-table-column label="型号" prop="model" width="120" />
@@ -810,7 +810,7 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: 3fr 2fr;
   gap: 20px;
-  min-height: 500px;
+  align-items: start;
 }
 
 .section-header {
@@ -1148,12 +1148,25 @@ onUnmounted(() => {
     align-items: stretch;
   }
   
-  .map-controls, .list-controls {
+  .map-controls,.device-monitor .list-controls {
   display: flex;
   gap: 12px;
   align-items: center;
   flex: 1;
   justify-content: flex-end;
+}
+
+.list-section .section-header {
+  padding: 0;
+}
+
+.list-section .header-content {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 /* 设备监控页面按钮深色主题适配 - 提高优先级 */
@@ -1204,11 +1217,15 @@ onUnmounted(() => {
 }
 
 .device-monitor .list-section .el-table {
-  margin-top: 16px;
+  margin-top: 0;
   background: transparent;
   color: var(--color-text-primary);
-  position: relative;
-  z-index: 1;
+}
+
+.device-monitor .list-section .el-table__header-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .device-monitor .list-section .el-table th.el-table__cell {
@@ -1244,40 +1261,14 @@ onUnmounted(() => {
   color: var(--color-text-tertiary) !important;
 }
 
-.device-monitor .list-section .el-table__body-wrapper {
-  max-height: 340px;
-  overflow-y: auto;
-  z-index: 1 !important;
-}
-
 .device-monitor .list-section .el-table .el-table__row {
   height: 40px;
-}
-
-.device-monitor .list-section .el-table__fixed-right {
-  z-index: 3 !important;
-}
-
-.device-monitor .list-section .el-table__fixed-body-wrapper {
-  z-index: 4 !important;
-}
-
-.device-monitor .list-section .el-table__body {
-  overflow: hidden;
 }
 
 .device-monitor .list-section .el-table td {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.device-monitor .list-section .el-table .el-table__fixed-right-patch {
-  z-index: 2 !important;
-}
-
-.device-monitor .list-section .el-table .el-table__cell {
-  padding: 8px 0;
 }
 
 /* 标签 */

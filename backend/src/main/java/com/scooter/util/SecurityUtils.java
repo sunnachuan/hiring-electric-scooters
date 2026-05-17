@@ -131,10 +131,21 @@ public class SecurityUtils {
     }
     
     /**
-     * 获取当前登录用户（从HttpServletRequest）
+     * 获取当前登录用户（优先从SecurityContext，回退到请求头）
      */
     public User getCurrentUser(HttpServletRequest request) {
-        // 从请求头中获取用户ID
+        var authentication = org.springframework.security.core.context.SecurityContextHolder
+            .getContext().getAuthentication();
+            
+        if (authentication != null && authentication.isAuthenticated()
+            && !(authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
+            String username = authentication.getName();
+            var userOptional = userService.findByUsername(username);
+            if (userOptional.isPresent()) {
+                return userOptional.get();
+            }
+        }
+        
         String userIdHeader = request.getHeader("X-User-Id");
         
         if (userIdHeader == null) {
@@ -144,7 +155,6 @@ public class SecurityUtils {
         try {
             Long userId = Long.parseLong(userIdHeader);
             
-            // 优先从数据库加载完整的用户信息
             var userOptional = userService.findByUsername(request.getHeader("X-Username"));
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
@@ -153,13 +163,11 @@ public class SecurityUtils {
                 }
             }
             
-            // 如果数据库中没有找到用户，尝试通过ID查找
             var userByIdOptional = userService.findByUsername(userId.toString());
             if (userByIdOptional.isPresent()) {
                 return userByIdOptional.get();
             }
             
-            // 如果数据库中没有用户信息，使用请求头中的信息（兼容旧逻辑）
             User user = new User();
             user.setId(userId);
             user.setUsername(request.getHeader("X-Username") != null ? request.getHeader("X-Username") : "unknown");

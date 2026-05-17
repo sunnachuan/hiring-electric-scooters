@@ -548,6 +548,9 @@ const bankCardRules = {
 
 // 加载银行卡列表
 const loadBankCards = async () => {
+  const token = localStorage.getItem('token')
+  if (!token) return
+  
   try {
     const response = await api.get('/bank-cards')
     bankCards.value = response.data

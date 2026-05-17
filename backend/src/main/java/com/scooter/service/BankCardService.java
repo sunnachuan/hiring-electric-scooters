@@ -5,7 +5,6 @@ import com.scooter.entity.BankCard;
 import com.scooter.repository.BankCardRepository;
 import com.scooter.util.DataPermissionValidator;
 import com.scooter.util.EncryptionUtils;
-import com.scooter.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
