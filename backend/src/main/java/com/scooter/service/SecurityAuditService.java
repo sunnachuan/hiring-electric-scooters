@@ -128,10 +128,6 @@ public class SecurityAuditService {
         public static final String LOGIN_LOCKED = "LOGIN_LOCKED";
         public static final String PASSWORD_CHANGE = "PASSWORD_CHANGE";
         public static final String PASSWORD_RESET = "PASSWORD_RESET";
-        public static final String TWO_FACTOR_ENABLED = "TWO_FACTOR_ENABLED";
-        public static final String TWO_FACTOR_DISABLED = "TWO_FACTOR_DISABLED";
-        public static final String TWO_FACTOR_VERIFIED = "TWO_FACTOR_VERIFIED";
-        public static final String TWO_FACTOR_FAILED = "TWO_FACTOR_FAILED";
         public static final String SESSION_CREATED = "SESSION_CREATED";
         public static final String SESSION_TERMINATED = "SESSION_TERMINATED";
         public static final String SUSPICIOUS_ACTIVITY = "SUSPICIOUS_ACTIVITY";

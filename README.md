@@ -7,7 +7,7 @@
 ## 技术栈
 
 ### 后端
-- Java 11+
+- Java 17
 - Spring Boot 2.7+
 - Spring Security + JWT
 - Spring Data JPA
@@ -17,7 +17,8 @@
 
 ### 前端
 - Vue 3 (Composition API)
-- Vite
+- Vite 4.4+
+- Node.js 16+ (推荐 Node 18+)
 - Vue Router
 - Pinia
 - Axios
@@ -27,29 +28,36 @@
 ## 快速启动
 
 ### 前提条件
-- Java 11+ 环境
-- Node.js 16+
-- PostgreSQL 数据库
+- Java 17 环境
+- Node.js 16+ (推荐 18+)
+- PostgreSQL 数据库 (已安装并运行)
+- Maven (已安装或使用 IDE 集成)
 
 ### 启动步骤
 
 1. **数据库设置**
-   ```bash
-   # 创建数据库（开发环境）
-   createdb scooter
    
-   # 执行初始化脚本
-   psql -d scooter -f database/init.sql
+   创建数据库：
+   ```sql
+   -- 在 PostgreSQL 中执行
+   CREATE DATABASE scooter;
    ```
+   
+   数据库连接配置在 `backend/src/main/resources/application.properties`，默认配置：
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/scooter
+   spring.datasource.username=postgres
+   spring.datasource.password=zjx1028
+   ```
+   
+   **注意**：首次启动后，JPA 会自动创建所需的数据库表结构，无需手动执行 SQL 脚本。
 
 2. **启动后端**
    ```bash
    cd backend
-   ./mvnw spring-boot:run
-   # 或使用Maven
    mvn spring-boot:run
    ```
-   后端默认在 http://localhost:8080 启动（可通过环境变量 `SERVER_PORT` 修改，端口被占用会自动顺延）。
+   后端默认在 http://localhost:8080 启动（可通过环境变量 `SERVER_PORT` 修改）。
 
 3. **启动前端**
    ```bash
@@ -57,12 +65,16 @@
    npm install
    npm run dev
    ```
-   前端默认在 http://localhost:5173 启动（可通过环境变量 `VITE_PORT` 修改，端口被占用会自动顺延）。
+   前端默认在 http://localhost:5173 启动（可通过环境变量 `VITE_PORT` 修改）。
 
 4. **访问系统**
    - 前端界面: http://localhost:5173
    - 后端API: http://localhost:8080
    - 管理员账号: admin / admin
+   - 如需自定义后端地址，在 `frontend` 目录创建 `.env` 文件：
+     ```env
+     VITE_API_URL=http://127.0.0.1:8080
+     ```
 
 ## 功能特性
 
@@ -120,18 +132,27 @@
 │   └── src/
 │       ├── api/                # API封装
 │       ├── components/         # 公共组件
-│       ├── router/             # 路由配置 (20个路由)
+│       ├── router/             # 路由配置
 │       ├── stores/             # Pinia状态管理
 │       ├── utils/              # 工具函数
-│       └── views/              # 页面组件 (17个)
-├── database/
-│   ├── init.sql                # 数据库初始化脚本
-│   └── database_management.sql # 数据库管理脚本
+│       └── views/              # 页面组件
 ├── docs/                       # 项目文档
-│   ├── API.md                  # API文档
-│   ├── database.md             # 数据库文档
-│   ├── deployment.md           # 部署指南
-│   ├── user_manual.md          # 用户手册
-│   └── test.md                 # 测试文档
+│   └── database.md             # 数据库文档
+├── database_management.sql     # 数据库管理脚本
 └── README.md                   # 项目说明
 ```
+
+## 常见问题
+
+### 端口被占用
+- 修改后端端口：设置环境变量 `SERVER_PORT` 或修改 `application.properties` 中的 `server.port`
+- 修改前端端口：设置环境变量 `VITE_PORT` 或在 `vite.config.js` 中配置
+
+### 数据库连接失败
+- 确认 PostgreSQL 服务已启动
+- 检查 `application.properties` 中的数据库连接信息
+- 确认已创建名为 `scooter` 的数据库
+
+### JWT token 过期
+- 重新登录即可获取新 token
+- token 默认有效期 7 天（可在 `application.properties` 中配置）

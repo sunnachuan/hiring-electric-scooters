@@ -4,16 +4,12 @@ import com.scooter.dto.AuthRequest;
 import com.scooter.dto.AuthResponse;
 import com.scooter.dto.ChangePasswordRequest;
 import com.scooter.dto.RegisterRequest;
-import com.scooter.dto.TwoFactorAuthRequest;
 import com.scooter.dto.UpdateProfileRequest;
-import com.scooter.dto.TwoFactorAuthResponse;
 import java.util.HashMap;
 import java.util.Map;
-import com.scooter.entity.TwoFactorAuth;
 import com.scooter.entity.User;
 import com.scooter.service.EmailService;
 import com.scooter.service.UserService;
-import com.scooter.service.TwoFactorAuthService;
 import com.scooter.service.SecurityAuditService;
 import com.scooter.config.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +28,6 @@ import javax.validation.Valid;
 public class AuthController {
     
     private final UserService userService;
-    private final TwoFactorAuthService twoFactorAuthService;
     private final SecurityAuditService securityAuditService;
     private final EmailService emailService;
     private final JwtUtils jwtUtils;
@@ -47,7 +42,6 @@ public class AuthController {
         User user = userService.findByUsername(authRequest.getUsername()).orElse(null);
         
         if (user == null || !passwordEncoder.matches(authRequest.getPassword(), user.getPasswordHash())) {
-            // 记录失败的登录尝试
             securityAuditService.logSecurityEvent(
                 SecurityAuditService.EventTypes.LOGIN_FAILED,
                 "登录失败：用户名或密码错误",
@@ -60,7 +54,6 @@ public class AuthController {
                 "用户名或密码错误"
             );
             
-            // 检查是否超过登录尝试限制
             if (securityAuditService.isLoginAttemptsExceeded(authRequest.getUsername(), ipAddress)) {
                 securityAuditService.logSecurityEvent(
                     SecurityAuditService.EventTypes.LOGIN_LOCKED,
@@ -79,7 +72,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body("用户名或密码错误");
         }
         
-        // 记录成功的登录尝试
         securityAuditService.logSecurityEvent(
             SecurityAuditService.EventTypes.LOGIN_SUCCESS,
             "用户登录成功",
@@ -91,15 +83,6 @@ public class AuthController {
             true,
             null
         );
-        
-        // 检查用户是否启用了2FA
-        var twoFactorAuthOpt = twoFactorAuthService.get2FAStatus(user.getId());
-        if (twoFactorAuthOpt.isPresent() && twoFactorAuthOpt.get().getIsEnabled()) {
-            // 需要2FA验证，返回需要验证码的响应
-            return ResponseEntity.ok(new AuthResponse(
-                null, user.getId(), user.getUsername(), user.getEmail(), user.getRole(), true
-            ));
-        }
         
         String jwt = jwtUtils.generateToken(user.getUsername());
         
@@ -131,7 +114,6 @@ public class AuthController {
             
             String jwt = jwtUtils.generateToken(user.getUsername());
             
-            // 异步发送注册成功邮件，避免阻塞注册响应
             new Thread(() -> {
                 try {
                     String registrationTime = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm:ss"));
@@ -145,7 +127,6 @@ public class AuthController {
                     log.info("注册成功邮件已发送至: {}", registerRequest.getEmail());
                 } catch (Exception e) {
                     log.error("发送注册成功邮件失败: {}", e.getMessage());
-                    // 邮件发送失败不影响注册流程，记录日志即可
                 }
             }).start();
             
@@ -175,49 +156,10 @@ public class AuthController {
         }
     }
     
-    @PostMapping("/verify-2fa")
-    public ResponseEntity<?> verifyTwoFactorAuth(@Valid @RequestBody TwoFactorAuthRequest twoFactorAuthRequest) {
-        try {
-            User user = userService.findByUsername(twoFactorAuthRequest.getUsername())
-                    .orElseThrow(() -> new RuntimeException("用户不存在"));
-            
-            boolean isValid = twoFactorAuthService.verifyCode(user.getId(), twoFactorAuthRequest.getCode());
-            if (!isValid) {
-                return ResponseEntity.badRequest().body("验证码无效");
-            }
-            
-            String jwt = jwtUtils.generateToken(user.getUsername());
-            return ResponseEntity.ok(new AuthResponse(jwt, user.getId(), user.getUsername(), 
-                    user.getEmail(), user.getRole(), false));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-    
-    @PostMapping("/enable-2fa")
-    public ResponseEntity<?> enableTwoFactorAuth(@RequestParam String username) {
-        try {
-            User user = userService.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("用户不存在"));
-            
-            TwoFactorAuth twoFactorAuth = twoFactorAuthService.enable2FA(user);
-            
-            // 生成二维码URL（简化实现）
-            String qrCodeUrl = String.format("otpauth://totp/ScooterApp:%s?secret=%s&issuer=ScooterApp", 
-                    user.getUsername(), twoFactorAuth.getSecretKey());
-            
-            return ResponseEntity.ok(new TwoFactorAuthResponse(true, 
-                    twoFactorAuth.getSecretKey(), qrCodeUrl, "2FA已启用，请使用验证器应用扫描二维码"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-    
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody UpdateProfileRequest updateProfileRequest,
                                           HttpServletRequest request) {
         try {
-            // 获取当前登录用户
             String authHeader = request.getHeader("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.badRequest().body("缺少有效的认证令牌");
@@ -225,7 +167,6 @@ public class AuthController {
             
             String token = authHeader.substring(7);
             
-            // 验证JWT令牌有效性
             String username = jwtUtils.extractUsername(token);
             if (!jwtUtils.validateToken(token, username)) {
                 return ResponseEntity.badRequest().body("认证令牌无效或已过期");
@@ -233,7 +174,6 @@ public class AuthController {
             User currentUser = userService.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("用户不存在"));
             
-            // 更新用户信息
             User updatedUser = userService.updateUserProfile(
                 currentUser.getId(),
                 updateProfileRequest.getFullName(),
@@ -241,7 +181,6 @@ public class AuthController {
                 updateProfileRequest.getPhone()
             );
             
-            // 返回更新后的用户信息
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "用户信息更新成功");
@@ -253,35 +192,6 @@ public class AuthController {
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
-        }
-    }
-    
-    @PostMapping("/disable-2fa")
-    public ResponseEntity<?> disableTwoFactorAuth(@RequestParam String username) {
-        try {
-            User user = userService.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("用户不存在"));
-            
-            twoFactorAuthService.disable2FA(user.getId());
-            return ResponseEntity.ok(new TwoFactorAuthResponse(false, "2FA已禁用"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-    
-    @GetMapping("/2fa-status")
-    public ResponseEntity<?> getTwoFactorAuthStatus(@RequestParam String username) {
-        try {
-            User user = userService.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("用户不存在"));
-            
-            var twoFactorAuthOpt = twoFactorAuthService.get2FAStatus(user.getId());
-            boolean isEnabled = twoFactorAuthOpt.isPresent() && twoFactorAuthOpt.get().getIsEnabled();
-            
-            return ResponseEntity.ok(new TwoFactorAuthResponse(isEnabled, 
-                    isEnabled ? "2FA已启用" : "2FA未启用"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

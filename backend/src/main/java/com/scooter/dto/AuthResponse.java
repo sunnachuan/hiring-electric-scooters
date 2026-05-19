@@ -12,7 +12,6 @@ public class AuthResponse {
     private String role;
     private String phone;
     private String fullName;
-    private Boolean requires2FA = false;
     
     public AuthResponse(String token, Long id, String username, String email, String role) {
         this.token = token;
@@ -20,15 +19,6 @@ public class AuthResponse {
         this.username = username;
         this.email = email;
         this.role = role;
-    }
-    
-    public AuthResponse(String token, Long id, String username, String email, String role, Boolean requires2FA) {
-        this.token = token;
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.role = role;
-        this.requires2FA = requires2FA;
     }
     
     public AuthResponse(String token, Long id, String username, String email, String role, String phone, String fullName) {
