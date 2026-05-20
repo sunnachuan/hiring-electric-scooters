@@ -1,4 +1,3 @@
-C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\TwoFactorAuth.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\BankCardRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\TemporaryUserDTO.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\BankCardController.java
@@ -23,7 +22,6 @@ C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\ChangePasswordRequest.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\VehicleDamageService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\Scooter.java
-C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\TwoFactorAuthRequest.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\ScooterLocationRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\EmailService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\util\SecurityUtils.java
@@ -43,7 +41,6 @@ C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\DeviceController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\FeedbackRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\OperationTask.java
-C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\TwoFactorAuthService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\FileUploadController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\OperatorRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\Feedback.java
@@ -64,7 +61,6 @@ C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\FeedbackController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\UserSession.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\SecurityAuditLogRepository.java
-C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\TwoFactorAuthResponse.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\BookingRequest.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\OperationTaskRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\ScooterRentalApplication.java
@@ -74,7 +70,6 @@ C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\service\QRCodeService.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\controller\AuthController.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\entity\BankCard.java
-C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\TwoFactorAuthRepository.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\config\JwtUtils.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\dto\FeedbackRequest.java
 C:\Users\23757\OneDrive\Desktop\电动滑板车项目\backend\src\main\java\com\scooter\repository\BookingRepository.java

@@ -1,4 +1,3 @@
-com\scooter\dto\TwoFactorAuthResponse.class
 com\scooter\entity\DamageLevel.class
 com\scooter\repository\SecurityAuditLogRepository.class
 com\scooter\dto\DamageReportRequest.class
@@ -45,7 +44,6 @@ com\scooter\entity\Scooter.class
 com\scooter\repository\TemporaryUserRepository.class
 com\scooter\service\VehicleDamageService$1.class
 com\scooter\entity\Payment.class
-com\scooter\entity\TwoFactorAuth.class
 com\scooter\util\PasswordPolicy.class
 com\scooter\repository\VehicleDamageRecordRepository.class
 com\scooter\entity\TemporaryUser.class
@@ -55,12 +53,10 @@ com\scooter\dto\UpdateProfileRequest.class
 com\scooter\ScooterRentalApplication.class
 com\scooter\entity\UserSession.class
 com\scooter\util\DataPermissionValidator.class
-com\scooter\service\TwoFactorAuthService.class
 com\scooter\service\QRCodeService.class
 com\scooter\repository\FeedbackRepository.class
 com\scooter\dto\AuthResponse.class
 com\scooter\dto\BankCardRequest.class
-com\scooter\repository\TwoFactorAuthRepository.class
 com\scooter\dto\AdminBookingRequest$GuestInfo.class
 com\scooter\controller\FileUploadController.class
 com\scooter\controller\LocationController.class
@@ -82,7 +78,6 @@ com\scooter\repository\UserSessionRepository.class
 com\scooter\dto\BankCardDTO.class
 com\scooter\controller\DeviceController.class
 com\scooter\dto\BookingRequest.class
-com\scooter\dto\TwoFactorAuthRequest.class
 com\scooter\dto\AdminBookingRequest.class
 com\scooter\service\BookingService.class
 com\scooter\controller\ScooterController.class
